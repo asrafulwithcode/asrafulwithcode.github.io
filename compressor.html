@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuickCompress - Free Image & Signature Compressor for Forms</title>
+  <meta name="description" content="Compress photos and signatures online to under 50KB or 20KB for SSC, UPSC, and govt forms. 100% private, client-side browser compression." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google AdSense Code -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <a href="/" class="text-2xl font-black tracking-tight text-blue-600">FinGrow<span class="text-slate-900">Tools</span></a>
+        <span class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Compressor</span>
+      </div>
+      <nav class="flex space-x-4 text-sm font-medium text-slate-600">
+        <a href="/" class="hover:text-blue-600 transition">Calculators</a>
+        <a href="#how" class="hover:text-blue-600 transition">Guide</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">Photo & Signature Compressor</h1>
+      <p class="text-slate-600 max-w-xl mx-auto text-sm sm:text-base">
+        Instantly compress photos and signatures for Govt Exam forms (SSC, Railway, UPSC) and college admissions.
+      </p>
+      <div class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-medium">
+        <span>🔒 100% Secure: Images are processed entirely in your browser and never uploaded to any server.</span>
+      </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8">
+      
+      <!-- Upload Dropzone -->
+      <div id="dropZone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50/30 transition">
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden" />
+        <div class="flex flex-col items-center">
+          <svg class="w-12 h-12 text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <p class="text-sm font-semibold text-slate-700">Click to upload or drag & drop</p>
+          <p class="text-xs text-slate-500 mt-1">Supports JPG, PNG, WEBP (Max 15 MB)</p>
+        </div>
+      </div>
+
+      <!-- Controls (Hidden until file selected) -->
+      <div id="editorSection" class="hidden mt-6 space-y-6">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Select Target Preset</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <button onclick="setPreset(50)" class="preset-btn px-4 py-2 border rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition active">Govt Form Photo (&lt; 50 KB)</button>
+            <button onclick="setPreset(20)" class="preset-btn px-4 py-2 border rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Signature (&lt; 20 KB)</button>
+            <button onclick="setPreset(100)" class="preset-btn px-4 py-2 border rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Document (&lt; 100 KB)</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+            <span>Target Max Size</span>
+            <span id="targetSizeDisplay" class="text-blue-600 font-bold">50 KB</span>
+          </div>
+          <input type="range" id="sizeSlider" min="10" max="500" value="50" step="5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" oninput="updateTargetSize(this.value)" />
+        </div>
+
+        <!-- Preview Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+          <div class="p-4 bg-slate-50 rounded-xl text-center">
+            <span class="text-xs font-semibold text-slate-500 block mb-2">Original</span>
+            <div class="h-44 flex items-center justify-center overflow-hidden rounded-lg bg-white border border-slate-200 mb-2">
+              <img id="originalImg" class="max-h-full max-w-full object-contain" />
+            </div>
+            <p id="originalInfo" class="text-xs text-slate-600 font-medium">Size: --</p>
+          </div>
+
+          <div class="p-4 bg-blue-50/50 rounded-xl text-center border border-blue-100">
+            <span class="text-xs font-semibold text-blue-700 block mb-2">Compressed Result</span>
+            <div class="h-44 flex items-center justify-center overflow-hidden rounded-lg bg-white border border-blue-200 mb-2">
+              <img id="compressedImg" class="max-h-full max-w-full object-contain" />
+            </div>
+            <p id="compressedInfo" class="text-xs text-blue-700 font-bold">Size: --</p>
+          </div>
+        </div>
+
+        <button id="downloadBtn" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow transition">
+          Download Compressed Image
+        </button>
+      </div>
+    </div>
+
+    <!-- SEO & FAQ Section -->
+    <section id="how" class="mt-12 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8">
+      <h2 class="text-xl font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
+      <div class="space-y-4 text-sm text-slate-600">
+        <div>
+          <h3 class="font-semibold text-slate-800">Why do exam forms require photos under 50KB or 20KB?</h3>
+          <p class="mt-1">Government portals receive millions of applications. Strict file size limits allow their servers to store and process millions of documents smoothly without slowing down.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-slate-800">Is my photo uploaded to your server?</h3>
+          <p class="mt-1">No. The compression runs entirely on your phone or computer using standard HTML5 Canvas technology. Your photos never leave your device.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <p>© 2026 FinGrowTools · Fast, Private In-Browser Utilities</p>
+  </footer>
+
+  <!-- Script Logic -->
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const editorSection = document.getElementById('editorSection');
+    const originalImg = document.getElementById('originalImg');
+    const compressedImg = document.getElementById('compressedImg');
+    const originalInfo = document.getElementById('originalInfo');
+    const compressedInfo = document.getElementById('compressedInfo');
+    const sizeSlider = document.getElementById('sizeSlider');
+    const targetSizeDisplay = document.getElementById('targetSizeDisplay');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    let currentFile = null;
+    let targetKB = 50;
+    let compressedBlob = null;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-blue-500'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-blue-500'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-blue-500');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload a valid image file (JPG, PNG).');
+        return;
+      }
+      currentFile = file;
+      originalInfo.innerText = `Size: ${(file.size / 1024).toFixed(1)} KB`;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        originalImg.src = e.target.result;
+        editorSection.classList.remove('hidden');
+        processCompression();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setPreset(kb) {
+      targetKB = kb;
+      sizeSlider.value = kb;
+      targetSizeDisplay.innerText = kb + ' KB';
+      processCompression();
+    }
+
+    function updateTargetSize(val) {
+      targetKB = parseInt(val);
+      targetSizeDisplay.innerText = val + ' KB';
+      processCompression();
+    }
+
+    function processCompression() {
+      if (!currentFile) return;
+      const img = new Image();
+      img.src = originalImg.src;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Auto-scale if huge dimension
+        const maxDimension = 1200;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Binary search for optimal quality
+        let minQuality = 0.05;
+        let maxQuality = 0.95;
+        let quality = 0.7;
+        let attempts = 0;
+
+        function attemptCompression() {
+          canvas.toBlob((blob) => {
+            const kb = blob.size / 1024;
+            attempts++;
+            if (attempts < 6) {
+              if (kb > targetKB && quality > minQuality) {
+                maxQuality = quality;
+                quality = (minQuality + maxQuality) / 2;
+                attemptCompression();
+                return;
+              } else if (kb < targetKB * 0.8 && quality < maxQuality) {
+                minQuality = quality;
+                quality = (minQuality + maxQuality) / 2;
+                attemptCompression();
+                return;
+              }
+            }
+            compressedBlob = blob;
+            compressedImg.src = URL.createObjectURL(blob);
+            compressedInfo.innerText = `Size: ${kb.toFixed(1)} KB (Ready)`;
+          }, 'image/jpeg', quality);
+        }
+        attemptCompression();
+      };
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!compressedBlob) return;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(compressedBlob);
+      a.download = `compressed_${targetKB}kb_${currentFile.name.replace(/\.[^/.]+$/, "")}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  </script>
+</body>
+</html>

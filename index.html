@@ -71,7 +71,7 @@
             <span id="sipInvested" class="text-base sm:text-lg font-bold text-slate-800">₹0</span>
           </div>
           <div>
-            <span class="block text-xs text-slate-500">Est. Returns</span>
+            <span id="sipReturnsLabel" class="block text-xs text-slate-500">Est. Returns</span>
             <span id="sipReturns" class="text-base sm:text-lg font-bold text-emerald-600">₹0</span>
           </div>
           <div>
@@ -119,21 +119,27 @@
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Annual Gross Income (₹)</label>
           <input type="number" id="taxIncome" value="950000" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" oninput="calcTax()" />
-          <p class="text-xs text-slate-500 mt-1">Includes ₹75,000 Standard Deduction under Revised New Tax Regime.</p>
+          
+          <!-- Standard Deduction Toggle -->
+          <div class="flex items-center space-x-2 mt-2">
+            <input type="checkbox" id="taxSalaried" checked onchange="calcTax()" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
+            <label for="taxSalaried" class="text-xs text-slate-600 font-medium">Apply ₹75,000 Standard Deduction (For Salaried & Pensioners)</label>
+          </div>
         </div>
 
         <div class="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
           <div>
             <span class="block text-xs text-slate-500">Taxable Income</span>
             <span id="taxTaxable" class="text-base sm:text-lg font-bold text-slate-800">₹0</span>
+            <span id="taxDeductionNote" class="block text-[10px] text-blue-600 mt-0.5">(-₹75,000 std ded)</span>
           </div>
           <div>
-            <span class="block text-xs text-slate-500">Rebate 87A</span>
+            <span class="block text-xs text-slate-500">Rebate u/s 87A</span>
             <span id="taxRebate" class="text-base sm:text-lg font-bold text-emerald-600">₹0</span>
           </div>
           <div>
-            <span class="block text-xs text-slate-500">Net Tax Payable</span>
-            <span id="taxNet" class="text-base sm:text-lg font-bold text-rose-600">₹0</span>
+            <span class="block text-xs text-slate-500">Net Tax (incl. Cess)</span>
+            <span id="taxNet" class="text-base sm:text-lg font-bold text-slate-800">₹0</span>
           </div>
         </div>
       </div>
@@ -145,12 +151,12 @@
       <h2 class="text-xl font-bold text-slate-900 mb-4">Financial Calculators Guide & Rules</h2>
       <div class="space-y-4 text-sm text-slate-600">
         <div>
-          <h3 class="font-semibold text-slate-800">How does the SIP compound return work?</h3>
-          <p class="mt-1">Systematic Investment Plan (SIP) allows monthly regular investing in mutual funds, averaging market volatility through Rupee Cost Averaging and generating compounded returns over time.</p>
+          <h3 class="font-semibold text-slate-800">Why is Taxable Income ₹75,000 less than Gross Salary?</h3>
+          <p class="mt-1">Under Section 16(ia) of the Income Tax Act, salaried employees and pensioners receive a flat standard deduction of ₹75,000 without needing any investment proofs. Tax is calculated strictly on this reduced taxable income.</p>
         </div>
         <div>
-          <h3 class="font-semibold text-slate-800">What is the standard deduction in the New Tax Regime?</h3>
-          <p class="mt-1">Salaried individuals receive an automatic ₹75,000 standard deduction under the revised New Tax Regime slabs, reducing your gross taxable income directly.</p>
+          <h3 class="font-semibold text-slate-800">What is the Section 87A rebate limit?</h3>
+          <p class="mt-1">In the New Tax Regime, if your taxable income after standard deduction is up to ₹7,00,000 (meaning gross salary up to ₹7.75 lakh), you receive a 100% tax rebate under Section 87A, resulting in zero tax liability.</p>
         </div>
       </div>
     </section>
@@ -164,7 +170,9 @@
   <!-- Logic Script -->
   <script>
     function formatINR(val) {
-      return '₹' + Math.round(val).toLocaleString('en-IN');
+      const isNegative = val < 0;
+      const absVal = Math.round(Math.abs(val));
+      return (isNegative ? '-₹' : '₹') + absVal.toLocaleString('en-IN');
     }
 
     function switchTab(type) {
@@ -185,47 +193,122 @@
 
     function calcSIP() {
       const p = parseFloat(document.getElementById('sipAmount').value) || 0;
-      const r = (parseFloat(document.getElementById('sipRate').value) || 0) / 100 / 12;
+      const rawRate = parseFloat(document.getElementById('sipRate').value) || 0;
+      const r = rawRate / 100 / 12;
       const n = (parseFloat(document.getElementById('sipYears').value) || 0) * 12;
-      if (p <= 0 || n <= 0) return;
+
+      const returnsEl = document.getElementById('sipReturns');
+      const returnsLabel = document.getElementById('sipReturnsLabel');
+      const totalEl = document.getElementById('sipTotal');
+
+      if (p <= 0 || n <= 0) {
+        document.getElementById('sipInvested').innerText = '₹0';
+        returnsEl.innerText = '₹0';
+        totalEl.innerText = '₹0';
+        return;
+      }
+
       const totalInvested = p * n;
-      const totalValue = p * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+      let totalValue = 0;
+
+      if (r === 0) {
+        totalValue = totalInvested;
+      } else {
+        totalValue = p * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+      }
+
       const estReturns = totalValue - totalInvested;
+
       document.getElementById('sipInvested').innerText = formatINR(totalInvested);
-      document.getElementById('sipReturns').innerText = formatINR(estReturns);
-      document.getElementById('sipTotal').innerText = formatINR(totalValue);
+      returnsEl.innerText = formatINR(estReturns);
+      totalEl.innerText = formatINR(totalValue);
+
+      // Color coding: Red for Loss / Negative, Green for Profit
+      if (estReturns < 0) {
+        returnsLabel.innerText = "Est. Loss";
+        returnsEl.className = "text-base sm:text-lg font-bold text-rose-600";
+      } else {
+        returnsLabel.innerText = "Est. Returns";
+        returnsEl.className = "text-base sm:text-lg font-bold text-emerald-600";
+      }
+
+      if (totalValue < totalInvested) {
+        totalEl.className = "text-base sm:text-lg font-bold text-rose-600";
+      } else {
+        totalEl.className = "text-base sm:text-lg font-bold text-blue-700";
+      }
     }
 
     function calcEMI() {
       const p = parseFloat(document.getElementById('emiAmount').value) || 0;
-      const r = (parseFloat(document.getElementById('emiRate').value) || 0) / 12 / 100;
+      const rawRate = parseFloat(document.getElementById('emiRate').value) || 0;
+      const r = rawRate / 12 / 100;
       const n = (parseFloat(document.getElementById('emiTenure').value) || 0) * 12;
-      if (p <= 0 || n <= 0) return;
-      const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+      const monthlyEl = document.getElementById('emiMonthly');
+      const interestEl = document.getElementById('emiInterest');
+      const totalEl = document.getElementById('emiTotal');
+
+      if (p <= 0 || n <= 0 || rawRate < 0) {
+        monthlyEl.innerText = '₹0';
+        interestEl.innerText = '₹0';
+        totalEl.innerText = '₹0';
+        return;
+      }
+
+      let emi = 0;
+      if (r === 0) {
+        emi = p / n;
+      } else {
+        emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      }
+
       const totalPayment = emi * n;
       const totalInterest = totalPayment - p;
-      document.getElementById('emiMonthly').innerText = formatINR(emi);
-      document.getElementById('emiInterest').innerText = formatINR(totalInterest);
-      document.getElementById('emiTotal').innerText = formatINR(totalPayment);
+
+      monthlyEl.innerText = formatINR(emi);
+      interestEl.innerText = formatINR(totalInterest);
+      totalEl.innerText = formatINR(totalPayment);
     }
 
     function calcTax() {
       const gross = parseFloat(document.getElementById('taxIncome').value) || 0;
-      const stdDeduction = 75000;
+      const isSalaried = document.getElementById('taxSalaried').checked;
+      const stdDeduction = isSalaried ? 75000 : 0;
+      
+      const deductionNote = document.getElementById('taxDeductionNote');
+      if (isSalaried) {
+        deductionNote.innerText = "(-₹75,000 std ded)";
+        deductionNote.classList.remove('hidden');
+      } else {
+        deductionNote.classList.add('hidden');
+      }
+
       const taxable = Math.max(0, gross - stdDeduction);
       document.getElementById('taxTaxable').innerText = formatINR(taxable);
 
+      // Progressive Tax Slabs Calculation (New Tax Regime)
       let tax = 0;
       if (taxable > 1500000) {
-        tax = 150000 + (taxable - 1500000) * 0.30;
+        tax += (taxable - 1500000) * 0.30;
+        tax += 300000 * 0.20; // 12L to 15L
+        tax += 200000 * 0.15; // 10L to 12L
+        tax += 300000 * 0.10; // 7L to 10L
+        tax += 400000 * 0.05; // 3L to 7L
       } else if (taxable > 1200000) {
-        tax = 90000 + (taxable - 1200000) * 0.20;
+        tax += (taxable - 1200000) * 0.20;
+        tax += 200000 * 0.15;
+        tax += 300000 * 0.10;
+        tax += 400000 * 0.05;
       } else if (taxable > 1000000) {
-        tax = 60000 + (taxable - 1000000) * 0.15;
+        tax += (taxable - 1000000) * 0.15;
+        tax += 300000 * 0.10;
+        tax += 400000 * 0.05;
       } else if (taxable > 700000) {
-        tax = 30000 + (taxable - 700000) * 0.10;
+        tax += (taxable - 700000) * 0.10;
+        tax += 400000 * 0.05;
       } else if (taxable > 300000) {
-        tax = (taxable - 300000) * 0.05;
+        tax += (taxable - 300000) * 0.05;
       }
 
       let rebate = 0;
@@ -233,8 +316,22 @@
         rebate = tax;
         tax = 0;
       }
+
+      // Add 4% Health & Education Cess
+      const cess = tax > 0 ? tax * 0.04 : 0;
+      const netTax = tax + cess;
+
       document.getElementById('taxRebate').innerText = formatINR(rebate);
-      document.getElementById('taxNet').innerText = formatINR(tax);
+      
+      const taxNetEl = document.getElementById('taxNet');
+      taxNetEl.innerText = formatINR(netTax);
+
+      // Color coding for Tax: Red if tax payable > 0, Green if Zero Tax
+      if (netTax > 0) {
+        taxNetEl.className = "text-base sm:text-lg font-bold text-rose-600";
+      } else {
+        taxNetEl.className = "text-base sm:text-lg font-bold text-emerald-600";
+      }
     }
 
     // Initialize calculations

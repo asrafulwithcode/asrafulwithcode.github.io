@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Exact Age Calculator & Govt Job Eligibility Check - FinGrowTools</title>
-  <meta name="description" content="Free online Age Calculator for SSC, Railway, UPSC, and State Govt forms. Calculate exact age in years, months, days, total weeks, and next birthday countdown." />
+  <meta name="description" content="Free online Age Calculator for SSC, Railway, UPSC, and State Govt forms. Calculate exact age in years, months, days, total weeks, and next birthday countdown in DD-MM-YYYY format." />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
@@ -38,22 +38,62 @@
 
     <!-- Calculator Card -->
     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8 max-w-2xl mx-auto space-y-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Date of Birth (DOB)</label>
-          <input type="date" id="dobInput" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800" onchange="calculateAge()" />
+      
+      <!-- Date of Birth Selection (DD / MM / YYYY) -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+          Date of Birth (DOB) <span class="text-slate-400 font-normal">[Day - Month - Year]</span>
+        </label>
+        <div class="grid grid-cols-3 gap-2">
+          <select id="dobDay" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          <select id="dobMonth" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="0">January (01)</option>
+            <option value="1">February (02)</option>
+            <option value="2">March (03)</option>
+            <option value="3">April (04)</option>
+            <option value="4">May (05)</option>
+            <option value="5">June (06)</option>
+            <option value="6">July (07)</option>
+            <option value="7">August (08)</option>
+            <option value="8">September (09)</option>
+            <option value="9">October (10)</option>
+            <option value="10">November (11)</option>
+            <option value="11">December (12)</option>
+          </select>
+          <select id="dobYear" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
         </div>
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Age as on (Cut-off Date)</label>
-          <input type="date" id="targetDateInput" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800" onchange="calculateAge()" />
+      </div>
+
+      <!-- Cut-off Target Date Selection (DD / MM / YYYY) -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+          Age as on (Cut-off Date) <span class="text-slate-400 font-normal">[Day - Month - Year]</span>
+        </label>
+        <div class="grid grid-cols-3 gap-2">
+          <select id="targetDay" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          <select id="targetMonth" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="0">January (01)</option>
+            <option value="1">February (02)</option>
+            <option value="2">March (03)</option>
+            <option value="3">April (04)</option>
+            <option value="4">May (05)</option>
+            <option value="5">June (06)</option>
+            <option value="6">July (07)</option>
+            <option value="7">August (08)</option>
+            <option value="8">September (09)</option>
+            <option value="9">October (10)</option>
+            <option value="10">November (11)</option>
+            <option value="11">December (12)</option>
+          </select>
+          <select id="targetYear" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
         </div>
       </div>
 
       <!-- Main Result Display -->
       <div id="resultBox" class="p-6 bg-blue-50/70 border border-blue-100 rounded-xl text-center space-y-2">
         <span class="text-xs uppercase font-bold tracking-wider text-blue-600">Your Exact Age</span>
-        <div id="mainAgeText" class="text-2xl sm:text-3xl font-extrabold text-slate-900">
-          Select your dates above
+        <div id="mainAgeText" class="text-2xl sm:text-3xl font-extrabold text-blue-700">
+          Calculating...
         </div>
         <p id="nextBirthdayText" class="text-xs sm:text-sm text-slate-600 pt-1 font-medium"></p>
       </div>
@@ -87,7 +127,7 @@
           </select>
         </div>
         <div id="eligibilityResult" class="p-3 rounded-lg text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100">
-          Please pick your Date of Birth to check eligibility.
+          Calculating eligibility...
         </div>
       </div>
     </div>
@@ -97,12 +137,12 @@
       <h2 class="text-xl font-bold text-slate-900 mb-4">How is Cut-Off Age Calculated for Government Forms?</h2>
       <div class="space-y-4 text-sm text-slate-600">
         <div>
-          <h3 class="font-semibold text-slate-800">What is a Cut-Off Date?</h3>
-          <p class="mt-1">In competitive exams like SSC, Banking, and UPSC, age is not checked as of the application date. Instead, official notifications state a fixed benchmark date (e.g., 1st August or 1st January). You must meet the age limits precisely on that day.</p>
+          <h3 class="font-semibold text-slate-800">Standard DD / MM / YYYY Format</h3>
+          <p class="mt-1">In India and competitive recruitment portals, dates follow the Day-Month-Year sequence. Our calculator strictly uses this order so you never mix up months and dates while verifying your cutoff limits.</p>
         </div>
         <div>
-          <h3 class="font-semibold text-slate-800">How Leap Years Affect Age Counting?</h3>
-          <p class="mt-1">Our algorithm accounts for exact leap years, varied month lengths (28, 29, 30, and 31 days) to give you 100% accurate days so your online exam form never gets rejected.</p>
+          <h3 class="font-semibold text-slate-800">What is a Cut-Off Date?</h3>
+          <p class="mt-1">In competitive exams like SSC, Banking, and UPSC, age is not checked as of today's date. Official notifications give a fixed benchmark date (e.g., 1st August or 1st January). You must meet the age requirements precisely on that day.</p>
         </div>
       </div>
     </section>
@@ -114,32 +154,72 @@
   </footer>
 
   <script>
-    // Set default target date to Today
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    document.getElementById('targetDateInput').value = todayStr;
+    // Populate Days (1 - 31)
+    function populateDays(elementId) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = '';
+      for (let i = 1; i <= 31; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = i < 10 ? '0' + i : i;
+        el.appendChild(opt);
+      }
+    }
 
-    // Set default sample DOB (20 years ago)
-    const defaultDob = new Date(today.getFullYear() - 20, 0, 15);
-    document.getElementById('dobInput').value = defaultDob.toISOString().split('T')[0];
+    // Populate Years
+    function populateYears(elementId, startYear, endYear) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = '';
+      for (let y = endYear; y >= startYear; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.innerText = y;
+        el.appendChild(opt);
+      }
+    }
+
+    const today = new Date();
+    const currentYear = today.getFullYear();
+
+    // Populate Dropdowns
+    populateDays('dobDay');
+    populateDays('targetDay');
+    populateYears('dobYear', 1950, currentYear);
+    populateYears('targetYear', 1980, currentYear + 10);
+
+    // Default Values: Target = Today (Date, Month, Year)
+    document.getElementById('targetDay').value = today.getDate();
+    document.getElementById('targetMonth').value = today.getMonth();
+    document.getElementById('targetYear').value = today.getFullYear();
+
+    // Default Values: DOB = 15 Jan, 2005 (20 years ago approx)
+    document.getElementById('dobDay').value = 14;
+    document.getElementById('dobMonth').value = 11; // December (0-indexed: 11)
+    document.getElementById('dobYear').value = 2007;
 
     let calculatedYears = 0;
     let calculatedMonths = 0;
     let calculatedDays = 0;
 
     function calculateAge() {
-      const dobVal = document.getElementById('dobInput').value;
-      const targetVal = document.getElementById('targetDateInput').value;
+      const bDay = parseInt(document.getElementById('dobDay').value);
+      const bMonth = parseInt(document.getElementById('dobMonth').value);
+      const bYear = parseInt(document.getElementById('dobYear').value);
 
-      if (!dobVal || !targetVal) return;
+      const tDay = parseInt(document.getElementById('targetDay').value);
+      const tMonth = parseInt(document.getElementById('targetMonth').value);
+      const tYear = parseInt(document.getElementById('targetYear').value);
 
-      const birthDate = new Date(dobVal);
-      const targetDate = new Date(targetVal);
+      const birthDate = new Date(bYear, bMonth, bDay);
+      const targetDate = new Date(tYear, tMonth, tDay);
 
       if (birthDate > targetDate) {
         document.getElementById('mainAgeText').innerText = "Birth date cannot be after the cutoff date!";
         document.getElementById('mainAgeText').className = "text-lg font-bold text-rose-600";
         document.getElementById('nextBirthdayText').innerText = "";
+        document.getElementById('totalMonths').innerText = "-";
+        document.getElementById('totalWeeks').innerText = "-";
+        document.getElementById('totalDays').innerText = "-";
         return;
       }
 
@@ -149,9 +229,8 @@
 
       if (d < 0) {
         m--;
-        // Days in previous month of target date
-        const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
-        d += prevMonth.getDate();
+        const prevMonthDays = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0).getDate();
+        d += prevMonthDays;
       }
 
       if (m < 0) {
@@ -180,7 +259,7 @@
       document.getElementById('totalDays').innerText = totalDaysCount.toLocaleString();
 
       // Next Birthday Countdown
-      let nextBday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+      let nextBday = new Date(today.getFullYear(), bMonth, bDay);
       if (nextBday < today) {
         nextBday.setFullYear(today.getFullYear() + 1);
       }

@@ -39,16 +39,16 @@
     <!-- Calculator Card -->
     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8 max-w-2xl mx-auto space-y-6">
       
-      <!-- Date of Birth Selection -->
+      <!-- Date of Birth Selection with Distinct Vertical Labels -->
       <div class="space-y-1.5">
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Date of Birth (DOB)</label>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-800">Date of Birth (DOB)</label>
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</span>
+            <label for="dobDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</label>
             <select id="dobDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
           </div>
           <div>
-            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Month</span>
+            <label for="dobMonth" class="block text-[11px] font-semibold text-slate-500 mb-1">Month</label>
             <select id="dobMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
               <option value="0">January (01)</option>
               <option value="1">February (02)</option>
@@ -65,22 +65,22 @@
             </select>
           </div>
           <div>
-            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Year</span>
+            <label for="dobYear" class="block text-[11px] font-semibold text-slate-500 mb-1">Year</label>
             <select id="dobYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
           </div>
         </div>
       </div>
 
-      <!-- Cut-off Target Date Selection -->
+      <!-- Cut-off Target Date Selection with Distinct Vertical Labels -->
       <div class="space-y-1.5">
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Age as on (Cut-off Date)</label>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-800">Age as on (Cut-off Date)</label>
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</span>
+            <label for="targetDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</label>
             <select id="targetDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
           </div>
           <div>
-            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Month</span>
+            <label for="targetMonth" class="block text-[11px] font-semibold text-slate-500 mb-1">Month</label>
             <select id="targetMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
               <option value="0">January (01)</option>
               <option value="1">February (02)</option>
@@ -97,7 +97,7 @@
             </select>
           </div>
           <div>
-            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Year</span>
+            <label for="targetYear" class="block text-[11px] font-semibold text-slate-500 mb-1">Year</label>
             <select id="targetYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
           </div>
         </div>

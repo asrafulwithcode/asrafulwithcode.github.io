@@ -39,53 +39,67 @@
     <!-- Calculator Card -->
     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8 max-w-2xl mx-auto space-y-6">
       
-      <!-- Date of Birth Selection (DD / MM / YYYY) -->
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-          Date of Birth (DOB) <span class="text-slate-400 font-normal">[Day - Month - Year]</span>
-        </label>
-        <div class="grid grid-cols-3 gap-2">
-          <select id="dobDay" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
-          <select id="dobMonth" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            <option value="0">January (01)</option>
-            <option value="1">February (02)</option>
-            <option value="2">March (03)</option>
-            <option value="3">April (04)</option>
-            <option value="4">May (05)</option>
-            <option value="5">June (06)</option>
-            <option value="6">July (07)</option>
-            <option value="7">August (08)</option>
-            <option value="8">September (09)</option>
-            <option value="9">October (10)</option>
-            <option value="10">November (11)</option>
-            <option value="11">December (12)</option>
-          </select>
-          <select id="dobYear" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+      <!-- Date of Birth Selection -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Date of Birth (DOB)</label>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</span>
+            <select id="dobDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
+          <div>
+            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Month</span>
+            <select id="dobMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="0">January (01)</option>
+              <option value="1">February (02)</option>
+              <option value="2">March (03)</option>
+              <option value="3">April (04)</option>
+              <option value="4">May (05)</option>
+              <option value="5">June (06)</option>
+              <option value="6">July (07)</option>
+              <option value="7">August (08)</option>
+              <option value="8">September (09)</option>
+              <option value="9">October (10)</option>
+              <option value="10">November (11)</option>
+              <option value="11">December (12)</option>
+            </select>
+          </div>
+          <div>
+            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Year</span>
+            <select id="dobYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
         </div>
       </div>
 
-      <!-- Cut-off Target Date Selection (DD / MM / YYYY) -->
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-          Age as on (Cut-off Date) <span class="text-slate-400 font-normal">[Day - Month - Year]</span>
-        </label>
-        <div class="grid grid-cols-3 gap-2">
-          <select id="targetDay" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
-          <select id="targetMonth" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            <option value="0">January (01)</option>
-            <option value="1">February (02)</option>
-            <option value="2">March (03)</option>
-            <option value="3">April (04)</option>
-            <option value="4">May (05)</option>
-            <option value="5">June (06)</option>
-            <option value="6">July (07)</option>
-            <option value="7">August (08)</option>
-            <option value="8">September (09)</option>
-            <option value="9">October (10)</option>
-            <option value="10">November (11)</option>
-            <option value="11">December (12)</option>
-          </select>
-          <select id="targetYear" onchange="calculateAge()" class="px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+      <!-- Cut-off Target Date Selection -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Age as on (Cut-off Date)</label>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</span>
+            <select id="targetDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
+          <div>
+            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Month</span>
+            <select id="targetMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="0">January (01)</option>
+              <option value="1">February (02)</option>
+              <option value="2">March (03)</option>
+              <option value="3">April (04)</option>
+              <option value="4">May (05)</option>
+              <option value="5">June (06)</option>
+              <option value="6">July (07)</option>
+              <option value="7">August (08)</option>
+              <option value="8">September (09)</option>
+              <option value="9">October (10)</option>
+              <option value="10">November (11)</option>
+              <option value="11">December (12)</option>
+            </select>
+          </div>
+          <div>
+            <span class="block text-[11px] font-semibold text-slate-500 mb-1">Year</span>
+            <select id="targetYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
         </div>
       </div>
 
@@ -154,7 +168,6 @@
   </footer>
 
   <script>
-    // Populate Days (1 - 31)
     function populateDays(elementId) {
       const el = document.getElementById(elementId);
       el.innerHTML = '';
@@ -166,7 +179,6 @@
       }
     }
 
-    // Populate Years
     function populateYears(elementId, startYear, endYear) {
       const el = document.getElementById(elementId);
       el.innerHTML = '';
@@ -181,20 +193,17 @@
     const today = new Date();
     const currentYear = today.getFullYear();
 
-    // Populate Dropdowns
     populateDays('dobDay');
     populateDays('targetDay');
     populateYears('dobYear', 1950, currentYear);
     populateYears('targetYear', 1980, currentYear + 10);
 
-    // Default Values: Target = Today (Date, Month, Year)
     document.getElementById('targetDay').value = today.getDate();
     document.getElementById('targetMonth').value = today.getMonth();
     document.getElementById('targetYear').value = today.getFullYear();
 
-    // Default Values: DOB = 15 Jan, 2005 (20 years ago approx)
     document.getElementById('dobDay').value = 14;
-    document.getElementById('dobMonth').value = 11; // December (0-indexed: 11)
+    document.getElementById('dobMonth').value = 11;
     document.getElementById('dobYear').value = 2007;
 
     let calculatedYears = 0;
@@ -242,13 +251,11 @@
       calculatedMonths = m;
       calculatedDays = d;
 
-      // Update Main Display
       const mainText = `${y} Years, ${m} Months, ${d} Days`;
       const mainEl = document.getElementById('mainAgeText');
       mainEl.innerText = mainText;
       mainEl.className = "text-2xl sm:text-3xl font-extrabold text-blue-700";
 
-      // Total Breakdown
       const diffMs = targetDate.getTime() - birthDate.getTime();
       const totalDaysCount = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       const totalWeeksCount = Math.floor(totalDaysCount / 7);
@@ -258,7 +265,6 @@
       document.getElementById('totalWeeks').innerText = totalWeeksCount.toLocaleString();
       document.getElementById('totalDays').innerText = totalDaysCount.toLocaleString();
 
-      // Next Birthday Countdown
       let nextBday = new Date(today.getFullYear(), bMonth, bDay);
       if (nextBday < today) {
         nextBday.setFullYear(today.getFullYear() + 1);
@@ -298,7 +304,6 @@
       }
     }
 
-    // Run on page load
     calculateAge();
   </script>
 </body>

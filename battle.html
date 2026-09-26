@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battle Royale & Clout Wars - FinGrowTools</title>
+  <meta name="description" content="Play the FF Headshot Reflex Arena and Instagram Clout Wars right in your browser. 100% free web game." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
+  <style>
+    @keyframes floatUp {
+      0% { transform: translateY(0px) scale(0.9); opacity: 1; }
+      100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
+    }
+    .floating-text {
+      animation: floatUp 0.8s ease-out forwards;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="text-2xl font-black tracking-tight text-amber-400">FinGrow<span class="text-white">Tools</span></a>
+      <nav class="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm font-medium text-slate-300">
+        <a href="/" class="hover:text-amber-400 transition">Calculators</a>
+        <a href="/compressor.html" class="hover:text-amber-400 transition">Compressor</a>
+        <a href="/age-calculator.html" class="hover:text-amber-400 transition">Age Tool</a>
+        <a href="/battle.html" class="bg-amber-400/20 text-amber-400 px-3 py-1.5 rounded-lg font-bold border border-amber-400/40">Battle Arena</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Game Container -->
+  <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+    <!-- Mode Switcher -->
+    <div class="flex justify-center space-x-3 mb-6">
+      <button id="btnTabFF" onclick="switchMode('ff')" class="px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-amber-500 bg-amber-500 text-black shadow-lg shadow-amber-500/30 transition">
+        🔥 FF Headshot Arena
+      </button>
+      <button id="btnTabInsta" onclick="switchMode('insta')" class="px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-slate-700 bg-slate-900 text-slate-300 hover:border-pink-500 transition">
+        📸 Insta Clout Wars
+      </button>
+    </div>
+
+    <!-- ================= MODE 1: FF HEADSHOT ARENA ================= -->
+    <div id="ffArena" class="space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 text-center space-y-3">
+        <div class="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-400 px-2">
+          <div>TIMER: <span id="ffTimer" class="text-amber-400 text-lg">30</span>s</div>
+          <div>KILLSTREAK: <span id="ffStreak" class="text-rose-500 text-lg">0</span></div>
+          <div>SCORE: <span id="ffScore" class="text-emerald-400 text-lg">0</span></div>
+        </div>
+
+        <!-- Target Window -->
+        <div id="ffPlayzone" class="relative w-full h-80 sm:h-96 bg-gradient-to-b from-slate-950 to-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-crosshair flex items-center justify-center">
+          <div id="ffStartOverlay" class="absolute inset-0 bg-slate-950/90 z-20 flex flex-col items-center justify-center space-y-4 p-4 text-center">
+            <h2 class="text-2xl sm:text-3xl font-black text-amber-400 tracking-wider">SURVIVAL REFLEX SHOWDOWN</h2>
+            <p class="text-xs sm:text-sm text-slate-400 max-w-md">Click enemy HEADS for 150 CRIT headshots. Bodyshots give only 30 pts. Beat 3,000 points for Grandmaster rank!</p>
+            <button onclick="startFFGame()" class="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-black text-lg rounded-xl shadow-lg shadow-amber-500/40 active:scale-95 transition">START MATCH</button>
+          </div>
+          <!-- Target container -->
+          <div id="ffTarget" class="absolute hidden select-none" style="left:50%; top:50%;">
+            <!-- Head -->
+            <div onclick="hitTarget(event, 'head')" class="w-12 h-12 bg-rose-600 rounded-full border-2 border-white hover:scale-110 active:scale-95 shadow-lg shadow-rose-600/50 flex items-center justify-center text-xs font-black text-white cursor-pointer mx-auto">
+              HEAD
+            </div>
+            <!-- Body -->
+            <div onclick="hitTarget(event, 'body')" class="w-16 h-20 bg-amber-600 rounded-t-xl mt-1 border-2 border-amber-400 hover:brightness-110 flex items-center justify-center text-[10px] font-bold text-black cursor-pointer">
+              BODY
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MODE 2: INSTA CLOUT WARS ================= -->
+    <div id="instaArena" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 text-center space-y-4">
+        <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-amber-400">
+          INSTA 1M FOLLOWER TAP DUEL
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400">Spam Tap the Reel to gain followers faster than the Rival Bot. First to 1,000,000 wins the Blue Tick!</p>
+
+        <!-- Progress Comparison -->
+        <div class="space-y-3">
+          <div>
+            <div class="flex justify-between text-xs font-bold mb-1">
+              <span class="text-pink-400">YOU (@creator)</span>
+              <span id="userCount" class="text-pink-400">0 / 1,000,000</span>
+            </div>
+            <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+              <div id="userBar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full w-0 transition-all duration-100"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs font-bold mb-1">
+              <span class="text-slate-400">RIVAL BOT (@troll_bot)</span>
+              <span id="botCount" class="text-slate-400">0 / 1,000,000</span>
+            </div>
+            <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+              <div id="botBar" class="bg-slate-600 h-full w-0 transition-all duration-100"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Big Tap Button -->
+        <div class="py-6 relative">
+          <button id="tapBtn" onclick="userTap(event)" class="w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-500 text-white font-black text-xl shadow-2xl shadow-pink-500/40 border-4 border-white/20 active:scale-90 transition transform">
+            ❤️ TAP REEL!<br><span class="text-xs font-medium opacity-80">+5,000 Followers</span>
+          </button>
+        </div>
+
+        <!-- Start/Reset -->
+        <div class="flex justify-center space-x-3">
+          <button id="btnStartDuel" onclick="startInstaDuel()" class="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl font-bold text-sm text-white">Start Clout Race</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp Share Box -->
+    <div id="shareBox" class="mt-6 bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="text-left">
+        <h3 class="text-sm font-bold text-white">Brag to Friends!</h3>
+        <p class="text-xs text-slate-400">Challenge friends on WhatsApp to beat your highest score.</p>
+      </div>
+      <button onclick="shareWhatsApp()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs sm:text-sm rounded-xl flex items-center space-x-2 transition">
+        <span>📲 Challenge on WhatsApp</span>
+      </button>
+    </div>
+  </main>
+
+  <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+    <p>© 2026 FinGrowTools · Fast, Addictive Mini Web Utilities</p>
+  </footer>
+
+  <script>
+    // Audio Synthesizer
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq, type, duration) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    // Switch Tab Mode
+    function switchMode(mode) {
+      const ffTab = document.getElementById('btnTabFF');
+      const instaTab = document.getElementById('btnTabInsta');
+      const ffArena = document.getElementById('ffArena');
+      const instaArena = document.getElementById('instaArena');
+
+      if (mode === 'ff') {
+        ffArena.classList.remove('hidden');
+        instaArena.classList.add('hidden');
+        ffTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-amber-500 bg-amber-500 text-black shadow-lg shadow-amber-500/30 transition";
+        instaTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-slate-700 bg-slate-900 text-slate-300 hover:border-pink-500 transition";
+      } else {
+        ffArena.classList.add('hidden');
+        instaArena.classList.remove('hidden');
+        instaTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-pink-500 bg-pink-500 text-white shadow-lg shadow-pink-500/30 transition";
+        ffTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 transition";
+      }
+    }
+
+    // --- Free Fire Logic ---
+    let ffScore = 0;
+    let ffStreak = 0;
+    let ffTimeLeft = 30;
+    let ffTimerInterval = null;
+    const playzone = document.getElementById('ffPlayzone');
+    const target = document.getElementById('ffTarget');
+
+    function startFFGame() {
+      ffScore = 0;
+      ffStreak = 0;
+      ffTimeLeft = 30;
+      document.getElementById('ffScore').innerText = '0';
+      document.getElementById('ffStreak').innerText = '0';
+      document.getElementById('ffTimer').innerText = '30';
+      document.getElementById('ffStartOverlay').classList.add('hidden');
+      target.classList.remove('hidden');
+      repositionTarget();
+
+      clearInterval(ffTimerInterval);
+      ffTimerInterval = setInterval(() => {
+        ffTimeLeft--;
+        document.getElementById('ffTimer').innerText = ffTimeLeft;
+        if (ffTimeLeft <= 0) {
+          endFFGame();
+        }
+      }, 1000);
+    }
+
+    function repositionTarget() {
+      const maxX = playzone.clientWidth - 90;
+      const maxY = playzone.clientHeight - 130;
+      const rx = Math.max(10, Math.floor(Math.random() * maxX));
+      const ry = Math.max(10, Math.floor(Math.random() * maxY));
+      target.style.left = rx + 'px';
+      target.style.top = ry + 'px';
+    }
+
+    function hitTarget(e, type) {
+      e.stopPropagation();
+      let pts = type === 'head' ? 150 : 30;
+      if (type === 'head') {
+        ffStreak++;
+        playBeep(800, 'sawtooth', 0.15);
+        showFloating(e.clientX, e.clientY, '💥 150 HEADSHOT!', 'text-rose-500');
+      } else {
+        ffStreak = 0;
+        playBeep(300, 'square', 0.1);
+        showFloating(e.clientX, e.clientY, '+30 Body', 'text-amber-400');
+      }
+
+      ffScore += pts;
+      document.getElementById('ffScore').innerText = ffScore;
+      document.getElementById('ffStreak').innerText = ffStreak;
+      repositionTarget();
+    }
+
+    function endFFGame() {
+      clearInterval(ffTimerInterval);
+      target.classList.add('hidden');
+      const overlay = document.getElementById('ffStartOverlay');
+      overlay.classList.remove('hidden');
+
+      let rank = ffScore >= 3000 ? "👑 GRANDMASTER" : ffScore >= 1800 ? "⚡ HEROIC" : "🥉 BRONZE";
+      overlay.innerHTML = `
+        <h2 class="text-3xl font-black text-amber-400">MATCH OVER!</h2>
+        <div class="text-xl font-bold text-white">Final Score: ${ffScore}</div>
+        <div class="text-sm font-extrabold px-4 py-2 bg-amber-500/20 text-amber-400 border border-amber-400/40 rounded-xl">${rank}</div>
+        <button onclick="startFFGame()" class="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-black text-lg rounded-xl shadow-lg shadow-amber-500/40 transition">PLAY AGAIN</button>
+      `;
+    }
+
+    function showFloating(x, y, text, colorClass) {
+      const el = document.createElement('div');
+      el.className = `fixed font-black text-lg z-50 floating-text ${colorClass}`;
+      el.innerText = text;
+      el.style.left = (x - 40) + 'px';
+      el.style.top = (y - 30) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 800);
+    }
+
+    // --- Insta Clout Logic ---
+    let userFollowers = 0;
+    let botFollowers = 0;
+    let instaDuelInterval = null;
+    let isDuelRunning = false;
+
+    function startInstaDuel() {
+      userFollowers = 0;
+      botFollowers = 0;
+      isDuelRunning = true;
+      updateInstaDisplay();
+      document.getElementById('btnStartDuel').innerText = 'Race in Progress...';
+      document.getElementById('btnStartDuel').disabled = true;
+
+      clearInterval(instaDuelInterval);
+      instaDuelInterval = setInterval(() => {
+        if (!isDuelRunning) return;
+        // Bot taps automatically (12,000 - 25,000 followers per sec)
+        botFollowers += Math.floor(Math.random() * 15000) + 8000;
+        updateInstaDisplay();
+        checkDuelEnd();
+      }, 500);
+    }
+
+    function userTap(e) {
+      if (!isDuelRunning) startInstaDuel();
+      userFollowers += 12000;
+      playBeep(520, 'sine', 0.08);
+      showFloating(e.clientX, e.clientY, '🔥 +12K Follower Surge', 'text-pink-400');
+      updateInstaDisplay();
+      checkDuelEnd();
+    }
+
+    function updateInstaDisplay() {
+      const uPercent = Math.min(100, (userFollowers / 1000000) * 100);
+      const bPercent = Math.min(100, (botFollowers / 1000000) * 100);
+
+      document.getElementById('userBar').style.width = uPercent + '%';
+      document.getElementById('botBar').style.width = bPercent + '%';
+
+      document.getElementById('userCount').innerText = `${userFollowers.toLocaleString()} / 1,000,000`;
+      document.getElementById('botCount').innerText = `${botFollowers.toLocaleString()} / 1,000,000`;
+    }
+
+    function checkDuelEnd() {
+      if (userFollowers >= 1000000 || botFollowers >= 1000000) {
+        isDuelRunning = false;
+        clearInterval(instaDuelInterval);
+        document.getElementById('btnStartDuel').innerText = 'Play Again';
+        document.getElementById('btnStartDuel').disabled = false;
+
+        if (userFollowers >= 1000000) {
+          playBeep(900, 'square', 0.4);
+          alert('🎉 BOOM! You beat the bot and hit 1M Followers! Verified Blue Tick Unlocked! 💙');
+        } else {
+          alert('💀 Troll Bot won the race! Tap faster next time!');
+        }
+      }
+    }
+
+    function shareWhatsApp() {
+      const text = `🔥 I just scored ${ffScore} PTS in the Free Fire Headshot Reflex Arena! Can you beat my score? Play free here: https://asrafulwithcode.github.io/battle.html`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  </script>
+</body>
+</html>

@@ -2,325 +2,284 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Battle Royale & Clout Wars - FinGrowTools</title>
-  <meta name="description" content="Play the FF Headshot Reflex Arena and Instagram Clout Wars right in your browser. 100% free web game." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>CyberShift 3D: Hyper Velocity - FinGrowTools</title>
+  <meta name="description" content="Experience high-speed 3D neon tunnel racing. Dodge laser barriers and break speed records right in your browser." />
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
   <style>
-    @keyframes floatUp {
-      0% { transform: translateY(0px) scale(0.9); opacity: 1; }
-      100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
-    }
-    .floating-text {
-      animation: floatUp 0.8s ease-out forwards;
-      pointer-events: none;
-    }
+    body { margin: 0; overflow: hidden; background: #020617; touch-action: none; }
+    canvas { display: block; width: 100vw; height: 100vh; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+<body class="select-none font-sans text-white bg-slate-950">
 
-  <!-- Header -->
-  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/" class="text-2xl font-black tracking-tight text-amber-400">FinGrow<span class="text-white">Tools</span></a>
-      <nav class="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm font-medium text-slate-300">
-        <a href="/" class="hover:text-amber-400 transition">Calculators</a>
-        <a href="/compressor.html" class="hover:text-amber-400 transition">Compressor</a>
-        <a href="/age-calculator.html" class="hover:text-amber-400 transition">Age Tool</a>
-        <a href="/battle.html" class="bg-amber-400/20 text-amber-400 px-3 py-1.5 rounded-lg font-bold border border-amber-400/40">Battle Arena</a>
+  <!-- Header Navigation -->
+  <header class="fixed top-0 left-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
+      <a href="/" class="text-xl font-black tracking-tight text-cyan-400">FinGrow<span class="text-white">Tools</span></a>
+      <nav class="flex items-center space-x-2 sm:space-x-4 text-xs font-semibold text-slate-300">
+        <a href="/" class="hover:text-cyan-400 transition">Calculators</a>
+        <a href="/compressor.html" class="hover:text-cyan-400 transition">Compressor</a>
+        <a href="/age-calculator.html" class="hover:text-cyan-400 transition">Age Tool</a>
+        <a href="/battle.html" class="bg-cyan-500/20 text-cyan-300 px-2.5 py-1 rounded-lg border border-cyan-500/40">CyberShift 3D</a>
       </nav>
     </div>
   </header>
 
-  <!-- Main Game Container -->
-  <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
-    <!-- Mode Switcher -->
-    <div class="flex justify-center space-x-3 mb-6">
-      <button id="btnTabFF" onclick="switchMode('ff')" class="px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-amber-500 bg-amber-500 text-black shadow-lg shadow-amber-500/30 transition">
-        🔥 FF Headshot Arena
-      </button>
-      <button id="btnTabInsta" onclick="switchMode('insta')" class="px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-slate-700 bg-slate-900 text-slate-300 hover:border-pink-500 transition">
-        📸 Insta Clout Wars
-      </button>
+  <!-- HUD Overlay -->
+  <div class="fixed top-14 left-0 w-full px-4 sm:px-6 flex justify-between items-center z-10 pointer-events-none">
+    <div class="bg-slate-900/80 backdrop-blur border border-cyan-500/40 px-3.5 py-1.5 rounded-xl shadow-lg">
+      <span class="text-[10px] text-cyan-400 font-bold tracking-widest block">DISTANCE SCORE</span>
+      <span class="text-xl sm:text-2xl font-black tracking-wider" id="scoreDisplay">00000</span>
     </div>
-
-    <!-- ================= MODE 1: FF HEADSHOT ARENA ================= -->
-    <div id="ffArena" class="space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 text-center space-y-3">
-        <div class="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-400 px-2">
-          <div>TIMER: <span id="ffTimer" class="text-amber-400 text-lg">30</span>s</div>
-          <div>KILLSTREAK: <span id="ffStreak" class="text-rose-500 text-lg">0</span></div>
-          <div>SCORE: <span id="ffScore" class="text-emerald-400 text-lg">0</span></div>
-        </div>
-
-        <!-- Target Window -->
-        <div id="ffPlayzone" class="relative w-full h-80 sm:h-96 bg-gradient-to-b from-slate-950 to-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-crosshair flex items-center justify-center">
-          <div id="ffStartOverlay" class="absolute inset-0 bg-slate-950/90 z-20 flex flex-col items-center justify-center space-y-4 p-4 text-center">
-            <h2 class="text-2xl sm:text-3xl font-black text-amber-400 tracking-wider">SURVIVAL REFLEX SHOWDOWN</h2>
-            <p class="text-xs sm:text-sm text-slate-400 max-w-md">Click enemy HEADS for 150 CRIT headshots. Bodyshots give only 30 pts. Beat 3,000 points for Grandmaster rank!</p>
-            <button onclick="startFFGame()" class="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-black text-lg rounded-xl shadow-lg shadow-amber-500/40 active:scale-95 transition">START MATCH</button>
-          </div>
-          <!-- Target container -->
-          <div id="ffTarget" class="absolute hidden select-none" style="left:50%; top:50%;">
-            <!-- Head -->
-            <div onclick="hitTarget(event, 'head')" class="w-12 h-12 bg-rose-600 rounded-full border-2 border-white hover:scale-110 active:scale-95 shadow-lg shadow-rose-600/50 flex items-center justify-center text-xs font-black text-white cursor-pointer mx-auto">
-              HEAD
-            </div>
-            <!-- Body -->
-            <div onclick="hitTarget(event, 'body')" class="w-16 h-20 bg-amber-600 rounded-t-xl mt-1 border-2 border-amber-400 hover:brightness-110 flex items-center justify-center text-[10px] font-bold text-black cursor-pointer">
-              BODY
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="bg-slate-900/80 backdrop-blur border border-pink-500/40 px-3.5 py-1.5 rounded-xl text-right shadow-lg">
+      <span class="text-[10px] text-pink-400 font-bold tracking-widest block">VELOCITY</span>
+      <span class="text-lg sm:text-xl font-black text-pink-300" id="speedDisplay">240 KM/H</span>
     </div>
+  </div>
 
-    <!-- ================= MODE 2: INSTA CLOUT WARS ================= -->
-    <div id="instaArena" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 text-center space-y-4">
-        <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-amber-400">
-          INSTA 1M FOLLOWER TAP DUEL
-        </h2>
-        <p class="text-xs sm:text-sm text-slate-400">Spam Tap the Reel to gain followers faster than the Rival Bot. First to 1,000,000 wins the Blue Tick!</p>
-
-        <!-- Progress Comparison -->
-        <div class="space-y-3">
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1">
-              <span class="text-pink-400">YOU (@creator)</span>
-              <span id="userCount" class="text-pink-400">0 / 1,000,000</span>
-            </div>
-            <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
-              <div id="userBar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full w-0 transition-all duration-100"></div>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1">
-              <span class="text-slate-400">RIVAL BOT (@troll_bot)</span>
-              <span id="botCount" class="text-slate-400">0 / 1,000,000</span>
-            </div>
-            <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
-              <div id="botBar" class="bg-slate-600 h-full w-0 transition-all duration-100"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Big Tap Button -->
-        <div class="py-6 relative">
-          <button id="tapBtn" onclick="userTap(event)" class="w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-500 text-white font-black text-xl shadow-2xl shadow-pink-500/40 border-4 border-white/20 active:scale-90 transition transform">
-            ❤️ TAP REEL!<br><span class="text-xs font-medium opacity-80">+5,000 Followers</span>
-          </button>
-        </div>
-
-        <!-- Start/Reset -->
-        <div class="flex justify-center space-x-3">
-          <button id="btnStartDuel" onclick="startInstaDuel()" class="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl font-bold text-sm text-white">Start Clout Race</button>
-        </div>
-      </div>
+  <!-- Start & Game Over Screen -->
+  <div id="gameOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-20 text-center">
+    <div class="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-xs font-bold tracking-widest mb-3 uppercase">
+      High-Speed 3D Simulator
     </div>
-
-    <!-- WhatsApp Share Box -->
-    <div id="shareBox" class="mt-6 bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="text-left">
-        <h3 class="text-sm font-bold text-white">Brag to Friends!</h3>
-        <p class="text-xs text-slate-400">Challenge friends on WhatsApp to beat your highest score.</p>
-      </div>
-      <button onclick="shareWhatsApp()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs sm:text-sm rounded-xl flex items-center space-x-2 transition">
-        <span>📲 Challenge on WhatsApp</span>
-      </button>
-    </div>
-  </main>
-
-  <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
-    <p>© 2026 FinGrowTools · Fast, Addictive Mini Web Utilities</p>
-  </footer>
+    <h1 id="mainTitle" class="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-pink-500 mb-2">
+      CYBERSHIFT 3D
+    </h1>
+    <p id="subTitle" class="text-slate-400 text-xs sm:text-sm max-w-md mb-8 leading-relaxed">
+      Dodge incoming quantum grid barriers at hyper-velocity. Use <b class="text-cyan-300">A / D</b>, <b class="text-cyan-300">Arrow Keys</b>, or <b class="text-cyan-300">Drag / Swipe</b> on screen.
+    </p>
+    <button onclick="startGame()" id="btnPlay" class="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-cyan-500/30 active:scale-95 transition">
+      ENGAGE THRUSTERS
+    </button>
+  </div>
 
   <script>
-    // Audio Synthesizer
+    // Web Audio Synthesizer (Zero External Files)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playBeep(freq, type, duration) {
+    function playSound(type) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
-    }
 
-    // Switch Tab Mode
-    function switchMode(mode) {
-      const ffTab = document.getElementById('btnTabFF');
-      const instaTab = document.getElementById('btnTabInsta');
-      const ffArena = document.getElementById('ffArena');
-      const instaArena = document.getElementById('instaArena');
-
-      if (mode === 'ff') {
-        ffArena.classList.remove('hidden');
-        instaArena.classList.add('hidden');
-        ffTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-amber-500 bg-amber-500 text-black shadow-lg shadow-amber-500/30 transition";
-        instaTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-slate-700 bg-slate-900 text-slate-300 hover:border-pink-500 transition";
-      } else {
-        ffArena.classList.add('hidden');
-        instaArena.classList.remove('hidden');
-        instaTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-pink-500 bg-pink-500 text-white shadow-lg shadow-pink-500/30 transition";
-        ffTab.className = "px-5 py-2.5 rounded-xl font-extrabold text-sm border-2 border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 transition";
+      if (type === 'start') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+      } else if (type === 'crash') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
       }
     }
 
-    // --- Free Fire Logic ---
-    let ffScore = 0;
-    let ffStreak = 0;
-    let ffTimeLeft = 30;
-    let ffTimerInterval = null;
-    const playzone = document.getElementById('ffPlayzone');
-    const target = document.getElementById('ffTarget');
+    let scene, camera, renderer, ship, stars;
+    let obstacles = [];
+    let speed = 1.2;
+    let score = 0;
+    let isPlaying = false;
+    let targetShipX = 0;
+    const boundaryX = 13;
 
-    function startFFGame() {
-      ffScore = 0;
-      ffStreak = 0;
-      ffTimeLeft = 30;
-      document.getElementById('ffScore').innerText = '0';
-      document.getElementById('ffStreak').innerText = '0';
-      document.getElementById('ffTimer').innerText = '30';
-      document.getElementById('ffStartOverlay').classList.add('hidden');
-      target.classList.remove('hidden');
-      repositionTarget();
+    function init() {
+      // Scene & Fog
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x020617, 0.016);
 
-      clearInterval(ffTimerInterval);
-      ffTimerInterval = setInterval(() => {
-        ffTimeLeft--;
-        document.getElementById('ffTimer').innerText = ffTimeLeft;
-        if (ffTimeLeft <= 0) {
-          endFFGame();
+      // Camera
+      camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 3.2, 7.5);
+      camera.rotation.x = -0.22;
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      document.body.appendChild(renderer.domElement);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0x00f0ff, 1.3);
+      dirLight.position.set(5, 12, 8);
+      scene.add(dirLight);
+
+      // 3D Player Starship
+      const shipGeo = new THREE.ConeGeometry(0.75, 2.2, 5);
+      const shipMat = new THREE.MeshStandardMaterial({
+        color: 0x00f5ff,
+        emissive: 0x005577,
+        roughness: 0.25,
+        metalness: 0.8
+      });
+      ship = new THREE.Mesh(shipGeo, shipMat);
+      ship.rotation.x = Math.PI / 2;
+      ship.rotation.z = Math.PI;
+      ship.position.y = 0.5;
+      scene.add(ship);
+
+      // Warp Field Particles
+      const starGeo = new THREE.BufferGeometry();
+      const starCount = 1000;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount * 3; i += 3) {
+        starPositions[i] = (Math.random() - 0.5) * 60;
+        starPositions[i + 1] = (Math.random() - 0.5) * 30 + 5;
+        starPositions[i + 2] = -Math.random() * 250;
+      }
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMat = new THREE.PointsMaterial({ color: 0x38bdf8, size: 0.25, transparent: true, opacity: 0.8 });
+      stars = new THREE.Points(starGeo, starMat);
+      scene.add(stars);
+
+      // Neon Floor Grid
+      const grid = new THREE.GridHelper(320, 60, 0x06b6d4, 0x1e293b);
+      grid.position.y = 0;
+      grid.position.z = -100;
+      scene.add(grid);
+
+      // Event Listeners
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+
+      animate();
+    }
+
+    function spawnObstacle(zDistance) {
+      const width = Math.random() * 4 + 2.5;
+      const height = Math.random() * 2.5 + 2;
+      const geo = new THREE.BoxGeometry(width, height, 1);
+      const isPink = Math.random() > 0.5;
+      const mat = new THREE.MeshStandardMaterial({
+        color: isPink ? 0xff007f : 0x00f0ff,
+        emissive: isPink ? 0x660033 : 0x004455,
+        roughness: 0.3
+      });
+      const obs = new THREE.Mesh(geo, mat);
+      const xPos = (Math.random() - 0.5) * (boundaryX * 1.8);
+      obs.position.set(xPos, height / 2, zDistance);
+      obs.userData = { width: width, height: height };
+      scene.add(obs);
+      obstacles.push(obs);
+    }
+
+    function startGame() {
+      playSound('start');
+      obstacles.forEach(obs => scene.remove(obs));
+      obstacles = [];
+
+      for (let i = -30; i > -250; i -= 20) {
+        spawnObstacle(i);
+      }
+
+      score = 0;
+      speed = 1.3;
+      targetShipX = 0;
+      ship.position.x = 0;
+      isPlaying = true;
+      document.getElementById('gameOverlay').classList.add('hidden');
+    }
+
+    function gameOver() {
+      playSound('crash');
+      isPlaying = false;
+      document.getElementById('mainTitle').innerText = "SYSTEM OVERLOAD";
+      document.getElementById('mainTitle').className = "text-4xl sm:text-6xl font-black text-rose-500 mb-2";
+      document.getElementById('subTitle').innerText = `Max Score: ${Math.floor(score)} | Final Speed: ${Math.floor(speed * 180)} KM/H`;
+      document.getElementById('btnPlay').innerText = "RESTART RUN";
+      document.getElementById('gameOverlay').classList.remove('hidden');
+    }
+
+    function onKeyDown(e) {
+      if (!isPlaying) return;
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        targetShipX = Math.max(-boundaryX, targetShipX - 2.8);
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        targetShipX = Math.min(boundaryX, targetShipX + 2.8);
+      }
+    }
+
+    function onPointerMove(e) {
+      if (!isPlaying) return;
+      const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
+      targetShipX = normalizedX * boundaryX;
+    }
+
+    function onTouchMove(e) {
+      if (!isPlaying) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const normalizedX = (touch.clientX / window.innerWidth) * 2 - 1;
+      targetShipX = normalizedX * boundaryX;
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (isPlaying) {
+        score += speed * 0.6;
+        speed += 0.00035;
+        document.getElementById('scoreDisplay').innerText = Math.floor(score).toString().padStart(5, '0');
+        document.getElementById('speedDisplay').innerText = Math.floor(speed * 180) + ' KM/H';
+
+        ship.position.x += (targetShipX - ship.position.x) * 0.12;
+        ship.rotation.y = -(ship.position.x - targetShipX) * 0.22;
+        camera.position.x = ship.position.x * 0.4;
+
+        const pos = stars.geometry.attributes.position.array;
+        for (let i = 2; i < pos.length; i += 3) {
+          pos[i] += speed * 2.8;
+          if (pos[i] > 10) pos[i] = -250;
         }
-      }, 1000);
-    }
+        stars.geometry.attributes.position.needsUpdate = true;
 
-    function repositionTarget() {
-      const maxX = playzone.clientWidth - 90;
-      const maxY = playzone.clientHeight - 130;
-      const rx = Math.max(10, Math.floor(Math.random() * maxX));
-      const ry = Math.max(10, Math.floor(Math.random() * maxY));
-      target.style.left = rx + 'px';
-      target.style.top = ry + 'px';
-    }
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obs = obstacles[i];
+          obs.position.z += speed;
 
-    function hitTarget(e, type) {
-      e.stopPropagation();
-      let pts = type === 'head' ? 150 : 30;
-      if (type === 'head') {
-        ffStreak++;
-        playBeep(800, 'sawtooth', 0.15);
-        showFloating(e.clientX, e.clientY, '💥 150 HEADSHOT!', 'text-rose-500');
-      } else {
-        ffStreak = 0;
-        playBeep(300, 'square', 0.1);
-        showFloating(e.clientX, e.clientY, '+30 Body', 'text-amber-400');
-      }
+          if (Math.abs(obs.position.z - ship.position.z) < 1.2) {
+            const halfWidth = obs.userData.width / 2 + 0.4;
+            if (Math.abs(obs.position.x - ship.position.x) < halfWidth) {
+              gameOver();
+              break;
+            }
+          }
 
-      ffScore += pts;
-      document.getElementById('ffScore').innerText = ffScore;
-      document.getElementById('ffStreak').innerText = ffStreak;
-      repositionTarget();
-    }
-
-    function endFFGame() {
-      clearInterval(ffTimerInterval);
-      target.classList.add('hidden');
-      const overlay = document.getElementById('ffStartOverlay');
-      overlay.classList.remove('hidden');
-
-      let rank = ffScore >= 3000 ? "👑 GRANDMASTER" : ffScore >= 1800 ? "⚡ HEROIC" : "🥉 BRONZE";
-      overlay.innerHTML = `
-        <h2 class="text-3xl font-black text-amber-400">MATCH OVER!</h2>
-        <div class="text-xl font-bold text-white">Final Score: ${ffScore}</div>
-        <div class="text-sm font-extrabold px-4 py-2 bg-amber-500/20 text-amber-400 border border-amber-400/40 rounded-xl">${rank}</div>
-        <button onclick="startFFGame()" class="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-black text-lg rounded-xl shadow-lg shadow-amber-500/40 transition">PLAY AGAIN</button>
-      `;
-    }
-
-    function showFloating(x, y, text, colorClass) {
-      const el = document.createElement('div');
-      el.className = `fixed font-black text-lg z-50 floating-text ${colorClass}`;
-      el.innerText = text;
-      el.style.left = (x - 40) + 'px';
-      el.style.top = (y - 30) + 'px';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 800);
-    }
-
-    // --- Insta Clout Logic ---
-    let userFollowers = 0;
-    let botFollowers = 0;
-    let instaDuelInterval = null;
-    let isDuelRunning = false;
-
-    function startInstaDuel() {
-      userFollowers = 0;
-      botFollowers = 0;
-      isDuelRunning = true;
-      updateInstaDisplay();
-      document.getElementById('btnStartDuel').innerText = 'Race in Progress...';
-      document.getElementById('btnStartDuel').disabled = true;
-
-      clearInterval(instaDuelInterval);
-      instaDuelInterval = setInterval(() => {
-        if (!isDuelRunning) return;
-        // Bot taps automatically (12,000 - 25,000 followers per sec)
-        botFollowers += Math.floor(Math.random() * 15000) + 8000;
-        updateInstaDisplay();
-        checkDuelEnd();
-      }, 500);
-    }
-
-    function userTap(e) {
-      if (!isDuelRunning) startInstaDuel();
-      userFollowers += 12000;
-      playBeep(520, 'sine', 0.08);
-      showFloating(e.clientX, e.clientY, '🔥 +12K Follower Surge', 'text-pink-400');
-      updateInstaDisplay();
-      checkDuelEnd();
-    }
-
-    function updateInstaDisplay() {
-      const uPercent = Math.min(100, (userFollowers / 1000000) * 100);
-      const bPercent = Math.min(100, (botFollowers / 1000000) * 100);
-
-      document.getElementById('userBar').style.width = uPercent + '%';
-      document.getElementById('botBar').style.width = bPercent + '%';
-
-      document.getElementById('userCount').innerText = `${userFollowers.toLocaleString()} / 1,000,000`;
-      document.getElementById('botCount').innerText = `${botFollowers.toLocaleString()} / 1,000,000`;
-    }
-
-    function checkDuelEnd() {
-      if (userFollowers >= 1000000 || botFollowers >= 1000000) {
-        isDuelRunning = false;
-        clearInterval(instaDuelInterval);
-        document.getElementById('btnStartDuel').innerText = 'Play Again';
-        document.getElementById('btnStartDuel').disabled = false;
-
-        if (userFollowers >= 1000000) {
-          playBeep(900, 'square', 0.4);
-          alert('🎉 BOOM! You beat the bot and hit 1M Followers! Verified Blue Tick Unlocked! 💙');
-        } else {
-          alert('💀 Troll Bot won the race! Tap faster next time!');
+          if (obs.position.z > 10) {
+            scene.remove(obs);
+            obstacles.splice(i, 1);
+            spawnObstacle(-240);
+          }
         }
       }
+
+      renderer.render(scene, camera);
     }
 
-    function shareWhatsApp() {
-      const text = `🔥 I just scored ${ffScore} PTS in the Free Fire Headshot Reflex Arena! Can you beat my score? Play free here: https://asrafulwithcode.github.io/battle.html`;
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-    }
+    window.onload = init;
   </script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>CyberShift 3D: Hyper Velocity - FinGrowTools</title>
-  <meta name="description" content="Smooth and addictive 3D tunnel runner game right in your browser." />
+  <meta name="description" content="Smooth 3D tunnel runner game with dynamic throttle & brake mechanics right in your browser." />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Three.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -32,29 +32,42 @@
 
   <!-- HUD Overlay -->
   <div class="fixed top-14 left-0 w-full px-4 sm:px-6 flex justify-between items-center z-10 pointer-events-none">
-    <div class="bg-slate-900/80 backdrop-blur border border-cyan-500/40 px-3.5 py-1.5 rounded-xl shadow-lg">
-      <span class="text-[10px] text-cyan-400 font-bold tracking-widest block">SCORE</span>
-      <span class="text-xl sm:text-2xl font-black tracking-wider" id="scoreDisplay">00000</span>
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <div class="bg-slate-900/80 backdrop-blur border border-cyan-500/40 px-3.5 py-1.5 rounded-xl shadow-lg">
+        <span class="text-[10px] text-cyan-400 font-bold tracking-widest block">SCORE</span>
+        <span class="text-xl sm:text-2xl font-black tracking-wider" id="scoreDisplay">00000</span>
+      </div>
+      <div class="bg-slate-900/80 backdrop-blur border border-amber-500/50 px-3.5 py-1.5 rounded-xl shadow-lg">
+        <span class="text-[10px] text-amber-400 font-bold tracking-widest block">🪙 COINS</span>
+        <span class="text-xl sm:text-2xl font-black text-amber-300 tracking-wider" id="coinDisplay">0</span>
+      </div>
     </div>
-    <div class="bg-slate-900/80 backdrop-blur border border-pink-500/40 px-3.5 py-1.5 rounded-xl text-right shadow-lg">
-      <span class="text-[10px] text-pink-400 font-bold tracking-widest block">SPEED</span>
-      <span class="text-lg sm:text-xl font-black text-pink-300" id="speedDisplay">60 KM/H</span>
+    
+    <div class="flex flex-col items-end space-y-1">
+      <div class="bg-slate-900/80 backdrop-blur border border-pink-500/40 px-3.5 py-1.5 rounded-xl text-right shadow-lg">
+        <span class="text-[10px] text-pink-400 font-bold tracking-widest block" id="modeStatus">SLOW CRUISE</span>
+        <span class="text-lg sm:text-xl font-black text-pink-300" id="speedDisplay">40 KM/H</span>
+      </div>
+      <!-- Throttle Bar -->
+      <div class="w-28 bg-slate-900/80 border border-slate-700 h-1.5 rounded-full overflow-hidden">
+        <div id="throttleBar" class="bg-gradient-to-r from-cyan-400 to-pink-500 h-full w-0 transition-all duration-150"></div>
+      </div>
     </div>
   </div>
 
   <!-- Start & Game Over Screen -->
   <div id="gameOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-20 text-center">
     <div class="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-xs font-bold tracking-widest mb-3 uppercase">
-      Smooth 3D Glider
+      Dynamic Throttle Runner
     </div>
-    <h1 id="mainTitle" class="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-pink-500 mb-2">
+    <h1 id="mainTitle" class="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-400 mb-2">
       CYBERSHIFT 3D
     </h1>
     <p id="subTitle" class="text-slate-400 text-xs sm:text-sm max-w-md mb-8 leading-relaxed">
-      Dodge oncoming neon barriers. Steer with <b class="text-cyan-300">A / D</b>, <b class="text-cyan-300">Left / Right Arrows</b>, or <b class="text-cyan-300">Screen Touch / Drag</b>.
+      <b>PRO MECHANIC:</b> Hold touch or press keys to <b>THRUST FAST</b>. Release controls anytime to <b>SLOW DOWN</b> and dodge tight barriers easily!
     </p>
-    <button onclick="startGame()" id="btnPlay" class="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-cyan-500/30 active:scale-95 transition">
-      START FLIGHT
+    <button onclick="startGame()" id="btnPlay" class="px-8 py-3.5 bg-gradient-to-r from-amber-500 via-cyan-500 to-blue-600 hover:brightness-110 text-slate-950 font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-cyan-500/30 active:scale-95 transition">
+      LAUNCH MISSION
     </button>
   </div>
 
@@ -75,6 +88,14 @@
         gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.3);
+      } else if (type === 'coin') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987.77, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(1318.51, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
       } else if (type === 'crash') {
         osc.type = 'square';
         osc.frequency.setValueAtTime(110, audioCtx.currentTime);
@@ -88,8 +109,17 @@
 
     let scene, camera, renderer, ship, stars;
     let obstacles = [];
-    let speed = 0.45; // Bahut slow & comfortable starting speed
+    let coins = [];
+    
+    // Speed control parameters
+    const cruiseSpeed = 0.35; // Jab chhod dega toh yeh slow speed rahegi
+    const maxBoostSpeed = 0.95; // Jab control karega toh fast chalega
+    let currentSpeed = cruiseSpeed;
+    let isActivelyControlling = false;
+    let controlTimeout = null;
+
     let score = 0;
+    let coinsCollected = 0;
     let isPlaying = false;
     let targetShipX = 0;
     const boundaryX = 13;
@@ -107,7 +137,7 @@
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       document.body.appendChild(renderer.domElement);
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambientLight);
 
       const dirLight = new THREE.DirectionalLight(0x00f0ff, 1.2);
@@ -148,12 +178,26 @@
       grid.position.z = -100;
       scene.add(grid);
 
+      // Listeners
       window.addEventListener('resize', onWindowResize);
       window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', () => { isActivelyControlling = false; });
       window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerdown', () => { isActivelyControlling = true; });
+      window.addEventListener('pointerup', () => { isActivelyControlling = false; });
       window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('touchstart', () => { isActivelyControlling = true; }, { passive: true });
+      window.addEventListener('touchend', () => { isActivelyControlling = false; });
 
       animate();
+    }
+
+    function triggerActiveThrust() {
+      isActivelyControlling = true;
+      clearTimeout(controlTimeout);
+      controlTimeout = setTimeout(() => {
+        isActivelyControlling = false;
+      }, 650); // Chhodne ke baad 0.6 second me brake lag jayega
     }
 
     function spawnObstacle(zDistance) {
@@ -174,21 +218,43 @@
       obstacles.push(obs);
     }
 
+    function spawnCoin(zDistance) {
+      const geo = new THREE.CylinderGeometry(0.65, 0.65, 0.18, 16);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0xffb703,
+        emissive: 0xfb8500,
+        roughness: 0.2,
+        metalness: 0.9
+      });
+      const coin = new THREE.Mesh(geo, mat);
+      coin.rotation.x = Math.PI / 2;
+      const xPos = (Math.random() - 0.5) * (boundaryX * 1.5);
+      coin.position.set(xPos, 0.6, zDistance);
+      scene.add(coin);
+      coins.push(coin);
+    }
+
     function startGame() {
       playSound('start');
+
       obstacles.forEach(obs => scene.remove(obs));
       obstacles = [];
+      coins.forEach(c => scene.remove(c));
+      coins = [];
 
-      // Shuru me kaafi door-door blocks spawn honge (45 unit ka distance)
       for (let i = -50; i > -260; i -= 45) {
         spawnObstacle(i);
+        spawnCoin(i + 22);
       }
 
       score = 0;
-      speed = 0.45; // Slow chill start
+      coinsCollected = 0;
+      currentSpeed = cruiseSpeed;
       targetShipX = 0;
       ship.position.x = 0;
       isPlaying = true;
+
+      document.getElementById('coinDisplay').innerText = '0';
       document.getElementById('gameOverlay').classList.add('hidden');
     }
 
@@ -197,13 +263,18 @@
       isPlaying = false;
       document.getElementById('mainTitle').innerText = "SYSTEM CRASH";
       document.getElementById('mainTitle').className = "text-4xl sm:text-6xl font-black text-rose-500 mb-2";
-      document.getElementById('subTitle').innerText = `Score: ${Math.floor(score)} | Speed: ${Math.floor(speed * 120)} KM/H`;
+      document.getElementById('subTitle').innerHTML = `
+        <span class="text-white font-bold block mb-1">Total Score: ${Math.floor(score)}</span>
+        <span class="text-amber-400 font-bold block mb-1">🪙 Coins Looted: ${coinsCollected}</span>
+        <span class="text-slate-400 text-xs">Top Velocity: ${Math.floor(currentSpeed * 140)} KM/H</span>
+      `;
       document.getElementById('btnPlay').innerText = "TRY AGAIN";
       document.getElementById('gameOverlay').classList.remove('hidden');
     }
 
     function onKeyDown(e) {
       if (!isPlaying) return;
+      triggerActiveThrust();
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         targetShipX = Math.max(-boundaryX, targetShipX - 2.5);
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
@@ -213,6 +284,7 @@
 
     function onPointerMove(e) {
       if (!isPlaying) return;
+      triggerActiveThrust();
       const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
       targetShipX = normalizedX * boundaryX;
     }
@@ -220,6 +292,7 @@
     function onTouchMove(e) {
       if (!isPlaying) return;
       e.preventDefault();
+      triggerActiveThrust();
       const touch = e.touches[0];
       const normalizedX = (touch.clientX / window.innerWidth) * 2 - 1;
       targetShipX = normalizedX * boundaryX;
@@ -235,32 +308,67 @@
       requestAnimationFrame(animate);
 
       if (isPlaying) {
-        score += speed * 0.8;
-        // Speed bohot dheere dheere badhegi
-        speed = Math.min(1.1, speed + 0.0001);
+        // Dynamic Throttle Acceleration & Deceleration
+        if (isActivelyControlling) {
+          currentSpeed = Math.min(maxBoostSpeed, currentSpeed + 0.015); // Accelerate
+          document.getElementById('modeStatus').innerText = "⚡ HYPER BOOST";
+          document.getElementById('modeStatus').className = "text-[10px] text-cyan-400 font-bold tracking-widest block";
+        } else {
+          currentSpeed = Math.max(cruiseSpeed, currentSpeed - 0.02); // Auto Slow Down / Brake
+          document.getElementById('modeStatus').innerText = "🛡️ SLOW CRUISE";
+          document.getElementById('modeStatus').className = "text-[10px] text-emerald-400 font-bold tracking-widest block";
+        }
 
+        const throttlePct = ((currentSpeed - cruiseSpeed) / (maxBoostSpeed - cruiseSpeed)) * 100;
+        document.getElementById('throttleBar').style.width = throttlePct + '%';
+
+        score += currentSpeed * 0.8;
         document.getElementById('scoreDisplay').innerText = Math.floor(score).toString().padStart(5, '0');
-        document.getElementById('speedDisplay').innerText = Math.floor(speed * 120) + ' KM/H';
+        document.getElementById('speedDisplay').innerText = Math.floor(currentSpeed * 140) + ' KM/H';
 
-        // Ship turning smooth & controlled
-        ship.position.x += (targetShipX - ship.position.x) * 0.08;
-        ship.rotation.y = -(ship.position.x - targetShipX) * 0.15;
+        // Steer Ship
+        ship.position.x += (targetShipX - ship.position.x) * 0.09;
+        ship.rotation.y = -(ship.position.x - targetShipX) * 0.16;
         camera.position.x = ship.position.x * 0.35;
 
         // Move stars
         const pos = stars.geometry.attributes.position.array;
         for (let i = 2; i < pos.length; i += 3) {
-          pos[i] += speed * 2.2;
+          pos[i] += currentSpeed * 2.5;
           if (pos[i] > 10) pos[i] = -260;
         }
         stars.geometry.attributes.position.needsUpdate = true;
 
-        // Move obstacles
+        // Move & Collect Coins
+        for (let i = coins.length - 1; i >= 0; i--) {
+          const coin = coins[i];
+          coin.position.z += currentSpeed;
+          coin.rotation.z += 0.05;
+
+          const dist = Math.hypot(coin.position.x - ship.position.x, coin.position.z - ship.position.z);
+          if (dist < 1.3) {
+            playSound('coin');
+            coinsCollected++;
+            score += 500;
+            document.getElementById('coinDisplay').innerText = coinsCollected;
+            scene.remove(coin);
+            coins.splice(i, 1);
+            spawnCoin(-240);
+            continue;
+          }
+
+          if (coin.position.z > 10) {
+            scene.remove(coin);
+            coins.splice(i, 1);
+            spawnCoin(-240);
+          }
+        }
+
+        // Move obstacles & Collision
         for (let i = obstacles.length - 1; i >= 0; i--) {
           const obs = obstacles[i];
-          obs.position.z += speed;
+          obs.position.z += currentSpeed;
 
-          // Fair collision box
           if (Math.abs(obs.position.z - ship.position.z) < 0.9) {
             const halfWidth = obs.userData.width / 2 + 0.3;
             if (Math.abs(obs.position.x - ship.position.x) < halfWidth) {

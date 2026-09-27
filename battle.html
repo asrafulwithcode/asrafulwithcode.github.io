@@ -3,534 +3,571 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>CyberShift 3D: Hyper Velocity - FinGrowTools</title>
-  <meta name="description" content="RGB Infinite level 3D space runner with sound toggle, slow start, and glowing coins." />
+  <title>Cyber Survivor 2077 - FinGrowTools</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Three.js Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
   <style>
-    body { margin: 0; overflow: hidden; background: #020617; touch-action: none; }
+    body { margin: 0; overflow: hidden; background: #020617; touch-action: none; font-family: system-ui, sans-serif; }
     canvas { display: block; width: 100vw; height: 100vh; }
-    @keyframes pulseNotice {
-      0% { transform: scale(0.8); opacity: 0; }
-      50% { transform: scale(1.1); opacity: 1; }
-      100% { transform: scale(1); opacity: 0; }
-    }
-    .level-banner {
-      animation: pulseNotice 1.2s ease-out forwards;
-    }
-    .rgb-text {
-      background: linear-gradient(90deg, #ff0055, #00ffcc, #ffdd00, #9d00ff, #ff0055);
-      background-size: 300% 300%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: rainbowShift 4s ease infinite;
-    }
-    @keyframes rainbowShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
   </style>
 </head>
-<body class="select-none font-sans text-white bg-slate-950">
+<body class="select-none text-white bg-slate-950">
 
   <!-- Header Navigation -->
-  <header class="fixed top-0 left-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-30">
-    <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
-      <a href="/" class="text-xl font-black tracking-tight text-cyan-400">FinGrow<span class="text-white">Tools</span></a>
-      <nav class="flex items-center space-x-2 sm:space-x-4 text-xs font-semibold text-slate-300">
-        <a href="/" class="hover:text-cyan-400 transition">Calculators</a>
-        <a href="/compressor.html" class="hover:text-cyan-400 transition">Compressor</a>
-        <a href="/age-calculator.html" class="hover:text-cyan-400 transition">Age Tool</a>
-        <a href="/battle.html" class="bg-cyan-500/20 text-cyan-300 px-2.5 py-1 rounded-lg border border-cyan-500/40">CyberShift 3D</a>
+  <header class="fixed top-0 left-0 w-full bg-slate-950/85 backdrop-blur-md border-b border-slate-800 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
+      <a href="/" class="text-lg font-black tracking-tight text-cyan-400">FinGrow<span class="text-white">Tools</span></a>
+      <nav class="flex items-center space-x-3 text-xs font-semibold text-slate-300">
+        <a href="/" class="hover:text-cyan-400">Calculators</a>
+        <a href="/compressor.html" class="hover:text-cyan-400">Compressor</a>
+        <a href="/battle.html" class="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/40">Cyber Survivor</a>
       </nav>
     </div>
   </header>
 
   <!-- HUD Overlay -->
-  <div class="fixed top-14 left-0 w-full px-3 sm:px-6 flex justify-between items-center z-10 pointer-events-none">
-    <div class="flex items-center space-x-1.5 sm:space-x-3 pointer-events-auto">
-      <!-- Level Badge -->
-      <div class="bg-slate-900/90 backdrop-blur border border-purple-500/50 px-2.5 sm:px-3 py-1.5 rounded-xl shadow-lg text-center">
-        <span class="text-[8px] sm:text-[9px] text-purple-400 font-bold tracking-widest block">LEVEL</span>
-        <span class="text-base sm:text-xl font-black text-purple-300" id="levelDisplay">1</span>
+  <div class="fixed top-12 left-0 w-full px-4 py-2 flex justify-between items-center z-10 pointer-events-none">
+    <div class="flex items-center space-x-2 pointer-events-auto">
+      <div class="bg-slate-900/90 border border-purple-500/40 px-3 py-1 rounded-xl">
+        <span class="text-[9px] text-purple-400 font-bold block">LEVEL</span>
+        <span id="uiLevel" class="text-base font-black text-purple-300">1</span>
       </div>
-
-      <!-- Score Badge -->
-      <div class="bg-slate-900/90 backdrop-blur border border-cyan-500/40 px-2.5 sm:px-3 py-1.5 rounded-xl shadow-lg">
-        <span class="text-[8px] sm:text-[9px] text-cyan-400 font-bold tracking-widest block">SCORE</span>
-        <span class="text-base sm:text-xl font-black tracking-wider" id="scoreDisplay">00000</span>
+      <div class="bg-slate-900/90 border border-cyan-500/40 px-3 py-1 rounded-xl">
+        <span class="text-[9px] text-cyan-400 font-bold block">SCORE</span>
+        <span id="uiScore" class="text-base font-black text-cyan-300">0</span>
       </div>
-
-      <!-- Coin Badge -->
-      <div class="bg-slate-900/90 backdrop-blur border border-amber-500/50 px-2.5 sm:px-3 py-1.5 rounded-xl shadow-lg">
-        <span class="text-[8px] sm:text-[9px] text-amber-400 font-bold tracking-widest block">🪙 COINS</span>
-        <span class="text-base sm:text-xl font-black text-amber-300 tracking-wider" id="coinDisplay">0</span>
+      <div class="bg-slate-900/90 border border-amber-500/40 px-3 py-1 rounded-xl">
+        <span class="text-[9px] text-amber-400 font-bold block">🪙 COINS</span>
+        <span id="uiCoins" class="text-base font-black text-amber-300">0</span>
       </div>
     </div>
     
-    <div class="flex items-center space-x-1.5 sm:space-x-2 pointer-events-auto">
-      <!-- Sound Mute/Unmute Button -->
-      <button id="btnSound" onclick="toggleSound()" class="bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-500/40 px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg transition active:scale-95">
+    <div class="flex items-center space-x-2 pointer-events-auto">
+      <button onclick="toggleAudio()" id="btnAudio" class="bg-slate-900/90 border border-slate-700 hover:border-cyan-400 px-2.5 py-1.5 rounded-xl text-xs font-bold">
         🔊 SOUND
       </button>
-
-      <!-- Pause Button -->
-      <button id="btnPause" onclick="togglePause()" class="bg-slate-900/90 hover:bg-slate-800 text-amber-400 border border-amber-400/40 px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg transition active:scale-95">
+      <button onclick="togglePauseGame()" id="btnPause" class="bg-slate-900/90 border border-slate-700 hover:border-amber-400 text-amber-400 px-2.5 py-1.5 rounded-xl text-xs font-bold">
         ⏸️ PAUSE
       </button>
-
-      <div class="bg-slate-900/90 backdrop-blur border border-pink-500/40 px-2.5 sm:px-3 py-1.5 rounded-xl text-right shadow-lg hidden md:block">
-        <span class="text-[8px] text-pink-400 font-bold tracking-widest block" id="modeStatus">CRUISE</span>
-        <span class="text-sm font-black text-pink-300" id="speedDisplay">15 KM/H</span>
-      </div>
     </div>
   </div>
 
-  <!-- Level Up Floating Banner -->
-  <div id="levelNotice" class="fixed inset-0 flex items-center justify-center pointer-events-none z-30 hidden">
-    <div class="level-banner bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white font-black text-3xl sm:text-5xl px-8 py-4 rounded-3xl shadow-2xl border-2 border-white/40">
-      ⚡ LEVEL UP!
+  <!-- XP Progress Bar -->
+  <div class="fixed top-24 left-4 right-4 z-10 pointer-events-none">
+    <div class="w-full bg-slate-900/80 border border-slate-800 h-2 rounded-full overflow-hidden">
+      <div id="xpBar" class="bg-gradient-to-r from-cyan-400 to-purple-500 h-full w-0 transition-all duration-150"></div>
     </div>
   </div>
 
-  <!-- Pause Menu Modal Overlay -->
-  <div id="pauseOverlay" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 z-40 text-center hidden">
-    <h2 class="text-3xl sm:text-5xl font-black text-amber-400 tracking-wider mb-2">GAME PAUSED</h2>
-    <p class="text-slate-400 text-xs sm:text-sm mb-6">Mission on hold. Take a breather!</p>
-    
-    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 mb-6 flex space-x-6 text-center">
-      <div>
-        <span class="text-xs text-slate-500 block">CURRENT LVL</span>
-        <span id="pauseLevel" class="text-lg font-black text-purple-400">1</span>
-      </div>
-      <div>
-        <span class="text-xs text-slate-500 block">SCORE</span>
-        <span id="pauseScore" class="text-lg font-black text-cyan-400">0</span>
-      </div>
-      <div>
-        <span class="text-xs text-slate-500 block">COINS</span>
-        <span id="pauseCoins" class="text-lg font-black text-amber-400">0</span>
-      </div>
-    </div>
-
-    <div class="flex flex-col space-y-3 w-64">
-      <button onclick="togglePause()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black rounded-xl shadow-lg active:scale-95 transition">
-        ▶️ RESUME FLIGHT
-      </button>
-      <button onclick="restartGameFromPause()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl active:scale-95 transition">
-        🔄 RESTART RUN
-      </button>
-    </div>
-  </div>
+  <!-- Canvas -->
+  <canvas id="gameCanvas"></canvas>
 
   <!-- Start & Game Over Screen -->
-  <div id="gameOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-20 text-center">
-    <div class="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-xs font-bold tracking-widest mb-3 uppercase">
-      RGB Cyber Edition · Extra Chill Start
-    </div>
-    <h1 id="mainTitle" class="text-4xl sm:text-6xl font-black rgb-text mb-2">
-      CYBERSHIFT 3D
+  <div id="menuModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-40 text-center">
+    <h1 id="menuTitle" class="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 mb-2">
+      CYBER SURVIVOR
     </h1>
-    <p id="subTitle" class="text-slate-400 text-xs sm:text-sm max-w-md mb-8 leading-relaxed">
-      Starts super slow at Level 1 with <b>Chroma RGB Starship</b>. Collect <b class="text-amber-400">Golden Coins</b>. Toggle Sound with <b class="text-cyan-300">M</b> and Pause with <b class="text-amber-400">P</b>.
+    <p id="menuDesc" class="text-slate-400 text-xs sm:text-sm max-w-sm mb-6">
+      Auto-targeting neon roguelike. Move with <b class="text-cyan-300">WASD</b>, <b class="text-cyan-300">Arrows</b>, or <b class="text-cyan-300">Mobile Touch Joystick</b>. Kill bots, collect XP & coins, and survive!
     </p>
-    <button onclick="startGame()" id="btnPlay" class="px-8 py-3.5 bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 hover:brightness-110 text-white font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-cyan-500/30 active:scale-95 transition">
-      LAUNCH LEVEL 1
+    <button onclick="startNewGame()" id="btnAction" class="px-8 py-3.5 bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 text-white font-black text-base rounded-2xl shadow-xl shadow-cyan-500/30 active:scale-95 transition">
+      ENGAGE PROTOCOL
     </button>
   </div>
 
-  <script>
-    // Audio Synthesizer with Mute Support
-    let isMuted = false;
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  <!-- Roguelike Level Up Modal -->
+  <div id="upgradeModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50 hidden">
+    <div class="text-2xl sm:text-3xl font-black text-amber-400 tracking-wider mb-1">LEVEL UPGRADES</div>
+    <p class="text-slate-400 text-xs mb-6">Choose a combat enhancement to continue</p>
     
-    function toggleSound() {
-      isMuted = !isMuted;
-      const btnSound = document.getElementById('btnSound');
-      if (isMuted) {
-        btnSound.innerText = '🔇 MUTED';
-        btnSound.className = 'bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-500/50 px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg transition active:scale-95';
-      } else {
-        btnSound.innerText = '🔊 SOUND';
-        btnSound.className = 'bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-500/40 px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg transition active:scale-95';
-      }
-    }
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl" id="upgradeCards">
+      <!-- Injected Dynamically -->
+    </div>
+  </div>
 
-    function playSound(type) {
-      if (isMuted) return;
+  <script>
+    // Audio Synth
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq, type, duration) {
+      if (!soundEnabled) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + duration);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
-      if (type === 'coin') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(980, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(1320, audioCtx.currentTime + 0.07);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.22);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.22);
-      } else if (type === 'levelup') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.35);
-        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.35);
-      } else if (type === 'crash') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.35);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.35);
-      }
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
     }
 
-    let scene, camera, renderer, ship, shipMat, stars, rgbLight;
-    let obstacles = [];
-    let coins = [];
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('btnAudio').innerText = soundEnabled ? "🔊 SOUND" : "🔇 MUTED";
+    }
 
-    // Slow and Easy Starting Speeds
-    let currentLevel = 1;
-    let baseSpeed = 0.14; // Bohat slow & relaxed speed for Level 1
-    let currentSpeed = 0.14;
-    let isControlling = false;
+    // Canvas Setup
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    let score = 0;
-    let coinsCollected = 0;
-    let isPlaying = false;
+    // Game Variables
+    let isRunning = false;
     let isPaused = false;
-    let targetShipX = 0;
-    const boundaryX = 13;
-    let rgbHue = 0;
+    let score = 0;
+    let coins = 0;
+    let level = 1;
+    let currentXP = 0;
+    let neededXP = 50;
 
-    function init() {
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x020617, 0.014);
+    // Upgrades System
+    let stats = {
+      fireRate: 350,
+      bulletCount: 1,
+      bulletDamage: 25,
+      bulletSpeed: 9,
+      moveSpeed: 3.5,
+      orbitShield: false
+    };
 
-      camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 3.2, 7.5);
-      camera.rotation.x = -0.22;
+    let player = { x: 0, y: 0, r: 16, hp: 100, maxHp: 100 };
+    let bullets = [];
+    let enemies = [];
+    let gems = [];
+    let coinDrops = [];
+    let particles = [];
+    let lastShotTime = 0;
+    let shieldAngle = 0;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      document.body.appendChild(renderer.domElement);
+    // Controls State
+    const keys = {};
+    let joystick = { active: false, startX: 0, startY: 0, curX: 0, curY: 0, dx: 0, dy: 0 };
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
-      scene.add(ambientLight);
+    window.addEventListener('keydown', e => { 
+      keys[e.key.toLowerCase()] = true; 
+      if (e.key.toLowerCase() === 'p') togglePauseGame();
+    });
+    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
-      rgbLight = new THREE.PointLight(0xff00ff, 2.5, 30);
-      rgbLight.position.set(0, 4, 3);
-      scene.add(rgbLight);
+    // Touch Virtual Joystick
+    window.addEventListener('touchstart', e => {
+      if (!isRunning || isPaused) return;
+      const t = e.touches[0];
+      joystick.active = true;
+      joystick.startX = t.clientX;
+      joystick.startY = t.clientY;
+      joystick.curX = t.clientX;
+      joystick.curY = t.clientY;
+    });
 
-      // RGB Starship Geometry & Dynamic Material
-      const shipGeo = new THREE.ConeGeometry(0.75, 2.2, 5);
-      shipMat = new THREE.MeshStandardMaterial({
-        color: 0xff0055,
-        emissive: 0x440022,
-        roughness: 0.2,
-        metalness: 0.85
-      });
-      ship = new THREE.Mesh(shipGeo, shipMat);
-      ship.rotation.x = Math.PI / 2;
-      ship.rotation.z = Math.PI;
-      ship.position.y = 0.5;
-      scene.add(ship);
-
-      // Star Particles
-      const starGeo = new THREE.BufferGeometry();
-      const starCount = 800;
-      const starPositions = new Float32Array(starCount * 3);
-      for (let i = 0; i < starCount * 3; i += 3) {
-        starPositions[i] = (Math.random() - 0.5) * 60;
-        starPositions[i + 1] = (Math.random() - 0.5) * 30 + 5;
-        starPositions[i + 2] = -Math.random() * 260;
+    window.addEventListener('touchmove', e => {
+      if (!joystick.active) return;
+      const t = e.touches[0];
+      joystick.curX = t.clientX;
+      joystick.curY = t.clientY;
+      const diffX = joystick.curX - joystick.startX;
+      const diffY = joystick.curY - joystick.startY;
+      const dist = Math.hypot(diffX, diffY);
+      const maxDist = 45;
+      if (dist > 0) {
+        joystick.dx = (diffX / dist) * Math.min(dist, maxDist) / maxDist;
+        joystick.dy = (diffY / dist) * Math.min(dist, maxDist) / maxDist;
       }
-      starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-      const starMat = new THREE.PointsMaterial({ color: 0x38bdf8, size: 0.25, transparent: true, opacity: 0.8 });
-      stars = new THREE.Points(starGeo, starMat);
-      scene.add(stars);
+    });
 
-      // Neon Floor Grid
-      const grid = new THREE.GridHelper(320, 50, 0x06b6d4, 0x1e293b);
-      grid.position.y = 0;
-      grid.position.z = -100;
-      scene.add(grid);
+    window.addEventListener('touchend', () => {
+      joystick.active = false;
+      joystick.dx = 0;
+      joystick.dy = 0;
+    });
 
-      // Event Listeners
-      window.addEventListener('resize', onWindowResize);
-      window.addEventListener('keydown', onKeyDown);
-      window.addEventListener('keyup', () => { isControlling = false; });
-      window.addEventListener('pointermove', onPointerMove);
-      window.addEventListener('pointerdown', () => { if (isPlaying && !isPaused) isControlling = true; });
-      window.addEventListener('pointerup', () => { isControlling = false; });
-      window.addEventListener('touchmove', onTouchMove, { passive: false });
-      window.addEventListener('touchstart', () => { if (isPlaying && !isPaused) isControlling = true; }, { passive: true });
-      window.addEventListener('touchend', () => { isControlling = false; });
-
-      animate();
-    }
-
-    function togglePause() {
-      if (!isPlaying) return;
+    function togglePauseGame() {
+      if (!isRunning) return;
       isPaused = !isPaused;
-      const pauseOverlay = document.getElementById('pauseOverlay');
-      const btnPause = document.getElementById('btnPause');
-
-      if (isPaused) {
-        document.getElementById('pauseLevel').innerText = currentLevel;
-        document.getElementById('pauseScore').innerText = Math.floor(score);
-        document.getElementById('pauseCoins').innerText = coinsCollected;
-        pauseOverlay.classList.remove('hidden');
-        btnPause.innerText = '▶️ RESUME';
-      } else {
-        pauseOverlay.classList.add('hidden');
-        btnPause.innerText = '⏸️ PAUSE';
-      }
+      document.getElementById('btnPause').innerText = isPaused ? "▶️ RESUME" : "⏸️ PAUSE";
     }
 
-    function restartGameFromPause() {
-      isPaused = false;
-      document.getElementById('pauseOverlay').classList.add('hidden');
-      document.getElementById('btnPause').innerText = '⏸️ PAUSE';
-      startGame();
-    }
-
-    function spawnObstacle(zDistance) {
-      const width = Math.random() * 2.8 + 2.2;
-      const height = 2.2;
-      const geo = new THREE.BoxGeometry(width, height, 1);
-      
-      const obsColor = new THREE.Color().setHSL(Math.random(), 0.9, 0.55);
-      const mat = new THREE.MeshStandardMaterial({
-        color: obsColor,
-        emissive: obsColor.clone().multiplyScalar(0.4),
-        roughness: 0.3
-      });
-      const obs = new THREE.Mesh(geo, mat);
-      const xPos = (Math.random() - 0.5) * (boundaryX * 1.6);
-      obs.position.set(xPos, height / 2, zDistance);
-      obs.userData = { width: width };
-      scene.add(obs);
-      obstacles.push(obs);
-    }
-
-    function spawnCoin(zDistance) {
-      const geo = new THREE.CylinderGeometry(0.7, 0.7, 0.22, 16);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0xffcc00,
-        emissive: 0xff8800,
-        roughness: 0.2,
-        metalness: 0.9
-      });
-      const coin = new THREE.Mesh(geo, mat);
-      coin.rotation.x = Math.PI / 2;
-      const xPos = (Math.random() - 0.5) * (boundaryX * 1.5);
-      coin.position.set(xPos, 0.6, zDistance);
-      scene.add(coin);
-      coins.push(coin);
-    }
-
-    function startGame() {
-      obstacles.forEach(obs => scene.remove(obs));
-      obstacles = [];
-      coins.forEach(c => scene.remove(c));
-      coins = [];
-
-      for (let i = -70; i > -280; i -= 60) {
-        spawnObstacle(i);
-        spawnCoin(i + 30);
-      }
-
-      currentLevel = 1;
-      baseSpeed = 0.14; // Ultra slow chill start
-      currentSpeed = baseSpeed;
+    function startNewGame() {
+      player.x = canvas.width / 2;
+      player.y = canvas.height / 2;
+      player.hp = 100;
       score = 0;
-      coinsCollected = 0;
-      targetShipX = 0;
-      ship.position.x = 0;
-      isPlaying = true;
+      coins = 0;
+      level = 1;
+      currentXP = 0;
+      neededXP = 50;
+
+      stats = {
+        fireRate: 350,
+        bulletCount: 1,
+        bulletDamage: 25,
+        bulletSpeed: 9,
+        moveSpeed: 3.5,
+        orbitShield: false
+      };
+
+      bullets = [];
+      enemies = [];
+      gems = [];
+      coinDrops = [];
+      particles = [];
+
+      updateUI();
+      document.getElementById('menuModal').classList.add('hidden');
+      isRunning = true;
       isPaused = false;
-
-      document.getElementById('levelDisplay').innerText = '1';
-      document.getElementById('coinDisplay').innerText = '0';
-      document.getElementById('btnPause').innerText = '⏸️ PAUSE';
-      document.getElementById('gameOverlay').classList.add('hidden');
-      document.getElementById('pauseOverlay').classList.add('hidden');
     }
 
-    function triggerLevelUp() {
-      currentLevel++;
-      playSound('levelup');
-      baseSpeed += 0.045; // Smooth incremental speed increase
-      document.getElementById('levelDisplay').innerText = currentLevel;
-
-      const notice = document.getElementById('levelNotice');
-      notice.classList.remove('hidden');
-      setTimeout(() => notice.classList.add('hidden'), 1200);
+    function updateUI() {
+      document.getElementById('uiLevel').innerText = level;
+      document.getElementById('uiScore').innerText = Math.floor(score);
+      document.getElementById('uiCoins').innerText = coins;
+      const pct = Math.min(100, (currentXP / neededXP) * 100);
+      document.getElementById('xpBar').style.width = pct + '%';
     }
 
-    function gameOver() {
-      playSound('crash');
-      isPlaying = false;
+    // Upgrade Card Trigger
+    const UPGRADE_POOL = [
+      { id: 'multishot', title: 'Multishot Matrix', desc: '+1 Projectile fired per round', icon: '🔱' },
+      { id: 'firerate', title: 'Overclock Thrusters', desc: '+25% Rapid Fire rate', icon: '⚡' },
+      { id: 'damage', title: 'Plasma Core', desc: '+35% Bullet Damage', icon: '💥' },
+      { id: 'speed', title: 'Agility Drive', desc: '+20% Character Movement Speed', icon: '👟' },
+      { id: 'shield', title: 'Orbital Blade', desc: 'Rotating plasma shield damages nearby bots', icon: '🛡️' }
+    ];
+
+    function openUpgradeModal() {
+      isPaused = true;
+      const container = document.getElementById('upgradeCards');
+      container.innerHTML = '';
+      
+      // Shuffle & pick 3
+      const shuffled = [...UPGRADE_POOL].sort(() => 0.5 - Math.random()).slice(0, 3);
+      shuffled.forEach(up => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-900 border border-slate-700 hover:border-cyan-400 p-4 rounded-2xl cursor-pointer hover:bg-slate-800 transition active:scale-95 text-center flex flex-col items-center justify-between";
+        card.innerHTML = `
+          <div class="text-3xl mb-2">${up.icon}</div>
+          <div class="font-black text-cyan-300 text-sm mb-1">${up.title}</div>
+          <div class="text-[11px] text-slate-400 mb-4">${up.desc}</div>
+          <button class="w-full py-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 rounded-xl font-bold text-xs">CHOOSE</button>
+        `;
+        card.onclick = () => selectUpgrade(up.id);
+        container.appendChild(card);
+      });
+
+      document.getElementById('upgradeModal').classList.remove('hidden');
+    }
+
+    function selectUpgrade(id) {
+      if (id === 'multishot') stats.bulletCount += 1;
+      if (id === 'firerate') stats.fireRate = Math.max(120, stats.fireRate * 0.75);
+      if (id === 'damage') stats.bulletDamage += 12;
+      if (id === 'speed') stats.moveSpeed += 0.7;
+      if (id === 'shield') stats.orbitShield = true;
+
+      document.getElementById('upgradeModal').classList.add('hidden');
       isPaused = false;
-      document.getElementById('mainTitle').innerText = "SYSTEM CRASH";
-      document.getElementById('mainTitle').className = "text-4xl sm:text-6xl font-black text-rose-500 mb-2";
-      document.getElementById('subTitle').innerHTML = `
-        <span class="text-purple-400 font-black text-base block mb-1">REACHED LEVEL ${currentLevel}</span>
-        <span class="text-white font-bold block mb-1">Total Score: ${Math.floor(score)}</span>
-        <span class="text-amber-400 font-bold block">🪙 Coins Collected: ${coinsCollected}</span>
-      `;
-      document.getElementById('btnPlay').innerText = "PLAY AGAIN";
-      document.getElementById('gameOverlay').classList.remove('hidden');
     }
 
-    function onKeyDown(e) {
-      if (e.key === 'm' || e.key === 'M') {
-        toggleSound();
-        return;
-      }
-      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
-        togglePause();
-        return;
-      }
-      if (!isPlaying || isPaused) return;
-      isControlling = true;
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        targetShipX = Math.max(-boundaryX, targetShipX - 2.5);
-      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        targetShipX = Math.min(boundaryX, targetShipX + 2.5);
+    function spawnEnemy() {
+      if (!isRunning || isPaused) return;
+      const edge = Math.floor(Math.random() * 4);
+      let x, y;
+      if (edge === 0) { x = Math.random() * canvas.width; y = -20; }
+      else if (edge === 1) { x = canvas.width + 20; y = Math.random() * canvas.height; }
+      else if (edge === 2) { x = Math.random() * canvas.width; y = canvas.height + 20; }
+      else { x = -20; y = Math.random() * canvas.height; }
+
+      const isFast = Math.random() < 0.25;
+      enemies.push({
+        x: x, y: y,
+        r: isFast ? 10 : 13,
+        hp: isFast ? 20 + level * 4 : 45 + level * 8,
+        speed: isFast ? 2.4 : 1.4,
+        color: isFast ? '#ff007f' : '#00f0ff'
+      });
+    }
+    setInterval(spawnEnemy, 650);
+
+    function createExplosion(x, y, color) {
+      for (let i = 0; i < 8; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6,
+          life: 1,
+          color: color
+        });
       }
     }
 
-    function onPointerMove(e) {
-      if (!isPlaying || isPaused) return;
-      isControlling = true;
-      const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
-      targetShipX = normalizedX * boundaryX;
-    }
+    // Main Game Loop
+    function gameLoop(time) {
+      requestAnimationFrame(gameLoop);
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function onTouchMove(e) {
-      if (!isPlaying || isPaused) return;
-      e.preventDefault();
-      isControlling = true;
-      const touch = e.touches[0];
-      const normalizedX = (touch.clientX / window.innerWidth) * 2 - 1;
-      targetShipX = normalizedX * boundaryX;
-    }
-
-    function onWindowResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      // Realtime RGB Color Cycle on Glider
-      rgbHue = (rgbHue + 0.006) % 1;
-      const chromaColor = new THREE.Color().setHSL(rgbHue, 1, 0.55);
-      if (shipMat) {
-        shipMat.color.copy(chromaColor);
-        shipMat.emissive.copy(chromaColor).multiplyScalar(0.4);
-      }
-      if (rgbLight) {
-        rgbLight.color.copy(chromaColor);
+      if (!isRunning || isPaused) {
+        if (!isRunning) return;
       }
 
-      if (isPlaying && !isPaused) {
-        if (isControlling) {
-          currentSpeed = THREE.MathUtils.lerp(currentSpeed, baseSpeed * 1.5, 0.05);
-          document.getElementById('modeStatus').innerText = "BOOST";
-          document.getElementById('modeStatus').className = "text-[8px] text-cyan-400 font-bold tracking-widest block";
-        } else {
-          currentSpeed = THREE.MathUtils.lerp(currentSpeed, baseSpeed, 0.05);
-          document.getElementById('modeStatus').innerText = "CRUISE";
-          document.getElementById('modeStatus').className = "text-[8px] text-emerald-400 font-bold tracking-widest block";
+      // Draw Grid Background
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1;
+      const gridSize = 40;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      if (!isPaused) {
+        // Player Movement
+        let moveX = 0, moveY = 0;
+        if (keys['w'] || keys['arrowup']) moveY -= 1;
+        if (keys['s'] || keys['arrowdown']) moveY += 1;
+        if (keys['a'] || keys['arrowleft']) moveX -= 1;
+        if (keys['d'] || keys['arrowright']) moveX += 1;
+
+        if (joystick.active) {
+          moveX = joystick.dx;
+          moveY = joystick.dy;
         }
 
-        score += currentSpeed * 1.2;
-
-        if (Math.floor(score / 1000) + 1 > currentLevel) {
-          triggerLevelUp();
+        const len = Math.hypot(moveX, moveY);
+        if (len > 0 && !joystick.active) {
+          moveX /= len;
+          moveY /= len;
         }
 
-        document.getElementById('scoreDisplay').innerText = Math.floor(score).toString().padStart(5, '0');
-        document.getElementById('speedDisplay').innerText = Math.floor(currentSpeed * 100) + ' KM/H';
+        player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x + moveX * stats.moveSpeed));
+        player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y + moveY * stats.moveSpeed));
 
-        ship.position.x += (targetShipX - ship.position.x) * 0.09;
-        ship.rotation.y = -(ship.position.x - targetShipX) * 0.16;
-        camera.position.x = ship.position.x * 0.35;
-
-        // Move Stars
-        const pos = stars.geometry.attributes.position.array;
-        for (let i = 2; i < pos.length; i += 3) {
-          pos[i] += currentSpeed * 2.5;
-          if (pos[i] > 10) pos[i] = -260;
-        }
-        stars.geometry.attributes.position.needsUpdate = true;
-
-        // Coins Animation & Collection
-        for (let i = coins.length - 1; i >= 0; i--) {
-          const coin = coins[i];
-          coin.position.z += currentSpeed;
-          coin.rotation.z += 0.06;
-
-          const dist = Math.hypot(coin.position.x - ship.position.x, coin.position.z - ship.position.z);
-          if (dist < 1.4) {
-            playSound('coin');
-            coinsCollected++;
-            score += 250;
-            document.getElementById('coinDisplay').innerText = coinsCollected;
-            scene.remove(coin);
-            coins.splice(i, 1);
-            spawnCoin(-250);
-            continue;
+        // Auto Shooting closest enemy
+        if (time - lastShotTime > stats.fireRate && enemies.length > 0) {
+          let closest = null;
+          let minDist = Infinity;
+          for (let e of enemies) {
+            const d = Math.hypot(e.x - player.x, e.y - player.y);
+            if (d < minDist) { minDist = d; closest = e; }
           }
 
-          if (coin.position.z > 10) {
-            scene.remove(coin);
-            coins.splice(i, 1);
-            spawnCoin(-250);
-          }
-        }
+          if (closest && minDist < 450) {
+            playBeep(650, 'sine', 0.08);
+            const baseAngle = Math.atan2(closest.y - player.y, closest.x - player.x);
+            const spread = 0.18;
+            const startAngle = baseAngle - ((stats.bulletCount - 1) * spread) / 2;
 
-        // Obstacles & Collision
-        for (let i = obstacles.length - 1; i >= 0; i--) {
-          const obs = obstacles[i];
-          obs.position.z += currentSpeed;
-
-          if (Math.abs(obs.position.z - ship.position.z) < 0.9) {
-            const halfWidth = obs.userData.width / 2 + 0.35;
-            if (Math.abs(obs.position.x - ship.position.x) < halfWidth) {
-              gameOver();
-              break;
+            for (let i = 0; i < stats.bulletCount; i++) {
+              const ang = startAngle + i * spread;
+              bullets.push({
+                x: player.x, y: player.y,
+                vx: Math.cos(ang) * stats.bulletSpeed,
+                vy: Math.sin(ang) * stats.bulletSpeed,
+                damage: stats.bulletDamage
+              });
             }
-          }
-
-          if (obs.position.z > 10) {
-            scene.remove(obs);
-            obstacles.splice(i, 1);
-            spawnObstacle(-250);
+            lastShotTime = time;
           }
         }
       }
 
-      renderer.render(scene, camera);
+      // Draw Joystick Base on Mobile
+      if (joystick.active) {
+        ctx.beginPath();
+        ctx.arc(joystick.startX, joystick.startY, 40, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.15)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(joystick.curX, joystick.curY, 20, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
+        ctx.fill();
+      }
+
+      // Update & Draw Bullets
+      ctx.fillStyle = '#38bdf8';
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        if (!isPaused) {
+          b.x += b.vx;
+          b.y += b.vy;
+        }
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // Orbital Shield Update
+      if (stats.orbitShield) {
+        shieldAngle += 0.06;
+        const shieldX = player.x + Math.cos(shieldAngle) * 42;
+        const shieldY = player.y + Math.sin(shieldAngle) * 42;
+        ctx.fillStyle = '#f59e0b';
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(shieldX, shieldY, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Damage enemies on shield contact
+        for (let e of enemies) {
+          if (Math.hypot(e.x - shieldX, e.y - shieldY) < e.r + 8) {
+            e.hp -= 2;
+          }
+        }
+      }
+
+      // Update & Draw Enemies
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        if (!isPaused) {
+          const ang = Math.atan2(player.y - e.y, player.x - e.x);
+          e.x += Math.cos(ang) * e.speed;
+          e.y += Math.sin(ang) * e.speed;
+        }
+
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bullet Hit Check
+        for (let j = bullets.length - 1; j >= 0; j--) {
+          const b = bullets[j];
+          if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + 4) {
+            e.hp -= b.damage;
+            bullets.splice(j, 1);
+            if (e.hp <= 0) break;
+          }
+        }
+
+        // Enemy Death
+        if (e.hp <= 0) {
+          playBeep(220, 'square', 0.1);
+          createExplosion(e.x, e.y, e.color);
+          score += 20;
+
+          // Drop XP gem
+          gems.push({ x: e.x, y: e.y, val: 12 });
+
+          // 30% chance for Coin
+          if (Math.random() < 0.3) {
+            coinDrops.push({ x: e.x, y: e.y });
+          }
+
+          enemies.splice(i, 1);
+          updateUI();
+          continue;
+        }
+
+        // Touch Player
+        if (Math.hypot(e.x - player.x, e.y - player.y) < e.r + player.r) {
+          player.hp -= 0.6;
+          if (player.hp <= 0) {
+            isRunning = false;
+            document.getElementById('menuTitle').innerText = "SYSTEM PURGED";
+            document.getElementById('menuDesc').innerText = `Survived until Level ${level} | Final Score: ${Math.floor(score)} | Coins: ${coins}`;
+            document.getElementById('btnAction').innerText = "RESTART PROTOCOL";
+            document.getElementById('menuModal').classList.remove('hidden');
+          }
+        }
+      }
+
+      // Update & Draw XP Gems (Magnetic pull)
+      ctx.fillStyle = '#a855f7';
+      for (let i = gems.length - 1; i >= 0; i--) {
+        const g = gems[i];
+        const dist = Math.hypot(player.x - g.x, player.y - g.y);
+        if (dist < 110 && !isPaused) {
+          g.x += (player.x - g.x) * 0.14;
+          g.y += (player.y - g.y) * 0.14;
+        }
+        ctx.beginPath();
+        ctx.arc(g.x, g.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (dist < player.r + 4) {
+          playBeep(880, 'sine', 0.05);
+          currentXP += g.val;
+          gems.splice(i, 1);
+
+          if (currentXP >= neededXP) {
+            currentXP = 0;
+            neededXP = Math.floor(neededXP * 1.45);
+            level++;
+            openUpgradeModal();
+          }
+          updateUI();
+        }
+      }
+
+      // Update & Draw Coins
+      ctx.fillStyle = '#fbbf24';
+      for (let i = coinDrops.length - 1; i >= 0; i--) {
+        const c = coinDrops[i];
+        const dist = Math.hypot(player.x - c.x, player.y - c.y);
+        if (dist < 110 && !isPaused) {
+          c.x += (player.x - c.x) * 0.14;
+          c.y += (player.y - c.y) * 0.14;
+        }
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (dist < player.r + 5) {
+          playBeep(1200, 'sine', 0.08);
+          coins++;
+          score += 50;
+          coinDrops.splice(i, 1);
+          updateUI();
+        }
+      }
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.03;
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.globalAlpha = 1;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      // Draw Player Ship / Core
+      ctx.fillStyle = '#06b6d4';
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Health Bar over player
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(player.x - 18, player.y - 25, 36, 4);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(player.x - 18, player.y - 25, (player.hp / player.maxHp) * 36, 4);
     }
 
-    window.onload = init;
+    requestAnimationFrame(gameLoop);
   </script>
 </body>
 </html>

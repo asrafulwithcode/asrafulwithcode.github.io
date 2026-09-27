@@ -2,572 +2,309 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Cyber Survivor 2077 - FinGrowTools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exact Age Calculator & Govt Job Eligibility Check - FinGrowTools</title>
+  <meta name="description" content="Free online Age Calculator for SSC, Railway, UPSC, and State Govt forms. Calculate exact age in years, months, days, total weeks, and next birthday countdown in DD-MM-YYYY format." />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
-  <style>
-    body { margin: 0; overflow: hidden; background: #020617; touch-action: none; font-family: system-ui, sans-serif; }
-    canvas { display: block; width: 100vw; height: 100vh; }
-  </style>
 </head>
-<body class="select-none text-white bg-slate-950">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
 
-  <!-- Header Navigation -->
-  <header class="fixed top-0 left-0 w-full bg-slate-950/85 backdrop-blur-md border-b border-slate-800 z-30">
-    <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
-      <a href="/" class="text-lg font-black tracking-tight text-cyan-400">FinGrow<span class="text-white">Tools</span></a>
-      <nav class="flex items-center space-x-3 text-xs font-semibold text-slate-300">
-        <a href="/" class="hover:text-cyan-400">Calculators</a>
-        <a href="/compressor.html" class="hover:text-cyan-400">Compressor</a>
-        <a href="/battle.html" class="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/40">Cyber Survivor</a>
+  <!-- Header with Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <a href="/" class="text-2xl font-black tracking-tight text-blue-600">FinGrow<span class="text-slate-900">Tools</span></a>
+      </div>
+      <nav class="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm font-medium text-slate-600">
+        <a href="/" class="hover:text-blue-600 transition">Calculators</a>
+        <a href="/compressor.html" class="hover:text-blue-600 transition">Photo Compressor</a>
+        <!-- Active Tab -->
+        <a href="/age-calculator.html" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-semibold border border-blue-200">Age Calculator</a>
       </nav>
     </div>
   </header>
 
-  <!-- HUD Overlay -->
-  <div class="fixed top-12 left-0 w-full px-4 py-2 flex justify-between items-center z-10 pointer-events-none">
-    <div class="flex items-center space-x-2 pointer-events-auto">
-      <div class="bg-slate-900/90 border border-purple-500/40 px-3 py-1 rounded-xl">
-        <span class="text-[9px] text-purple-400 font-bold block">LEVEL</span>
-        <span id="uiLevel" class="text-base font-black text-purple-300">1</span>
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+    <div class="text-center mb-8">
+      <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-2">Govt Exam & Job Utilities</span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">Accurate Age & Eligibility Calculator</h1>
+      <p class="text-slate-600 max-w-lg mx-auto text-sm sm:text-base">
+        Calculate exact age in years, months, and days as of any specific cutoff date for SSC, UPSC, IBPS, or State exams.
+      </p>
+    </div>
+
+    <!-- Calculator Card -->
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8 max-w-2xl mx-auto space-y-6">
+      
+      <!-- Date of Birth Selection with Distinct Vertical Labels -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-800">Date of Birth (DOB)</label>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label for="dobDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</label>
+            <select id="dobDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
+          <div>
+            <label for="dobMonth" class="block text-[11px] font-semibold text-slate-500 mb-1">Month</label>
+            <select id="dobMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="0">January (01)</option>
+              <option value="1">February (02)</option>
+              <option value="2">March (03)</option>
+              <option value="3">April (04)</option>
+              <option value="4">May (05)</option>
+              <option value="5">June (06)</option>
+              <option value="6">July (07)</option>
+              <option value="7">August (08)</option>
+              <option value="8">September (09)</option>
+              <option value="9">October (10)</option>
+              <option value="10">November (11)</option>
+              <option value="11">December (12)</option>
+            </select>
+          </div>
+          <div>
+            <label for="dobYear" class="block text-[11px] font-semibold text-slate-500 mb-1">Year</label>
+            <select id="dobYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
+        </div>
       </div>
-      <div class="bg-slate-900/90 border border-cyan-500/40 px-3 py-1 rounded-xl">
-        <span class="text-[9px] text-cyan-400 font-bold block">SCORE</span>
-        <span id="uiScore" class="text-base font-black text-cyan-300">0</span>
+
+      <!-- Cut-off Target Date Selection with Distinct Vertical Labels -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-800">Age as on (Cut-off Date)</label>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label for="targetDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</label>
+            <select id="targetDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
+          <div>
+            <label for="targetMonth" class="block text-[11px] font-semibold text-slate-500 mb-1">Month</label>
+            <select id="targetMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="0">January (01)</option>
+              <option value="1">February (02)</option>
+              <option value="2">March (03)</option>
+              <option value="3">April (04)</option>
+              <option value="4">May (05)</option>
+              <option value="5">June (06)</option>
+              <option value="6">July (07)</option>
+              <option value="7">August (08)</option>
+              <option value="8">September (09)</option>
+              <option value="9">October (10)</option>
+              <option value="10">November (11)</option>
+              <option value="11">December (12)</option>
+            </select>
+          </div>
+          <div>
+            <label for="targetYear" class="block text-[11px] font-semibold text-slate-500 mb-1">Year</label>
+            <select id="targetYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
+        </div>
       </div>
-      <div class="bg-slate-900/90 border border-amber-500/40 px-3 py-1 rounded-xl">
-        <span class="text-[9px] text-amber-400 font-bold block">🪙 COINS</span>
-        <span id="uiCoins" class="text-base font-black text-amber-300">0</span>
+
+      <!-- Main Result Display -->
+      <div id="resultBox" class="p-6 bg-blue-50/70 border border-blue-100 rounded-xl text-center space-y-2">
+        <span class="text-xs uppercase font-bold tracking-wider text-blue-600">Your Exact Age</span>
+        <div id="mainAgeText" class="text-2xl sm:text-3xl font-extrabold text-blue-700">
+          Calculating...
+        </div>
+        <p id="nextBirthdayText" class="text-xs sm:text-sm text-slate-600 pt-1 font-medium"></p>
+      </div>
+
+      <!-- Detailed Breakdown Cards -->
+      <div id="breakdownGrid" class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl">
+          <span class="block text-[11px] font-semibold text-slate-500 uppercase">Total Months</span>
+          <span id="totalMonths" class="text-base sm:text-lg font-bold text-slate-800">-</span>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl">
+          <span class="block text-[11px] font-semibold text-slate-500 uppercase">Total Weeks</span>
+          <span id="totalWeeks" class="text-base sm:text-lg font-bold text-slate-800">-</span>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl">
+          <span class="block text-[11px] font-semibold text-slate-500 uppercase">Total Days</span>
+          <span id="totalDays" class="text-base sm:text-lg font-bold text-slate-800">-</span>
+        </div>
+      </div>
+
+      <!-- Govt Exam Eligibility Checker -->
+      <div class="border-t border-slate-200 pt-5 space-y-3">
+        <h3 class="text-sm font-bold text-slate-800">Quick Eligibility Check</h3>
+        <div class="flex items-center space-x-2 text-xs sm:text-sm text-slate-600">
+          <span>Target exam limit:</span>
+          <select id="examCriteria" onchange="checkEligibility()" class="border border-slate-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800">
+            <option value="18-27">18 to 27 Years (SSC CGL / CHSL Gen)</option>
+            <option value="18-30">18 to 30 Years (Railway / Defence / Police)</option>
+            <option value="21-32">21 to 32 Years (UPSC / Civil Services Gen)</option>
+            <option value="18-35">18 to 35 Years (State PCS / General)</option>
+          </select>
+        </div>
+        <div id="eligibilityResult" class="p-3 rounded-lg text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100">
+          Calculating eligibility...
+        </div>
       </div>
     </div>
-    
-    <div class="flex items-center space-x-2 pointer-events-auto">
-      <button onclick="toggleAudio()" id="btnAudio" class="bg-slate-900/90 border border-slate-700 hover:border-cyan-400 px-2.5 py-1.5 rounded-xl text-xs font-bold">
-        🔊 SOUND
-      </button>
-      <button onclick="togglePauseGame()" id="btnPause" class="bg-slate-900/90 border border-slate-700 hover:border-amber-400 text-amber-400 px-2.5 py-1.5 rounded-xl text-xs font-bold">
-        ⏸️ PAUSE
-      </button>
-    </div>
-  </div>
 
-  <!-- XP Progress Bar -->
-  <div class="fixed top-24 left-4 right-4 z-10 pointer-events-none">
-    <div class="w-full bg-slate-900/80 border border-slate-800 h-2 rounded-full overflow-hidden">
-      <div id="xpBar" class="bg-gradient-to-r from-cyan-400 to-purple-500 h-full w-0 transition-all duration-150"></div>
-    </div>
-  </div>
+    <!-- Educational Content & Guide for SEO -->
+    <section class="mt-12 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto">
+      <h2 class="text-xl font-bold text-slate-900 mb-4">How is Cut-Off Age Calculated for Government Forms?</h2>
+      <div class="space-y-4 text-sm text-slate-600">
+        <div>
+          <h3 class="font-semibold text-slate-800">Standard DD / MM / YYYY Format</h3>
+          <p class="mt-1">In India and competitive recruitment portals, dates follow the Day-Month-Year sequence. Our calculator strictly uses this order so you never mix up months and dates while verifying your cutoff limits.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-slate-800">What is a Cut-Off Date?</h3>
+          <p class="mt-1">In competitive exams like SSC, Banking, and UPSC, age is not checked as of today's date. Official notifications give a fixed benchmark date (e.g., 1st August or 1st January). You must meet the age requirements precisely on that day.</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <!-- Canvas -->
-  <canvas id="gameCanvas"></canvas>
-
-  <!-- Start & Game Over Screen -->
-  <div id="menuModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-40 text-center">
-    <h1 id="menuTitle" class="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 mb-2">
-      CYBER SURVIVOR
-    </h1>
-    <p id="menuDesc" class="text-slate-400 text-xs sm:text-sm max-w-sm mb-6">
-      Auto-targeting neon roguelike. Move with <b class="text-cyan-300">WASD</b>, <b class="text-cyan-300">Arrows</b>, or <b class="text-cyan-300">Mobile Touch Joystick</b>. Kill bots, collect XP & coins, and survive!
-    </p>
-    <button onclick="startNewGame()" id="btnAction" class="px-8 py-3.5 bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 text-white font-black text-base rounded-2xl shadow-xl shadow-cyan-500/30 active:scale-95 transition">
-      ENGAGE PROTOCOL
-    </button>
-  </div>
-
-  <!-- Roguelike Level Up Modal -->
-  <div id="upgradeModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50 hidden">
-    <div class="text-2xl sm:text-3xl font-black text-amber-400 tracking-wider mb-1">LEVEL UPGRADES</div>
-    <p class="text-slate-400 text-xs mb-6">Choose a combat enhancement to continue</p>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl" id="upgradeCards">
-      <!-- Injected Dynamically -->
-    </div>
-  </div>
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <p>© 2026 FinGrowTools · Fast, Accurate Online Utilities & Tools</p>
+  </footer>
 
   <script>
-    // Audio Synth
-    let soundEnabled = true;
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playBeep(freq, type, duration) {
-      if (!soundEnabled) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
-    }
-
-    function toggleAudio() {
-      soundEnabled = !soundEnabled;
-      document.getElementById('btnAudio').innerText = soundEnabled ? "🔊 SOUND" : "🔇 MUTED";
-    }
-
-    // Canvas Setup
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    // Game Variables
-    let isRunning = false;
-    let isPaused = false;
-    let score = 0;
-    let coins = 0;
-    let level = 1;
-    let currentXP = 0;
-    let neededXP = 50;
-
-    // Upgrades System
-    let stats = {
-      fireRate: 350,
-      bulletCount: 1,
-      bulletDamage: 25,
-      bulletSpeed: 9,
-      moveSpeed: 3.5,
-      orbitShield: false
-    };
-
-    let player = { x: 0, y: 0, r: 16, hp: 100, maxHp: 100 };
-    let bullets = [];
-    let enemies = [];
-    let gems = [];
-    let coinDrops = [];
-    let particles = [];
-    let lastShotTime = 0;
-    let shieldAngle = 0;
-
-    // Controls State
-    const keys = {};
-    let joystick = { active: false, startX: 0, startY: 0, curX: 0, curY: 0, dx: 0, dy: 0 };
-
-    window.addEventListener('keydown', e => { 
-      keys[e.key.toLowerCase()] = true; 
-      if (e.key.toLowerCase() === 'p') togglePauseGame();
-    });
-    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
-
-    // Touch Virtual Joystick
-    window.addEventListener('touchstart', e => {
-      if (!isRunning || isPaused) return;
-      const t = e.touches[0];
-      joystick.active = true;
-      joystick.startX = t.clientX;
-      joystick.startY = t.clientY;
-      joystick.curX = t.clientX;
-      joystick.curY = t.clientY;
-    });
-
-    window.addEventListener('touchmove', e => {
-      if (!joystick.active) return;
-      const t = e.touches[0];
-      joystick.curX = t.clientX;
-      joystick.curY = t.clientY;
-      const diffX = joystick.curX - joystick.startX;
-      const diffY = joystick.curY - joystick.startY;
-      const dist = Math.hypot(diffX, diffY);
-      const maxDist = 45;
-      if (dist > 0) {
-        joystick.dx = (diffX / dist) * Math.min(dist, maxDist) / maxDist;
-        joystick.dy = (diffY / dist) * Math.min(dist, maxDist) / maxDist;
+    function populateDays(elementId) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = '';
+      for (let i = 1; i <= 31; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = i < 10 ? '0' + i : i;
+        el.appendChild(opt);
       }
-    });
-
-    window.addEventListener('touchend', () => {
-      joystick.active = false;
-      joystick.dx = 0;
-      joystick.dy = 0;
-    });
-
-    function togglePauseGame() {
-      if (!isRunning) return;
-      isPaused = !isPaused;
-      document.getElementById('btnPause').innerText = isPaused ? "▶️ RESUME" : "⏸️ PAUSE";
     }
 
-    function startNewGame() {
-      player.x = canvas.width / 2;
-      player.y = canvas.height / 2;
-      player.hp = 100;
-      score = 0;
-      coins = 0;
-      level = 1;
-      currentXP = 0;
-      neededXP = 50;
-
-      stats = {
-        fireRate: 350,
-        bulletCount: 1,
-        bulletDamage: 25,
-        bulletSpeed: 9,
-        moveSpeed: 3.5,
-        orbitShield: false
-      };
-
-      bullets = [];
-      enemies = [];
-      gems = [];
-      coinDrops = [];
-      particles = [];
-
-      updateUI();
-      document.getElementById('menuModal').classList.add('hidden');
-      isRunning = true;
-      isPaused = false;
+    function populateYears(elementId, startYear, endYear) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = '';
+      for (let y = endYear; y >= startYear; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.innerText = y;
+        el.appendChild(opt);
+      }
     }
 
-    function updateUI() {
-      document.getElementById('uiLevel').innerText = level;
-      document.getElementById('uiScore').innerText = Math.floor(score);
-      document.getElementById('uiCoins').innerText = coins;
-      const pct = Math.min(100, (currentXP / neededXP) * 100);
-      document.getElementById('xpBar').style.width = pct + '%';
-    }
+    const today = new Date();
+    const currentYear = today.getFullYear();
 
-    // Upgrade Card Trigger
-    const UPGRADE_POOL = [
-      { id: 'multishot', title: 'Multishot Matrix', desc: '+1 Projectile fired per round', icon: '🔱' },
-      { id: 'firerate', title: 'Overclock Thrusters', desc: '+25% Rapid Fire rate', icon: '⚡' },
-      { id: 'damage', title: 'Plasma Core', desc: '+35% Bullet Damage', icon: '💥' },
-      { id: 'speed', title: 'Agility Drive', desc: '+20% Character Movement Speed', icon: '👟' },
-      { id: 'shield', title: 'Orbital Blade', desc: 'Rotating plasma shield damages nearby bots', icon: '🛡️' }
-    ];
+    populateDays('dobDay');
+    populateDays('targetDay');
+    populateYears('dobYear', 1950, currentYear);
+    populateYears('targetYear', 1980, currentYear + 10);
 
-    function openUpgradeModal() {
-      isPaused = true;
-      const container = document.getElementById('upgradeCards');
-      container.innerHTML = '';
+    document.getElementById('targetDay').value = today.getDate();
+    document.getElementById('targetMonth').value = today.getMonth();
+    document.getElementById('targetYear').value = today.getFullYear();
+
+    document.getElementById('dobDay').value = 14;
+    document.getElementById('dobMonth').value = 11;
+    document.getElementById('dobYear').value = 2007;
+
+    let calculatedYears = 0;
+    let calculatedMonths = 0;
+    let calculatedDays = 0;
+
+    function calculateAge() {
+      const bDay = parseInt(document.getElementById('dobDay').value);
+      const bMonth = parseInt(document.getElementById('dobMonth').value);
+      const bYear = parseInt(document.getElementById('dobYear').value);
+
+      const tDay = parseInt(document.getElementById('targetDay').value);
+      const tMonth = parseInt(document.getElementById('targetMonth').value);
+      const tYear = parseInt(document.getElementById('targetYear').value);
+
+      const birthDate = new Date(bYear, bMonth, bDay);
+      const targetDate = new Date(tYear, tMonth, tDay);
+
+      if (birthDate > targetDate) {
+        document.getElementById('mainAgeText').innerText = "Birth date cannot be after the cutoff date!";
+        document.getElementById('mainAgeText').className = "text-lg font-bold text-rose-600";
+        document.getElementById('nextBirthdayText').innerText = "";
+        document.getElementById('totalMonths').innerText = "-";
+        document.getElementById('totalWeeks').innerText = "-";
+        document.getElementById('totalDays').innerText = "-";
+        return;
+      }
+
+      let y = targetDate.getFullYear() - birthDate.getFullYear();
+      let m = targetDate.getMonth() - birthDate.getMonth();
+      let d = targetDate.getDate() - birthDate.getDate();
+
+      if (d < 0) {
+        m--;
+        const prevMonthDays = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0).getDate();
+        d += prevMonthDays;
+      }
+
+      if (m < 0) {
+        y--;
+        m += 12;
+      }
+
+      calculatedYears = y;
+      calculatedMonths = m;
+      calculatedDays = d;
+
+      const mainText = `${y} Years, ${m} Months, ${d} Days`;
+      const mainEl = document.getElementById('mainAgeText');
+      mainEl.innerText = mainText;
+      mainEl.className = "text-2xl sm:text-3xl font-extrabold text-blue-700";
+
+      const diffMs = targetDate.getTime() - birthDate.getTime();
+      const totalDaysCount = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const totalWeeksCount = Math.floor(totalDaysCount / 7);
+      const totalMonthsCount = (y * 12) + m;
+
+      document.getElementById('totalMonths').innerText = totalMonthsCount.toLocaleString();
+      document.getElementById('totalWeeks').innerText = totalWeeksCount.toLocaleString();
+      document.getElementById('totalDays').innerText = totalDaysCount.toLocaleString();
+
+      let nextBday = new Date(today.getFullYear(), bMonth, bDay);
+      if (nextBday < today) {
+        nextBday.setFullYear(today.getFullYear() + 1);
+      }
+      const bdayDiffDays = Math.ceil((nextBday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       
-      // Shuffle & pick 3
-      const shuffled = [...UPGRADE_POOL].sort(() => 0.5 - Math.random()).slice(0, 3);
-      shuffled.forEach(up => {
-        const card = document.createElement('div');
-        card.className = "bg-slate-900 border border-slate-700 hover:border-cyan-400 p-4 rounded-2xl cursor-pointer hover:bg-slate-800 transition active:scale-95 text-center flex flex-col items-center justify-between";
-        card.innerHTML = `
-          <div class="text-3xl mb-2">${up.icon}</div>
-          <div class="font-black text-cyan-300 text-sm mb-1">${up.title}</div>
-          <div class="text-[11px] text-slate-400 mb-4">${up.desc}</div>
-          <button class="w-full py-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 rounded-xl font-bold text-xs">CHOOSE</button>
-        `;
-        card.onclick = () => selectUpgrade(up.id);
-        container.appendChild(card);
-      });
+      const bdayEl = document.getElementById('nextBirthdayText');
+      if (bdayDiffDays === 0 || bdayDiffDays === 365) {
+        bdayEl.innerText = "🎉 Today is the birthday! Happy Birthday!";
+      } else {
+        bdayEl.innerText = `🎂 Next birthday in: ${bdayDiffDays} days (${nextBday.toDateString()})`;
+      }
 
-      document.getElementById('upgradeModal').classList.remove('hidden');
+      checkEligibility();
     }
 
-    function selectUpgrade(id) {
-      if (id === 'multishot') stats.bulletCount += 1;
-      if (id === 'firerate') stats.fireRate = Math.max(120, stats.fireRate * 0.75);
-      if (id === 'damage') stats.bulletDamage += 12;
-      if (id === 'speed') stats.moveSpeed += 0.7;
-      if (id === 'shield') stats.orbitShield = true;
+    function checkEligibility() {
+      const criteria = document.getElementById('examCriteria').value.split('-');
+      const minAge = parseInt(criteria[0]);
+      const maxAge = parseInt(criteria[1]);
+      const resultBox = document.getElementById('eligibilityResult');
 
-      document.getElementById('upgradeModal').classList.add('hidden');
-      isPaused = false;
-    }
+      if (calculatedYears === 0 && calculatedMonths === 0 && calculatedDays === 0) return;
 
-    function spawnEnemy() {
-      if (!isRunning || isPaused) return;
-      const edge = Math.floor(Math.random() * 4);
-      let x, y;
-      if (edge === 0) { x = Math.random() * canvas.width; y = -20; }
-      else if (edge === 1) { x = canvas.width + 20; y = Math.random() * canvas.height; }
-      else if (edge === 2) { x = Math.random() * canvas.width; y = canvas.height + 20; }
-      else { x = -20; y = Math.random() * canvas.height; }
+      const isEligible = calculatedYears >= minAge && (calculatedYears < maxAge || (calculatedYears === maxAge && calculatedMonths === 0 && calculatedDays === 0));
 
-      const isFast = Math.random() < 0.25;
-      enemies.push({
-        x: x, y: y,
-        r: isFast ? 10 : 13,
-        hp: isFast ? 20 + level * 4 : 45 + level * 8,
-        speed: isFast ? 2.4 : 1.4,
-        color: isFast ? '#ff007f' : '#00f0ff'
-      });
-    }
-    setInterval(spawnEnemy, 650);
-
-    function createExplosion(x, y, color) {
-      for (let i = 0; i < 8; i++) {
-        particles.push({
-          x: x, y: y,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          life: 1,
-          color: color
-        });
+      if (isEligible) {
+        resultBox.className = "p-3 rounded-lg text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200";
+        resultBox.innerHTML = `✅ <strong>Eligible!</strong> Your age (${calculatedYears}y ${calculatedMonths}m) is within the required ${minAge} to ${maxAge} years window.`;
+      } else {
+        resultBox.className = "p-3 rounded-lg text-xs sm:text-sm font-semibold text-rose-800 bg-rose-50 border border-rose-200";
+        if (calculatedYears < minAge) {
+          resultBox.innerHTML = `❌ <strong>Underage:</strong> You must be at least ${minAge} years old on the cutoff date.`;
+        } else {
+          resultBox.innerHTML = `❌ <strong>Overage:</strong> You exceed the maximum age limit of ${maxAge} years on the cutoff date.`;
+        }
       }
     }
 
-    // Main Game Loop
-    function gameLoop(time) {
-      requestAnimationFrame(gameLoop);
-      ctx.fillStyle = '#020617';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      if (!isRunning || isPaused) {
-        if (!isRunning) return;
-      }
-
-      // Draw Grid Background
-      ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 1;
-      const gridSize = 40;
-      for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += gridSize) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-      }
-
-      if (!isPaused) {
-        // Player Movement
-        let moveX = 0, moveY = 0;
-        if (keys['w'] || keys['arrowup']) moveY -= 1;
-        if (keys['s'] || keys['arrowdown']) moveY += 1;
-        if (keys['a'] || keys['arrowleft']) moveX -= 1;
-        if (keys['d'] || keys['arrowright']) moveX += 1;
-
-        if (joystick.active) {
-          moveX = joystick.dx;
-          moveY = joystick.dy;
-        }
-
-        const len = Math.hypot(moveX, moveY);
-        if (len > 0 && !joystick.active) {
-          moveX /= len;
-          moveY /= len;
-        }
-
-        player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x + moveX * stats.moveSpeed));
-        player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y + moveY * stats.moveSpeed));
-
-        // Auto Shooting closest enemy
-        if (time - lastShotTime > stats.fireRate && enemies.length > 0) {
-          let closest = null;
-          let minDist = Infinity;
-          for (let e of enemies) {
-            const d = Math.hypot(e.x - player.x, e.y - player.y);
-            if (d < minDist) { minDist = d; closest = e; }
-          }
-
-          if (closest && minDist < 450) {
-            playBeep(650, 'sine', 0.08);
-            const baseAngle = Math.atan2(closest.y - player.y, closest.x - player.x);
-            const spread = 0.18;
-            const startAngle = baseAngle - ((stats.bulletCount - 1) * spread) / 2;
-
-            for (let i = 0; i < stats.bulletCount; i++) {
-              const ang = startAngle + i * spread;
-              bullets.push({
-                x: player.x, y: player.y,
-                vx: Math.cos(ang) * stats.bulletSpeed,
-                vy: Math.sin(ang) * stats.bulletSpeed,
-                damage: stats.bulletDamage
-              });
-            }
-            lastShotTime = time;
-          }
-        }
-      }
-
-      // Draw Joystick Base on Mobile
-      if (joystick.active) {
-        ctx.beginPath();
-        ctx.arc(joystick.startX, joystick.startY, 40, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(6, 182, 212, 0.15)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(joystick.curX, joystick.curY, 20, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
-        ctx.fill();
-      }
-
-      // Update & Draw Bullets
-      ctx.fillStyle = '#38bdf8';
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i];
-        if (!isPaused) {
-          b.x += b.vx;
-          b.y += b.vy;
-        }
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
-          bullets.splice(i, 1);
-        }
-      }
-
-      // Orbital Shield Update
-      if (stats.orbitShield) {
-        shieldAngle += 0.06;
-        const shieldX = player.x + Math.cos(shieldAngle) * 42;
-        const shieldY = player.y + Math.sin(shieldAngle) * 42;
-        ctx.fillStyle = '#f59e0b';
-        ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 10;
-        ctx.beginPath();
-        ctx.arc(shieldX, shieldY, 8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Damage enemies on shield contact
-        for (let e of enemies) {
-          if (Math.hypot(e.x - shieldX, e.y - shieldY) < e.r + 8) {
-            e.hp -= 2;
-          }
-        }
-      }
-
-      // Update & Draw Enemies
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        if (!isPaused) {
-          const ang = Math.atan2(player.y - e.y, player.x - e.x);
-          e.x += Math.cos(ang) * e.speed;
-          e.y += Math.sin(ang) * e.speed;
-        }
-
-        ctx.fillStyle = e.color;
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bullet Hit Check
-        for (let j = bullets.length - 1; j >= 0; j--) {
-          const b = bullets[j];
-          if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + 4) {
-            e.hp -= b.damage;
-            bullets.splice(j, 1);
-            if (e.hp <= 0) break;
-          }
-        }
-
-        // Enemy Death
-        if (e.hp <= 0) {
-          playBeep(220, 'square', 0.1);
-          createExplosion(e.x, e.y, e.color);
-          score += 20;
-
-          // Drop XP gem
-          gems.push({ x: e.x, y: e.y, val: 12 });
-
-          // 30% chance for Coin
-          if (Math.random() < 0.3) {
-            coinDrops.push({ x: e.x, y: e.y });
-          }
-
-          enemies.splice(i, 1);
-          updateUI();
-          continue;
-        }
-
-        // Touch Player
-        if (Math.hypot(e.x - player.x, e.y - player.y) < e.r + player.r) {
-          player.hp -= 0.6;
-          if (player.hp <= 0) {
-            isRunning = false;
-            document.getElementById('menuTitle').innerText = "SYSTEM PURGED";
-            document.getElementById('menuDesc').innerText = `Survived until Level ${level} | Final Score: ${Math.floor(score)} | Coins: ${coins}`;
-            document.getElementById('btnAction').innerText = "RESTART PROTOCOL";
-            document.getElementById('menuModal').classList.remove('hidden');
-          }
-        }
-      }
-
-      // Update & Draw XP Gems (Magnetic pull)
-      ctx.fillStyle = '#a855f7';
-      for (let i = gems.length - 1; i >= 0; i--) {
-        const g = gems[i];
-        const dist = Math.hypot(player.x - g.x, player.y - g.y);
-        if (dist < 110 && !isPaused) {
-          g.x += (player.x - g.x) * 0.14;
-          g.y += (player.y - g.y) * 0.14;
-        }
-        ctx.beginPath();
-        ctx.arc(g.x, g.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (dist < player.r + 4) {
-          playBeep(880, 'sine', 0.05);
-          currentXP += g.val;
-          gems.splice(i, 1);
-
-          if (currentXP >= neededXP) {
-            currentXP = 0;
-            neededXP = Math.floor(neededXP * 1.45);
-            level++;
-            openUpgradeModal();
-          }
-          updateUI();
-        }
-      }
-
-      // Update & Draw Coins
-      ctx.fillStyle = '#fbbf24';
-      for (let i = coinDrops.length - 1; i >= 0; i--) {
-        const c = coinDrops[i];
-        const dist = Math.hypot(player.x - c.x, player.y - c.y);
-        if (dist < 110 && !isPaused) {
-          c.x += (player.x - c.x) * 0.14;
-          c.y += (player.y - c.y) * 0.14;
-        }
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (dist < player.r + 5) {
-          playBeep(1200, 'sine', 0.08);
-          coins++;
-          score += 50;
-          coinDrops.splice(i, 1);
-          updateUI();
-        }
-      }
-
-      // Particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.03;
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0, p.life);
-        ctx.fillRect(p.x, p.y, 3, 3);
-        ctx.globalAlpha = 1;
-        if (p.life <= 0) particles.splice(i, 1);
-      }
-
-      // Draw Player Ship / Core
-      ctx.fillStyle = '#06b6d4';
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Health Bar over player
-      ctx.fillStyle = '#334155';
-      ctx.fillRect(player.x - 18, player.y - 25, 36, 4);
-      ctx.fillStyle = '#22c55e';
-      ctx.fillRect(player.x - 18, player.y - 25, (player.hp / player.maxHp) * 36, 4);
-    }
-
-    requestAnimationFrame(gameLoop);
+    calculateAge();
   </script>
 </body>
 </html>

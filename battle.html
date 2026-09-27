@@ -3,571 +3,297 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Cyber Survivor 2077 - FinGrowTools</title>
+  <title>NEON WAVE: CYBER DRIFT - FinGrowTools</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
   <style>
-    body { margin: 0; overflow: hidden; background: #020617; touch-action: none; font-family: system-ui, sans-serif; }
+    body { margin: 0; overflow: hidden; background: #05050d; touch-action: none; font-family: system-ui, sans-serif; }
     canvas { display: block; width: 100vw; height: 100vh; }
   </style>
 </head>
-<body class="select-none text-white bg-slate-950">
+<body class="select-none bg-slate-950 text-white">
 
   <!-- Header Navigation -->
-  <header class="fixed top-0 left-0 w-full bg-slate-950/85 backdrop-blur-md border-b border-slate-800 z-30">
+  <header class="fixed top-0 left-0 w-full bg-slate-950/70 backdrop-blur-md border-b border-slate-800/80 z-30 pointer-events-auto">
     <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
       <a href="/" class="text-lg font-black tracking-tight text-cyan-400">FinGrow<span class="text-white">Tools</span></a>
-      <nav class="flex items-center space-x-3 text-xs font-semibold text-slate-300">
-        <a href="/" class="hover:text-cyan-400">Calculators</a>
-        <a href="/compressor.html" class="hover:text-cyan-400">Compressor</a>
-        <a href="/battle.html" class="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/40">Cyber Survivor</a>
+      <nav class="flex items-center space-x-3 text-xs font-bold text-slate-300">
+        <a href="/" class="hover:text-cyan-400">Tools</a>
+        <a href="/battle.html" class="bg-cyan-500/20 text-cyan-300 px-2.5 py-1 rounded-lg border border-cyan-500/40">Neon Wave</a>
       </nav>
     </div>
   </header>
 
-  <!-- HUD Overlay -->
-  <div class="fixed top-12 left-0 w-full px-4 py-2 flex justify-between items-center z-10 pointer-events-none">
-    <div class="flex items-center space-x-2 pointer-events-auto">
-      <div class="bg-slate-900/90 border border-purple-500/40 px-3 py-1 rounded-xl">
-        <span class="text-[9px] text-purple-400 font-bold block">LEVEL</span>
-        <span id="uiLevel" class="text-base font-black text-purple-300">1</span>
+  <!-- HUD -->
+  <div class="fixed top-14 left-0 w-full px-4 sm:px-6 flex justify-between items-center z-10 pointer-events-none">
+    <div class="flex items-center space-x-3">
+      <div class="bg-slate-900/80 backdrop-blur border border-cyan-500/40 px-3.5 py-1.5 rounded-xl shadow-lg">
+        <span class="text-[9px] text-cyan-400 font-black tracking-widest block">SCORE</span>
+        <span id="uiScore" class="text-xl sm:text-2xl font-black text-cyan-300">0</span>
       </div>
-      <div class="bg-slate-900/90 border border-cyan-500/40 px-3 py-1 rounded-xl">
-        <span class="text-[9px] text-cyan-400 font-bold block">SCORE</span>
-        <span id="uiScore" class="text-base font-black text-cyan-300">0</span>
-      </div>
-      <div class="bg-slate-900/90 border border-amber-500/40 px-3 py-1 rounded-xl">
-        <span class="text-[9px] text-amber-400 font-bold block">🪙 COINS</span>
-        <span id="uiCoins" class="text-base font-black text-amber-300">0</span>
+      <div class="bg-slate-900/80 backdrop-blur border border-amber-500/50 px-3.5 py-1.5 rounded-xl shadow-lg">
+        <span class="text-[9px] text-amber-400 font-black tracking-widest block">BEST</span>
+        <span id="uiBest" class="text-xl sm:text-2xl font-black text-amber-300">0</span>
       </div>
     </div>
-    
-    <div class="flex items-center space-x-2 pointer-events-auto">
-      <button onclick="toggleAudio()" id="btnAudio" class="bg-slate-900/90 border border-slate-700 hover:border-cyan-400 px-2.5 py-1.5 rounded-xl text-xs font-bold">
-        🔊 SOUND
-      </button>
-      <button onclick="togglePauseGame()" id="btnPause" class="bg-slate-900/90 border border-slate-700 hover:border-amber-400 text-amber-400 px-2.5 py-1.5 rounded-xl text-xs font-bold">
-        ⏸️ PAUSE
-      </button>
+    <div id="comboBadge" class="hidden bg-pink-500/20 border border-pink-500 px-3 py-1 rounded-xl text-pink-400 font-black text-xs animate-pulse">
+      NEAR MISS x2!
     </div>
   </div>
 
-  <!-- XP Progress Bar -->
-  <div class="fixed top-24 left-4 right-4 z-10 pointer-events-none">
-    <div class="w-full bg-slate-900/80 border border-slate-800 h-2 rounded-full overflow-hidden">
-      <div id="xpBar" class="bg-gradient-to-r from-cyan-400 to-purple-500 h-full w-0 transition-all duration-150"></div>
+  <!-- Start / Game Over Screen -->
+  <div id="overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-6 z-20 text-center">
+    <div class="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-xs font-bold tracking-widest mb-3 uppercase">
+      Addictive Cyber Drift
     </div>
-  </div>
-
-  <!-- Canvas -->
-  <canvas id="gameCanvas"></canvas>
-
-  <!-- Start & Game Over Screen -->
-  <div id="menuModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-40 text-center">
-    <h1 id="menuTitle" class="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 mb-2">
-      CYBER SURVIVOR
+    <h1 id="overTitle" class="text-5xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 mb-2">
+      NEON WAVE
     </h1>
-    <p id="menuDesc" class="text-slate-400 text-xs sm:text-sm max-w-sm mb-6">
-      Auto-targeting neon roguelike. Move with <b class="text-cyan-300">WASD</b>, <b class="text-cyan-300">Arrows</b>, or <b class="text-cyan-300">Mobile Touch Joystick</b>. Kill bots, collect XP & coins, and survive!
+    <p id="overDesc" class="text-slate-400 text-xs sm:text-sm max-w-sm mb-8 leading-relaxed">
+      <b>HOLD SCREEN / SPACEBAR</b> to drift up ↗<br/>
+      <b>RELEASE</b> to dive down ↘<br/>
+      Dodge lasers, scrape close for bonus multiplier!
     </p>
-    <button onclick="startNewGame()" id="btnAction" class="px-8 py-3.5 bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 text-white font-black text-base rounded-2xl shadow-xl shadow-cyan-500/30 active:scale-95 transition">
-      ENGAGE PROTOCOL
+    <button onclick="startGame()" id="btnAction" class="px-8 py-3.5 bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 text-slate-950 font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-cyan-500/25 active:scale-95 transition">
+      TAP TO DRIFT
     </button>
   </div>
 
-  <!-- Roguelike Level Up Modal -->
-  <div id="upgradeModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50 hidden">
-    <div class="text-2xl sm:text-3xl font-black text-amber-400 tracking-wider mb-1">LEVEL UPGRADES</div>
-    <p class="text-slate-400 text-xs mb-6">Choose a combat enhancement to continue</p>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl" id="upgradeCards">
-      <!-- Injected Dynamically -->
-    </div>
-  </div>
+  <canvas id="canvas"></canvas>
 
   <script>
-    // Audio Synth
-    let soundEnabled = true;
+    // Audio Synthesizer (No external laggy audio files)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playBeep(freq, type, duration) {
-      if (!soundEnabled) return;
+    function playBeep(freq, type, duration, vol=0.1) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = type;
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + duration);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + duration);
     }
 
-    function toggleAudio() {
-      soundEnabled = !soundEnabled;
-      document.getElementById('btnAudio').innerText = soundEnabled ? "🔊 SOUND" : "🔇 MUTED";
-    }
-
-    // Canvas Setup
-    const canvas = document.getElementById('gameCanvas');
+    const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
+    function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    window.addEventListener('resize', resize);
+    resize();
 
-    // Game Variables
-    let isRunning = false;
-    let isPaused = false;
+    let isPlaying = false;
+    let isHolding = false;
     let score = 0;
-    let coins = 0;
-    let level = 1;
-    let currentXP = 0;
-    let neededXP = 50;
+    let bestScore = parseInt(localStorage.getItem('neon_best') || '0');
+    document.getElementById('uiBest').innerText = bestScore;
 
-    // Upgrades System
-    let stats = {
-      fireRate: 350,
-      bulletCount: 1,
-      bulletDamage: 25,
-      bulletSpeed: 9,
-      moveSpeed: 3.5,
-      orbitShield: false
-    };
-
-    let player = { x: 0, y: 0, r: 16, hp: 100, maxHp: 100 };
-    let bullets = [];
-    let enemies = [];
-    let gems = [];
-    let coinDrops = [];
+    let player = { x: 120, y: 0, vy: 0, r: 12 };
+    let trail = [];
+    let obstacles = [];
     let particles = [];
-    let lastShotTime = 0;
-    let shieldAngle = 0;
+    let speed = 5.5;
+    let hue = 180;
+    let screenShake = 0;
 
-    // Controls State
-    const keys = {};
-    let joystick = { active: false, startX: 0, startY: 0, curX: 0, curY: 0, dx: 0, dy: 0 };
-
-    window.addEventListener('keydown', e => { 
-      keys[e.key.toLowerCase()] = true; 
-      if (e.key.toLowerCase() === 'p') togglePauseGame();
-    });
-    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
-
-    // Touch Virtual Joystick
-    window.addEventListener('touchstart', e => {
-      if (!isRunning || isPaused) return;
-      const t = e.touches[0];
-      joystick.active = true;
-      joystick.startX = t.clientX;
-      joystick.startY = t.clientY;
-      joystick.curX = t.clientX;
-      joystick.curY = t.clientY;
-    });
-
-    window.addEventListener('touchmove', e => {
-      if (!joystick.active) return;
-      const t = e.touches[0];
-      joystick.curX = t.clientX;
-      joystick.curY = t.clientY;
-      const diffX = joystick.curX - joystick.startX;
-      const diffY = joystick.curY - joystick.startY;
-      const dist = Math.hypot(diffX, diffY);
-      const maxDist = 45;
-      if (dist > 0) {
-        joystick.dx = (diffX / dist) * Math.min(dist, maxDist) / maxDist;
-        joystick.dy = (diffY / dist) * Math.min(dist, maxDist) / maxDist;
-      }
-    });
-
-    window.addEventListener('touchend', () => {
-      joystick.active = false;
-      joystick.dx = 0;
-      joystick.dy = 0;
-    });
-
-    function togglePauseGame() {
-      if (!isRunning) return;
-      isPaused = !isPaused;
-      document.getElementById('btnPause').innerText = isPaused ? "▶️ RESUME" : "⏸️ PAUSE";
+    // Controls
+    function setHold(state) {
+      if (!isPlaying) return;
+      if (state && !isHolding) playBeep(520, 'sine', 0.08, 0.08);
+      isHolding = state;
     }
 
-    function startNewGame() {
-      player.x = canvas.width / 2;
+    window.addEventListener('mousedown', () => setHold(true));
+    window.addEventListener('mouseup', () => setHold(false));
+    window.addEventListener('touchstart', (e) => { e.preventDefault(); setHold(true); }, { passive: false });
+    window.addEventListener('touchend', (e) => { e.preventDefault(); setHold(false); }, { passive: false });
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space') setHold(true); });
+    window.addEventListener('keyup', (e) => { if (e.code === 'Space') setHold(false); });
+
+    function startGame() {
+      player.x = Math.min(180, canvas.width * 0.2);
       player.y = canvas.height / 2;
-      player.hp = 100;
-      score = 0;
-      coins = 0;
-      level = 1;
-      currentXP = 0;
-      neededXP = 50;
-
-      stats = {
-        fireRate: 350,
-        bulletCount: 1,
-        bulletDamage: 25,
-        bulletSpeed: 9,
-        moveSpeed: 3.5,
-        orbitShield: false
-      };
-
-      bullets = [];
-      enemies = [];
-      gems = [];
-      coinDrops = [];
+      player.vy = 0;
+      trail = [];
+      obstacles = [];
       particles = [];
+      score = 0;
+      speed = 6;
+      isPlaying = true;
+      document.getElementById('uiScore').innerText = '0';
+      document.getElementById('overlay').classList.add('hidden');
+      playBeep(440, 'triangle', 0.2, 0.15);
 
-      updateUI();
-      document.getElementById('menuModal').classList.add('hidden');
-      isRunning = true;
-      isPaused = false;
-    }
-
-    function updateUI() {
-      document.getElementById('uiLevel').innerText = level;
-      document.getElementById('uiScore').innerText = Math.floor(score);
-      document.getElementById('uiCoins').innerText = coins;
-      const pct = Math.min(100, (currentXP / neededXP) * 100);
-      document.getElementById('xpBar').style.width = pct + '%';
-    }
-
-    // Upgrade Card Trigger
-    const UPGRADE_POOL = [
-      { id: 'multishot', title: 'Multishot Matrix', desc: '+1 Projectile fired per round', icon: '🔱' },
-      { id: 'firerate', title: 'Overclock Thrusters', desc: '+25% Rapid Fire rate', icon: '⚡' },
-      { id: 'damage', title: 'Plasma Core', desc: '+35% Bullet Damage', icon: '💥' },
-      { id: 'speed', title: 'Agility Drive', desc: '+20% Character Movement Speed', icon: '👟' },
-      { id: 'shield', title: 'Orbital Blade', desc: 'Rotating plasma shield damages nearby bots', icon: '🛡️' }
-    ];
-
-    function openUpgradeModal() {
-      isPaused = true;
-      const container = document.getElementById('upgradeCards');
-      container.innerHTML = '';
-      
-      // Shuffle & pick 3
-      const shuffled = [...UPGRADE_POOL].sort(() => 0.5 - Math.random()).slice(0, 3);
-      shuffled.forEach(up => {
-        const card = document.createElement('div');
-        card.className = "bg-slate-900 border border-slate-700 hover:border-cyan-400 p-4 rounded-2xl cursor-pointer hover:bg-slate-800 transition active:scale-95 text-center flex flex-col items-center justify-between";
-        card.innerHTML = `
-          <div class="text-3xl mb-2">${up.icon}</div>
-          <div class="font-black text-cyan-300 text-sm mb-1">${up.title}</div>
-          <div class="text-[11px] text-slate-400 mb-4">${up.desc}</div>
-          <button class="w-full py-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 rounded-xl font-bold text-xs">CHOOSE</button>
-        `;
-        card.onclick = () => selectUpgrade(up.id);
-        container.appendChild(card);
-      });
-
-      document.getElementById('upgradeModal').classList.remove('hidden');
-    }
-
-    function selectUpgrade(id) {
-      if (id === 'multishot') stats.bulletCount += 1;
-      if (id === 'firerate') stats.fireRate = Math.max(120, stats.fireRate * 0.75);
-      if (id === 'damage') stats.bulletDamage += 12;
-      if (id === 'speed') stats.moveSpeed += 0.7;
-      if (id === 'shield') stats.orbitShield = true;
-
-      document.getElementById('upgradeModal').classList.add('hidden');
-      isPaused = false;
-    }
-
-    function spawnEnemy() {
-      if (!isRunning || isPaused) return;
-      const edge = Math.floor(Math.random() * 4);
-      let x, y;
-      if (edge === 0) { x = Math.random() * canvas.width; y = -20; }
-      else if (edge === 1) { x = canvas.width + 20; y = Math.random() * canvas.height; }
-      else if (edge === 2) { x = Math.random() * canvas.width; y = canvas.height + 20; }
-      else { x = -20; y = Math.random() * canvas.height; }
-
-      const isFast = Math.random() < 0.25;
-      enemies.push({
-        x: x, y: y,
-        r: isFast ? 10 : 13,
-        hp: isFast ? 20 + level * 4 : 45 + level * 8,
-        speed: isFast ? 2.4 : 1.4,
-        color: isFast ? '#ff007f' : '#00f0ff'
-      });
-    }
-    setInterval(spawnEnemy, 650);
-
-    function createExplosion(x, y, color) {
-      for (let i = 0; i < 8; i++) {
-        particles.push({
-          x: x, y: y,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          life: 1,
-          color: color
-        });
+      // Pre-seed first barriers
+      for (let i = 0; i < 4; i++) {
+        spawnObstacle(canvas.width + 300 + i * 320);
       }
     }
 
-    // Main Game Loop
-    function gameLoop(time) {
-      requestAnimationFrame(gameLoop);
-      ctx.fillStyle = '#020617';
+    function spawnObstacle(xPos) {
+      const minGap = 160;
+      const gap = Math.max(120, minGap - Math.min(score * 0.4, 45));
+      const topHeight = Math.random() * (canvas.height - gap - 160) + 80;
+      obstacles.push({
+        x: xPos,
+        top: topHeight,
+        bottom: topHeight + gap,
+        width: 32,
+        passed: false
+      });
+    }
+
+    function gameOver() {
+      isPlaying = false;
+      playBeep(120, 'sawtooth', 0.4, 0.25);
+      screenShake = 18;
+
+      if (score > bestScore) {
+        bestScore = Math.floor(score);
+        localStorage.setItem('neon_best', bestScore);
+        document.getElementById('uiBest').innerText = bestScore;
+      }
+
+      document.getElementById('overTitle').innerText = "WAVE CRASHED";
+      document.getElementById('overDesc').innerHTML = `Final Score: <b class="text-cyan-300 text-lg">${Math.floor(score)}</b><br/>High Score: <b class="text-amber-400">${bestScore}</b>`;
+      document.getElementById('btnAction').innerText = "RETRY DRIFT";
+      document.getElementById('overlay').classList.remove('hidden');
+    }
+
+    function loop() {
+      requestAnimationFrame(loop);
+
+      // Screen Shake
+      ctx.save();
+      if (screenShake > 0) {
+        ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
+        screenShake *= 0.88;
+      }
+
+      // Synthwave dark background fade
+      ctx.fillStyle = '#05050d';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      if (!isRunning || isPaused) {
-        if (!isRunning) return;
-      }
-
-      // Draw Grid Background
-      ctx.strokeStyle = '#0f172a';
+      // Neon horizontal grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
       ctx.lineWidth = 1;
-      const gridSize = 40;
-      for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += gridSize) {
+      for (let y = 0; y < canvas.height; y += 40) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
       }
 
-      if (!isPaused) {
-        // Player Movement
-        let moveX = 0, moveY = 0;
-        if (keys['w'] || keys['arrowup']) moveY -= 1;
-        if (keys['s'] || keys['arrowdown']) moveY += 1;
-        if (keys['a'] || keys['arrowleft']) moveX -= 1;
-        if (keys['d'] || keys['arrowright']) moveX += 1;
+      if (isPlaying) {
+        // Wave Angle Physics (45° Up or 45° Down)
+        const targetVy = isHolding ? -speed * 1.05 : speed * 1.05;
+        player.vy += (targetVy - player.vy) * 0.2;
+        player.y += player.vy;
+        score += 0.25;
+        speed = Math.min(11, 6 + score * 0.004);
+        hue = (hue + 0.4) % 360;
 
-        if (joystick.active) {
-          moveX = joystick.dx;
-          moveY = joystick.dy;
+        document.getElementById('uiScore').innerText = Math.floor(score);
+
+        // Ceiling / Floor Collision
+        if (player.y - player.r < 0 || player.y + player.r > canvas.height) {
+          gameOver();
         }
 
-        const len = Math.hypot(moveX, moveY);
-        if (len > 0 && !joystick.active) {
-          moveX /= len;
-          moveY /= len;
-        }
+        // Add trail point
+        trail.push({ x: player.x, y: player.y, hue: hue });
+        if (trail.length > 35) trail.shift();
 
-        player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x + moveX * stats.moveSpeed));
-        player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y + moveY * stats.moveSpeed));
+        // Obstacles loop
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obs = obstacles[i];
+          obs.x -= speed;
 
-        // Auto Shooting closest enemy
-        if (time - lastShotTime > stats.fireRate && enemies.length > 0) {
-          let closest = null;
-          let minDist = Infinity;
-          for (let e of enemies) {
-            const d = Math.hypot(e.x - player.x, e.y - player.y);
-            if (d < minDist) { minDist = d; closest = e; }
-          }
-
-          if (closest && minDist < 450) {
-            playBeep(650, 'sine', 0.08);
-            const baseAngle = Math.atan2(closest.y - player.y, closest.x - player.x);
-            const spread = 0.18;
-            const startAngle = baseAngle - ((stats.bulletCount - 1) * spread) / 2;
-
-            for (let i = 0; i < stats.bulletCount; i++) {
-              const ang = startAngle + i * spread;
-              bullets.push({
-                x: player.x, y: player.y,
-                vx: Math.cos(ang) * stats.bulletSpeed,
-                vy: Math.sin(ang) * stats.bulletSpeed,
-                damage: stats.bulletDamage
-              });
+          // Check Near Miss
+          if (!obs.passed && obs.x < player.x) {
+            obs.passed = true;
+            playBeep(880, 'sine', 0.05, 0.05);
+            // Near-miss spark bonus
+            const distToTop = Math.abs(player.y - obs.top);
+            const distToBottom = Math.abs(player.y - obs.bottom);
+            if (distToTop < 30 || distToBottom < 30) {
+              score += 15;
+              screenShake = 6;
+              const badge = document.getElementById('comboBadge');
+              badge.classList.remove('hidden');
+              setTimeout(() => badge.classList.add('hidden'), 600);
             }
-            lastShotTime = time;
+          }
+
+          // Collision Check
+          if (player.x + player.r > obs.x && player.x - player.r < obs.x + obs.width) {
+            if (player.y - player.r < obs.top || player.y + player.r > obs.bottom) {
+              gameOver();
+            }
+          }
+
+          // Respawn
+          if (obs.x + obs.width < -50) {
+            obstacles.splice(i, 1);
+            const lastObsX = obstacles[obstacles.length - 1].x;
+            spawnObstacle(lastObsX + 280 + Math.random() * 80);
           }
         }
       }
 
-      // Draw Joystick Base on Mobile
-      if (joystick.active) {
-        ctx.beginPath();
-        ctx.arc(joystick.startX, joystick.startY, 40, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(6, 182, 212, 0.15)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(joystick.curX, joystick.curY, 20, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
-        ctx.fill();
-      }
-
-      // Update & Draw Bullets
-      ctx.fillStyle = '#38bdf8';
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i];
-        if (!isPaused) {
-          b.x += b.vx;
-          b.y += b.vy;
-        }
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
-          bullets.splice(i, 1);
-        }
-      }
-
-      // Orbital Shield Update
-      if (stats.orbitShield) {
-        shieldAngle += 0.06;
-        const shieldX = player.x + Math.cos(shieldAngle) * 42;
-        const shieldY = player.y + Math.sin(shieldAngle) * 42;
-        ctx.fillStyle = '#f59e0b';
-        ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 10;
-        ctx.beginPath();
-        ctx.arc(shieldX, shieldY, 8, 0, Math.PI * 2);
-        ctx.fill();
+      // Draw Obstacles (Glowing Neon Gates)
+      for (const obs of obstacles) {
+        ctx.fillStyle = '#ff0055';
+        ctx.shadowColor = '#ff0055';
+        ctx.shadowBlur = 12;
+        // Top pillar
+        ctx.fillRect(obs.x, 0, obs.width, obs.top);
+        // Bottom pillar
+        ctx.fillRect(obs.x, obs.bottom, obs.width, canvas.height - obs.bottom);
         ctx.shadowBlur = 0;
-
-        // Damage enemies on shield contact
-        for (let e of enemies) {
-          if (Math.hypot(e.x - shieldX, e.y - shieldY) < e.r + 8) {
-            e.hp -= 2;
-          }
-        }
       }
 
-      // Update & Draw Enemies
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        if (!isPaused) {
-          const ang = Math.atan2(player.y - e.y, player.x - e.x);
-          e.x += Math.cos(ang) * e.speed;
-          e.y += Math.sin(ang) * e.speed;
-        }
-
-        ctx.fillStyle = e.color;
+      // Draw Glowing Ribbon Trail
+      if (trail.length > 1) {
         ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bullet Hit Check
-        for (let j = bullets.length - 1; j >= 0; j--) {
-          const b = bullets[j];
-          if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + 4) {
-            e.hp -= b.damage;
-            bullets.splice(j, 1);
-            if (e.hp <= 0) break;
-          }
+        ctx.moveTo(trail[0].x, trail[0].y);
+        for (let i = 1; i < trail.length; i++) {
+          ctx.lineTo(trail[i].x, trail[i].y);
         }
-
-        // Enemy Death
-        if (e.hp <= 0) {
-          playBeep(220, 'square', 0.1);
-          createExplosion(e.x, e.y, e.color);
-          score += 20;
-
-          // Drop XP gem
-          gems.push({ x: e.x, y: e.y, val: 12 });
-
-          // 30% chance for Coin
-          if (Math.random() < 0.3) {
-            coinDrops.push({ x: e.x, y: e.y });
-          }
-
-          enemies.splice(i, 1);
-          updateUI();
-          continue;
-        }
-
-        // Touch Player
-        if (Math.hypot(e.x - player.x, e.y - player.y) < e.r + player.r) {
-          player.hp -= 0.6;
-          if (player.hp <= 0) {
-            isRunning = false;
-            document.getElementById('menuTitle').innerText = "SYSTEM PURGED";
-            document.getElementById('menuDesc').innerText = `Survived until Level ${level} | Final Score: ${Math.floor(score)} | Coins: ${coins}`;
-            document.getElementById('btnAction').innerText = "RESTART PROTOCOL";
-            document.getElementById('menuModal').classList.remove('hidden');
-          }
-        }
+        ctx.strokeStyle = `hsl(${hue}, 100%, 65%)`;
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
       }
 
-      // Update & Draw XP Gems (Magnetic pull)
-      ctx.fillStyle = '#a855f7';
-      for (let i = gems.length - 1; i >= 0; i--) {
-        const g = gems[i];
-        const dist = Math.hypot(player.x - g.x, player.y - g.y);
-        if (dist < 110 && !isPaused) {
-          g.x += (player.x - g.x) * 0.14;
-          g.y += (player.y - g.y) * 0.14;
-        }
-        ctx.beginPath();
-        ctx.arc(g.x, g.y, 4, 0, Math.PI * 2);
-        ctx.fill();
+      // Draw Player Arrow Ship
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      const angle = Math.atan2(player.vy, speed);
+      ctx.rotate(angle);
 
-        if (dist < player.r + 4) {
-          playBeep(880, 'sine', 0.05);
-          currentXP += g.val;
-          gems.splice(i, 1);
-
-          if (currentXP >= neededXP) {
-            currentXP = 0;
-            neededXP = Math.floor(neededXP * 1.45);
-            level++;
-            openUpgradeModal();
-          }
-          updateUI();
-        }
-      }
-
-      // Update & Draw Coins
-      ctx.fillStyle = '#fbbf24';
-      for (let i = coinDrops.length - 1; i >= 0; i--) {
-        const c = coinDrops[i];
-        const dist = Math.hypot(player.x - c.x, player.y - c.y);
-        if (dist < 110 && !isPaused) {
-          c.x += (player.x - c.x) * 0.14;
-          c.y += (player.y - c.y) * 0.14;
-        }
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (dist < player.r + 5) {
-          playBeep(1200, 'sine', 0.08);
-          coins++;
-          score += 50;
-          coinDrops.splice(i, 1);
-          updateUI();
-        }
-      }
-
-      // Particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.03;
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0, p.life);
-        ctx.fillRect(p.x, p.y, 3, 3);
-        ctx.globalAlpha = 1;
-        if (p.life <= 0) particles.splice(i, 1);
-      }
-
-      // Draw Player Ship / Core
-      ctx.fillStyle = '#06b6d4';
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = `hsl(${hue}, 100%, 65%)`;
+      ctx.shadowBlur = 16;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+      ctx.moveTo(14, 0);
+      ctx.lineTo(-10, -8);
+      ctx.lineTo(-6, 0);
+      ctx.lineTo(-10, 8);
+      ctx.closePath();
       ctx.fill();
+      ctx.restore();
 
-      // Health Bar over player
-      ctx.fillStyle = '#334155';
-      ctx.fillRect(player.x - 18, player.y - 25, 36, 4);
-      ctx.fillStyle = '#22c55e';
-      ctx.fillRect(player.x - 18, player.y - 25, (player.hp / player.maxHp) * 36, 4);
+      ctx.restore();
     }
 
-    requestAnimationFrame(gameLoop);
+    loop();
   </script>
 </body>
 </html>

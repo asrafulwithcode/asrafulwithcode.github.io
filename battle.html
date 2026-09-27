@@ -55,7 +55,7 @@
       <b>RELEASE</b> to dive down ↘<br/>
       Dodge lasers, scrape close for bonus multiplier!
     </p>
-    <button onclick="startGame()" id="btnAction" class="px-8 py-3.5 bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 text-slate-950 font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-cyan-500/25 active:scale-95 transition">
+    <button id="btnAction" class="px-8 py-3.5 bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 text-slate-950 font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-cyan-500/25 active:scale-95 transition cursor-pointer pointer-events-auto">
       TAP TO DRIFT
     </button>
   </div>
@@ -63,7 +63,6 @@
   <canvas id="canvas"></canvas>
 
   <script>
-    // Audio Synthesizer (No external laggy audio files)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(freq, type, duration, vol=0.1) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -97,40 +96,60 @@
     let player = { x: 120, y: 0, vy: 0, r: 12 };
     let trail = [];
     let obstacles = [];
-    let particles = [];
     let speed = 5.5;
     let hue = 180;
     let screenShake = 0;
 
-    // Controls
     function setHold(state) {
       if (!isPlaying) return;
       if (state && !isHolding) playBeep(520, 'sine', 0.08, 0.08);
       isHolding = state;
     }
 
+    // Touch & Mouse Controls for Playing State
+    window.addEventListener('touchstart', (e) => {
+      if (!isPlaying) return;
+      e.preventDefault();
+      setHold(true);
+    }, { passive: false });
+
+    window.addEventListener('touchend', (e) => {
+      if (!isPlaying) return;
+      e.preventDefault();
+      setHold(false);
+    }, { passive: false });
+
     window.addEventListener('mousedown', () => setHold(true));
     window.addEventListener('mouseup', () => setHold(false));
-    window.addEventListener('touchstart', (e) => { e.preventDefault(); setHold(true); }, { passive: false });
-    window.addEventListener('touchend', (e) => { e.preventDefault(); setHold(false); }, { passive: false });
     window.addEventListener('keydown', (e) => { if (e.code === 'Space') setHold(true); });
     window.addEventListener('keyup', (e) => { if (e.code === 'Space') setHold(false); });
 
+    // Explicit Start Trigger for Mobile & Desktop
+    const btnAction = document.getElementById('btnAction');
+    btnAction.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startGame();
+    });
+    btnAction.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+      startGame();
+    });
+
     function startGame() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       player.x = Math.min(180, canvas.width * 0.2);
       player.y = canvas.height / 2;
       player.vy = 0;
       trail = [];
       obstacles = [];
-      particles = [];
       score = 0;
       speed = 6;
       isPlaying = true;
+      isHolding = false;
       document.getElementById('uiScore').innerText = '0';
       document.getElementById('overlay').classList.add('hidden');
       playBeep(440, 'triangle', 0.2, 0.15);
 
-      // Pre-seed first barriers
       for (let i = 0; i < 4; i++) {
         spawnObstacle(canvas.width + 300 + i * 320);
       }
@@ -151,6 +170,7 @@
 
     function gameOver() {
       isPlaying = false;
+      isHolding = false;
       playBeep(120, 'sawtooth', 0.4, 0.25);
       screenShake = 18;
 
@@ -169,18 +189,15 @@
     function loop() {
       requestAnimationFrame(loop);
 
-      // Screen Shake
       ctx.save();
       if (screenShake > 0) {
         ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
         screenShake *= 0.88;
       }
 
-      // Synthwave dark background fade
       ctx.fillStyle = '#05050d';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Neon horizontal grid lines
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
       ctx.lineWidth = 1;
       for (let y = 0; y < canvas.height; y += 40) {
@@ -188,7 +205,6 @@
       }
 
       if (isPlaying) {
-        // Wave Angle Physics (45° Up or 45° Down)
         const targetVy = isHolding ? -speed * 1.05 : speed * 1.05;
         player.vy += (targetVy - player.vy) * 0.2;
         player.y += player.vy;
@@ -198,25 +214,20 @@
 
         document.getElementById('uiScore').innerText = Math.floor(score);
 
-        // Ceiling / Floor Collision
         if (player.y - player.r < 0 || player.y + player.r > canvas.height) {
           gameOver();
         }
 
-        // Add trail point
         trail.push({ x: player.x, y: player.y, hue: hue });
         if (trail.length > 35) trail.shift();
 
-        // Obstacles loop
         for (let i = obstacles.length - 1; i >= 0; i--) {
           const obs = obstacles[i];
           obs.x -= speed;
 
-          // Check Near Miss
           if (!obs.passed && obs.x < player.x) {
             obs.passed = true;
             playBeep(880, 'sine', 0.05, 0.05);
-            // Near-miss spark bonus
             const distToTop = Math.abs(player.y - obs.top);
             const distToBottom = Math.abs(player.y - obs.bottom);
             if (distToTop < 30 || distToBottom < 30) {
@@ -228,14 +239,12 @@
             }
           }
 
-          // Collision Check
           if (player.x + player.r > obs.x && player.x - player.r < obs.x + obs.width) {
             if (player.y - player.r < obs.top || player.y + player.r > obs.bottom) {
               gameOver();
             }
           }
 
-          // Respawn
           if (obs.x + obs.width < -50) {
             obstacles.splice(i, 1);
             const lastObsX = obstacles[obstacles.length - 1].x;
@@ -244,19 +253,15 @@
         }
       }
 
-      // Draw Obstacles (Glowing Neon Gates)
       for (const obs of obstacles) {
         ctx.fillStyle = '#ff0055';
         ctx.shadowColor = '#ff0055';
         ctx.shadowBlur = 12;
-        // Top pillar
         ctx.fillRect(obs.x, 0, obs.width, obs.top);
-        // Bottom pillar
         ctx.fillRect(obs.x, obs.bottom, obs.width, canvas.height - obs.bottom);
         ctx.shadowBlur = 0;
       }
 
-      // Draw Glowing Ribbon Trail
       if (trail.length > 1) {
         ctx.beginPath();
         ctx.moveTo(trail[0].x, trail[0].y);
@@ -272,7 +277,6 @@
         ctx.shadowBlur = 0;
       }
 
-      // Draw Player Arrow Ship
       ctx.save();
       ctx.translate(player.x, player.y);
       const angle = Math.atan2(player.vy, speed);

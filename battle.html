@@ -3,503 +3,1323 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>CYBER SURVIVOR: PROTOCOL 2026</title>
+  <title>SHADOW RIFT: LAST SURVIVOR</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Three.js 3D Engine -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    * { touch-action: none; user-select: none; -webkit-user-select: none; }
-    body { margin: 0; overflow: hidden; background: #020617; font-family: system-ui, -apple-system, sans-serif; }
+    * { touch-action: none; user-select: none; -webkit-user-select: none; box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #030008; font-family: 'Segoe UI', system-ui, sans-serif; color: #fff; }
     canvas { display: block; width: 100vw; height: 100vh; }
-    .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.25); }
-    .glow-cyan { text-shadow: 0 0 15px rgba(6, 182, 212, 0.8); }
-    .glow-red { text-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
-    .joy-stick-base { width: 120px; height: 120px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(56, 189, 248, 0.3); position: absolute; pointer-events: none; display: none; }
-    .joy-stick-thumb { width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, #38bdf8 0%, #0284c7 100%); position: absolute; transform: translate(-50%, -50%); box-shadow: 0 0 20px #0284c7; }
+    .glass-panel { background: rgba(12, 10, 26, 0.88); backdrop-filter: blur(16px); border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); }
+    .neon-border { border-color: rgba(6, 182, 212, 0.5); box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); }
+    .neon-purple { text-shadow: 0 0 15px rgba(168, 85, 247, 0.9); }
+    .neon-cyan { text-shadow: 0 0 15px rgba(6, 182, 212, 0.9); }
+    .action-btn { transition: all 0.15s ease; }
+    .action-btn:active { transform: scale(0.92); }
   </style>
 </head>
-<body class="text-white">
+<body class="relative overflow-hidden">
 
-  <!-- HUD Interface -->
-  <div class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 sm:p-6 z-10">
-    <div class="flex justify-between items-start">
-      
-      <!-- Back & Stats -->
+  <!-- HUD INTERFACE -->
+  <div id="hud" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-3 sm:p-5 z-20 hidden">
+    <!-- Top Bar -->
+    <div class="flex justify-between items-start gap-2">
+      <!-- Player Status -->
       <div class="flex flex-col gap-2 pointer-events-auto">
-        <a href="/" class="glass px-4 py-2 rounded-xl text-cyan-400 text-xs font-bold hover:border-cyan-400 transition w-fit">
-          ← Exit
-        </a>
-        
-        <!-- Health & Shield -->
-        <div class="glass px-4 py-3 rounded-2xl flex flex-col gap-1.5 w-44 sm:w-56">
-          <div class="flex justify-between text-[11px] font-bold text-slate-400">
-            <span>HULL INTEGRITY</span>
-            <span id="hpText" class="text-cyan-400">100%</span>
+        <div class="glass-panel p-2.5 sm:p-3 rounded-2xl flex flex-col gap-1.5 w-44 sm:w-60">
+          <div class="flex justify-between items-center text-[10px] sm:text-xs font-bold text-slate-300">
+            <span id="hudOpName" class="text-cyan-400">CYBER RONIN</span>
+            <span id="hudLevelBadge" class="bg-purple-900/60 px-2 py-0.5 rounded-full border border-purple-500/40 text-purple-300">LVL 1</span>
           </div>
-          <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-            <div id="hpBar" class="h-full bg-gradient-to-r from-red-500 via-amber-400 to-cyan-400 transition-all duration-200" style="width: 100%;"></div>
+          <!-- HP Bar -->
+          <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700/80 p-0.5">
+            <div id="hpFill" class="h-full bg-gradient-to-r from-red-600 via-amber-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 100%;"></div>
+          </div>
+          <!-- XP Bar -->
+          <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-700/50">
+            <div id="xpFill" class="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400 rounded-full transition-all duration-150" style="width: 0%;"></div>
           </div>
         </div>
       </div>
 
-      <!-- Score, Wave & Weapon -->
-      <div class="flex flex-col items-end gap-2">
-        <div class="glass px-5 py-2.5 rounded-2xl text-right">
-          <div class="text-[10px] uppercase tracking-widest text-cyan-400 font-extrabold">Eliminations</div>
-          <div id="killVal" class="text-2xl sm:text-3xl font-black text-white glow-cyan">0</div>
+      <!-- Wave / Mode & Boss Alert -->
+      <div class="flex flex-col items-center">
+        <div class="glass-panel px-4 py-1.5 sm:px-6 sm:py-2 rounded-2xl text-center border-purple-500/30">
+          <div id="hudModeName" class="text-[9px] uppercase tracking-widest text-purple-400 font-extrabold">SURVIVAL PROTOCOL</div>
+          <div id="hudWaveCount" class="text-lg sm:text-2xl font-black text-white tracking-wide">WAVE 1</div>
         </div>
-        <div id="weaponBadge" class="glass px-3 py-1 rounded-xl text-[11px] font-bold text-amber-400 border-amber-500/30">
-          WEAPON: PLASMA BLASTER
+        <!-- Boss HP Bar (Hidden by default) -->
+        <div id="bossHpContainer" class="mt-2 glass-panel p-2 rounded-xl flex flex-col items-center w-64 sm:w-80 border-red-500/40 hidden">
+          <div class="flex justify-between w-full text-[10px] font-extrabold text-red-400 mb-1">
+            <span>⚠ GOLIATH TITAN</span>
+            <span id="bossHpPercent">100%</span>
+          </div>
+          <div class="w-full h-2.5 bg-black rounded-full overflow-hidden border border-red-900">
+            <div id="bossHpFill" class="h-full bg-gradient-to-r from-amber-500 to-red-600 transition-all duration-100" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score & Kills -->
+      <div class="flex flex-col items-end gap-1.5 pointer-events-auto">
+        <button onclick="togglePause()" class="glass-panel px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white border-slate-700">
+          ⏸ PAUSE
+        </button>
+        <div class="glass-panel px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-right">
+          <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Credits</div>
+          <div id="hudCoins" class="text-sm sm:text-base font-extrabold text-amber-400">⟠ 0</div>
+          <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold mt-1">Score</div>
+          <div id="hudScore" class="text-sm sm:text-lg font-black text-cyan-300">0</div>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Dual Joysticks Info -->
-    <div class="pointer-events-none sm:hidden flex justify-between text-[10px] text-slate-500 font-bold px-4 pb-2">
-      <div>[DRAG LEFT] MOVE</div>
-      <div>[DRAG RIGHT] AIM & FIRE</div>
+    <!-- Active Combo Notification -->
+    <div id="comboBanner" class="absolute left-6 top-32 text-left opacity-0 transition-opacity duration-200 pointer-events-none">
+      <div id="comboCounter" class="text-3xl sm:text-5xl font-black italic tracking-tighter text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.8)]">12x</div>
+      <div class="text-[10px] sm:text-xs font-extrabold tracking-widest uppercase text-cyan-300">KILL STREAK</div>
+    </div>
+
+    <!-- Bottom Controls for Mobile (Touch Action Buttons) -->
+    <div class="flex justify-between items-end pb-2 sm:hidden pointer-events-none">
+      <div class="text-[10px] text-slate-500 font-bold pl-2 pb-1">[DRAG HERE TO MOVE]</div>
+      <div class="flex gap-2 pointer-events-auto pr-1">
+        <!-- Dash Button -->
+        <button id="btnDashTouch" class="w-16 h-16 rounded-full glass-panel border-cyan-400 flex flex-col items-center justify-center action-btn">
+          <span class="text-lg">⚡</span>
+          <span class="text-[8px] font-black text-cyan-300">DASH</span>
+        </button>
+        <!-- Shadow Rift Ultimate Button -->
+        <button id="btnRiftTouch" class="w-16 h-16 rounded-full glass-panel border-purple-500 flex flex-col items-center justify-center action-btn">
+          <span class="text-lg">🌀</span>
+          <span class="text-[8px] font-black text-purple-300">RIFT</span>
+        </button>
+        <!-- Slash Attack Button -->
+        <button id="btnSlashTouch" class="w-20 h-20 rounded-full bg-gradient-to-tr from-cyan-600 to-blue-500 border-2 border-cyan-300 flex flex-col items-center justify-center action-btn shadow-lg shadow-cyan-500/40">
+          <span class="text-2xl">⚔</span>
+          <span class="text-[9px] font-black tracking-widest text-white">SLASH</span>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Joysticks Touch Overlays -->
-  <div id="leftJoyBase" class="joy-stick-base z-10"><div id="leftJoyThumb" class="joy-stick-thumb"></div></div>
-  <div id="rightJoyBase" class="joy-stick-base z-10"><div id="rightJoyThumb" class="joy-stick-thumb"></div></div>
+  <!-- VIRTUAL JOYSTICK -->
+  <div id="joyBase" class="absolute w-28 h-28 rounded-full border-2 border-purple-500/40 bg-purple-950/20 backdrop-blur-sm pointer-events-none hidden z-30 transform -translate-x-1/2 -translate-y-1/2">
+    <div id="joyThumb" class="absolute w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 shadow-[0_0_15px_#06b6d4] transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+  </div>
 
-  <!-- Start / Game Over Modal -->
-  <div id="modal" class="absolute inset-0 flex items-center justify-center bg-black/85 backdrop-blur-md z-30">
-    <div class="glass max-w-md w-full mx-4 p-8 rounded-3xl text-center border border-cyan-500/40 shadow-2xl shadow-cyan-500/20">
-      <div class="inline-block p-2 px-4 bg-cyan-500/10 rounded-full border border-cyan-500/30 text-cyan-400 text-xs font-bold tracking-widest uppercase mb-4">
-        3D Roguelike Arena
+  <!-- MAIN CANVAS -->
+  <canvas id="gameCanvas" class="absolute inset-0 z-0"></canvas>
+
+  <!-- MENUS / MODALS SYSTEM -->
+  <div id="menuContainer" class="absolute inset-0 flex items-center justify-center z-40 bg-black/80 backdrop-blur-md p-4">
+    
+    <!-- 1. MAIN MENU -->
+    <div id="mainMenu" class="glass-panel max-w-md w-full p-6 sm:p-8 rounded-3xl text-center border-purple-500/40 relative">
+      <div class="inline-block px-3 py-1 bg-purple-900/40 border border-purple-500/40 rounded-full text-purple-300 text-[10px] font-bold tracking-widest uppercase mb-3">
+        Cyberpunk Tactical Action
       </div>
-      <h1 id="modalTitle" class="text-4xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-500 mb-2">
-        CYBER SURVIVOR
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-purple-500 mb-1 neon-purple">
+        SHADOW RIFT
       </h1>
-      <p id="modalDesc" class="text-slate-400 text-xs sm:text-sm mb-6 leading-relaxed">
-        Neutralize hostile cyber drones in deep space. Collect weapon power-ups and survive the relentless swarm.
-      </p>
+      <div class="text-xs sm:text-sm font-extrabold tracking-widest text-slate-400 uppercase mb-6">Last Survivor</div>
 
-      <div id="scoreBox" class="hidden mb-6 bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
-        <div class="text-xs text-slate-400 uppercase font-bold">Total Drones Eradicated</div>
-        <div id="finalScore" class="text-4xl font-black text-cyan-400 glow-cyan">0</div>
+      <div class="space-y-2.5">
+        <button onclick="startGameMode('survival')" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-sm tracking-widest uppercase rounded-2xl shadow-lg shadow-cyan-500/30 action-btn">
+          ⚔ START SURVIVAL
+        </button>
+        <button onclick="showMenu('modesMenu')" class="w-full py-3 glass-panel hover:border-purple-400 text-slate-200 font-extrabold text-xs tracking-wider uppercase rounded-2xl action-btn">
+          MISSION PROTOCOLS (MODES)
+        </button>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="showMenu('operativesMenu')" class="py-2.5 glass-panel hover:border-cyan-400 text-cyan-300 font-bold text-xs rounded-xl action-btn">
+            👤 OPERATIVES
+          </button>
+          <button onclick="showMenu('labMenu')" class="py-2.5 glass-panel hover:border-amber-400 text-amber-300 font-bold text-xs rounded-xl action-btn">
+            ⚙ CYBER LAB
+          </button>
+        </div>
+        <button onclick="showMenu('settingsMenu')" class="w-full py-2.5 glass-panel hover:border-slate-500 text-slate-400 font-bold text-xs rounded-xl action-btn">
+          SETTINGS & CONTROLS
+        </button>
       </div>
 
-      <button id="startBtn" onclick="initGame()" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-lg rounded-2xl shadow-lg shadow-cyan-500/30 transition transform active:scale-95">
-        DEPLOY DRONE
-      </button>
+      <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
+        <div>Credits: <span id="menuCoinBalance" class="text-amber-400 font-bold">⟠ 0</span></div>
+        <div>Best Record: <span id="menuHighScore" class="text-cyan-400 font-bold">0 pts</span></div>
+      </div>
     </div>
+
+    <!-- 2. GAME MODES MENU -->
+    <div id="modesMenu" class="glass-panel max-w-md w-full p-6 rounded-3xl text-center hidden">
+      <h2 class="text-xl font-black text-purple-400 mb-1">SELECT PROTOCOL</h2>
+      <p class="text-xs text-slate-400 mb-4">Choose combat simulation rules</p>
+      
+      <div class="space-y-3 mb-4 text-left text-xs">
+        <div onclick="startGameMode('survival')" class="p-3.5 rounded-2xl bg-slate-900/80 border border-cyan-500/40 hover:border-cyan-400 cursor-pointer action-btn">
+          <div class="flex justify-between font-bold text-cyan-300"><span>1. SURVIVAL MODE</span><span class="text-[10px]">CORE</span></div>
+          <p class="text-slate-400 mt-1">Endless scaling enemy swarms, elite units, and boss battles at wave milestones.</p>
+        </div>
+        <div onclick="startGameMode('bossrush')" class="p-3.5 rounded-2xl bg-slate-900/80 border border-red-500/40 hover:border-red-400 cursor-pointer action-btn">
+          <div class="flex justify-between font-bold text-red-400"><span>2. TITAN BOSS RUSH</span><span class="text-[10px]">EXTREME</span></div>
+          <p class="text-slate-400 mt-1">Direct encounters with Goliath Titans equipped with bullet hell and shockwaves.</p>
+        </div>
+        <div onclick="startGameMode('timeattack')" class="p-3.5 rounded-2xl bg-slate-900/80 border border-amber-500/40 hover:border-amber-400 cursor-pointer action-btn">
+          <div class="flex justify-between font-bold text-amber-300"><span>3. TIME ATTACK (180s)</span><span class="text-[10px]">SPEED</span></div>
+          <p class="text-slate-400 mt-1">Achieve maximum eliminations before the orbital beam terminates the simulation.</p>
+        </div>
+        <div onclick="startGameMode('training')" class="p-3.5 rounded-2xl bg-slate-900/80 border border-purple-500/40 hover:border-purple-400 cursor-pointer action-btn">
+          <div class="flex justify-between font-bold text-purple-300"><span>4. TRAINING DOJO</span><span class="text-[10px]">PRACTICE</span></div>
+          <p class="text-slate-400 mt-1">Invulnerable combat testing with target dummies to refine slash combos and rift timings.</p>
+        </div>
+      </div>
+      <button onclick="showMenu('mainMenu')" class="w-full py-2.5 glass-panel text-slate-300 font-bold text-xs rounded-xl action-btn">← BACK TO TERMINAL</button>
+    </div>
+
+    <!-- 3. OPERATIVES SELECTION -->
+    <div id="operativesMenu" class="glass-panel max-w-md w-full p-6 rounded-3xl text-center hidden">
+      <h2 class="text-xl font-black text-cyan-400 mb-1">CYBER OPERATIVES</h2>
+      <p class="text-xs text-slate-400 mb-4">Select loadout chassis</p>
+      
+      <div class="grid grid-cols-2 gap-3 mb-4 text-xs text-left">
+        <!-- Operative 1: Ronin -->
+        <div id="cardRonin" onclick="selectOperative('ronin')" class="p-3 rounded-2xl border-2 border-cyan-400 bg-cyan-950/20 cursor-pointer action-btn">
+          <div class="text-cyan-400 font-black text-sm mb-1">CYBER RONIN</div>
+          <div class="text-[11px] text-slate-300">Fast katana slashes, high crit chance, medium armor.</div>
+          <div class="mt-2 text-[10px] text-cyan-300 font-bold">ACTIVE CHASSIS</div>
+        </div>
+        <!-- Operative 2: Valkyrie -->
+        <div id="cardValkyrie" onclick="selectOperative('valkyrie')" class="p-3 rounded-2xl border border-slate-700 bg-slate-900/50 cursor-pointer action-btn">
+          <div class="text-purple-400 font-black text-sm mb-1">VALKYRIE 09</div>
+          <div class="text-[11px] text-slate-300">Energy twin blasters, extended dash range, faster rift cooldown.</div>
+          <div id="valkyrieStatus" class="mt-2 text-[10px] text-slate-400 font-bold">UNLOCK: ⟠ 250</div>
+        </div>
+      </div>
+      <button onclick="showMenu('mainMenu')" class="w-full py-2.5 glass-panel text-slate-300 font-bold text-xs rounded-xl action-btn">← CONFIRM & RETURN</button>
+    </div>
+
+    <!-- 4. CYBER LAB (UPGRADES) -->
+    <div id="labMenu" class="glass-panel max-w-md w-full p-6 rounded-3xl text-center hidden">
+      <div class="flex justify-between items-center mb-1">
+        <h2 class="text-xl font-black text-amber-400">CYBER LAB</h2>
+        <span class="text-xs font-bold text-amber-400">CREDITS: <span id="labCredits">⟠ 0</span></span>
+      </div>
+      <p class="text-xs text-slate-400 mb-4">Permanent hardware enhancements</p>
+
+      <div class="space-y-2.5 mb-5 text-xs text-left">
+        <!-- Upgrade 1: Blade Damage -->
+        <div class="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <div class="font-extrabold text-slate-200">Nanotech Blade Edge</div>
+            <div class="text-[10px] text-slate-400">+25% Base Slash Damage (Rank <span id="rankDmg">0</span>/5)</div>
+          </div>
+          <button onclick="buyUpgrade('dmg')" id="btnUpDmg" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-xl font-black text-xs text-white action-btn">
+            ⟠ 50
+          </button>
+        </div>
+        <!-- Upgrade 2: Max Hull HP -->
+        <div class="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <div class="font-extrabold text-slate-200">Titanium Hull Plating</div>
+            <div class="text-[10px] text-slate-400">+20 Max Health Pool (Rank <span id="rankHp">0</span>/5)</div>
+          </div>
+          <button onclick="buyUpgrade('hp')" id="btnUpHp" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-xl font-black text-xs text-white action-btn">
+            ⟠ 50
+          </button>
+        </div>
+        <!-- Upgrade 3: Rift Mastery -->
+        <div class="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <div class="font-extrabold text-slate-200">Singularity Overclock</div>
+            <div class="text-[10px] text-slate-400">-15% Rift Cooldown & +30% Radius (Rank <span id="rankRift">0</span>/5)</div>
+          </div>
+          <button onclick="buyUpgrade('rift')" id="btnUpRift" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-xl font-black text-xs text-white action-btn">
+            ⟠ 75
+          </button>
+        </div>
+      </div>
+      <button onclick="showMenu('mainMenu')" class="w-full py-2.5 glass-panel text-slate-300 font-bold text-xs rounded-xl action-btn">← BACK TO TERMINAL</button>
+    </div>
+
+    <!-- 5. SETTINGS MENU -->
+    <div id="settingsMenu" class="glass-panel max-w-md w-full p-6 rounded-3xl text-center hidden">
+      <h2 class="text-xl font-black text-slate-200 mb-1">SYSTEM CONFIG</h2>
+      <p class="text-xs text-slate-400 mb-4">Audio & operational parameters</p>
+      
+      <div class="space-y-4 mb-6 text-xs text-left">
+        <div class="flex justify-between items-center p-3 bg-slate-900/80 rounded-2xl">
+          <div>
+            <div class="font-bold text-slate-200">Synthesizer Sound FX</div>
+            <div class="text-[10px] text-slate-400">Procedural combat & blast audio</div>
+          </div>
+          <input type="checkbox" id="cfgSfx" checked onchange="saveConfig()" class="w-5 h-5 accent-cyan-500 cursor-pointer" />
+        </div>
+        <div class="flex justify-between items-center p-3 bg-slate-900/80 rounded-2xl">
+          <div>
+            <div class="font-bold text-slate-200">Cinematic Screen Shake</div>
+            <div class="text-[10px] text-slate-400">Camera reaction on heavy impacts</div>
+          </div>
+          <input type="checkbox" id="cfgShake" checked onchange="saveConfig()" class="w-5 h-5 accent-cyan-500 cursor-pointer" />
+        </div>
+        <div class="p-3 bg-slate-900/80 rounded-2xl text-[11px] text-slate-300 leading-relaxed">
+          <div class="font-bold text-cyan-400 mb-1">PC CONTROLS REFERENCE:</div>
+          <div>• <strong>WASD / Arrows:</strong> Move Operative</div>
+          <div>• <strong>Left Click / Space:</strong> Melee Slash / Dash</div>
+          <div>• <strong>E Key:</strong> Activate Shadow Rift Singularity</div>
+          <div>• <strong>ESC / P:</strong> Pause Simulation</div>
+        </div>
+      </div>
+      <button onclick="showMenu('mainMenu')" class="w-full py-2.5 glass-panel text-slate-300 font-bold text-xs rounded-xl action-btn">← APPLY & CLOSE</button>
+    </div>
+
+    <!-- 6. PAUSE MODAL -->
+    <div id="pauseMenu" class="glass-panel max-w-xs w-full p-6 rounded-3xl text-center hidden">
+      <h2 class="text-2xl font-black text-cyan-400 mb-2">SIMULATION PAUSED</h2>
+      <p class="text-xs text-slate-400 mb-6">Combat feed on standby.</p>
+      <div class="space-y-3">
+        <button onclick="togglePause()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs uppercase rounded-xl action-btn">RESUME MISSION</button>
+        <button onclick="quitToMainMenu()" class="w-full py-2.5 glass-panel text-red-400 font-bold text-xs rounded-xl action-btn">ABORT TO TERMINAL</button>
+      </div>
+    </div>
+
+    <!-- 7. GAME OVER MODAL -->
+    <div id="gameOverModal" class="glass-panel max-w-sm w-full p-6 sm:p-8 rounded-3xl text-center border-red-500/40 hidden">
+      <div class="inline-block p-2 px-4 bg-red-950/40 border border-red-500/40 rounded-full text-red-400 text-[10px] font-black uppercase tracking-widest mb-3">
+        SYSTEM COMPROMISED
+      </div>
+      <h2 id="endTitle" class="text-3xl font-black text-red-500 mb-1">OPERATIVE FALLEN</h2>
+      <p id="endSubtitle" class="text-xs text-slate-400 mb-5">Hull integrity reached critical zero.</p>
+      
+      <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 mb-5 text-left text-xs space-y-1.5">
+        <div class="flex justify-between text-slate-400"><span>Wave Reached:</span><span id="endWave" class="font-bold text-white">Wave 1</span></div>
+        <div class="flex justify-between text-slate-400"><span>Enemies Eradicated:</span><span id="endKills" class="font-bold text-white">0</span></div>
+        <div class="flex justify-between text-slate-400"><span>Credits Harvested:</span><span id="endCoins" class="font-bold text-amber-400">⟠ 0</span></div>
+        <div class="flex justify-between text-slate-300 font-bold pt-2 border-t border-slate-800 text-sm"><span>Total Score:</span><span id="endScore" class="text-cyan-400">0</span></div>
+      </div>
+
+      <div class="space-y-2">
+        <button onclick="restartCurrentMode()" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black text-xs tracking-widest uppercase rounded-2xl shadow-lg action-btn">
+          REINITIALIZE PROTOCOL
+        </button>
+        <button onclick="quitToMainMenu()" class="w-full py-2.5 glass-panel text-slate-300 font-bold text-xs rounded-xl action-btn">
+          RETURN TO TERMINAL
+        </button>
+      </div>
+    </div>
+
   </div>
 
+  <!-- SCRIPT ENGINE -->
   <script>
-    // Audio Synthesizer (Zero External Assets)
-    const audio = new (window.AudioContext || window.webkitAudioContext)();
-    function sound(freq, type, dur, vol = 0.1) {
-      if (audio.state === 'suspended') audio.resume();
-      const osc = audio.createOscillator();
-      const g = audio.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audio.currentTime);
-      g.gain.setValueAtTime(vol, audio.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + dur);
-      osc.connect(g);
-      g.connect(audio.destination);
-      osc.start();
-      osc.stop(audio.currentTime + dur);
-    }
+    /* ==========================================================================
+       1. SYNTHESIZER AUDIO ENGINE (Zero Network Audio Assets)
+       ========================================================================== */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let sfxEnabled = true;
 
-    // Three.js Scene Setup
-    let scene, camera, renderer, playerMech, gridFloor;
-    let isPlaying = false, kills = 0, playerHp = 100;
-    let playerMove = { x: 0, z: 0 };
-    let playerLook = { x: 0, z: 0 };
-    let bullets = [], enemies = [], sparks = [], loot = [];
-    let keys = {};
-    let mouse = new THREE.Vector2();
-    let raycaster = new THREE.Raycaster();
-    let groundPlane;
-    let weaponLevel = 1;
-
-    function build3DWorld() {
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x020617, 0.02);
-
-      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 24, 18);
-      camera.lookAt(0, 0, 0);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      document.body.appendChild(renderer.domElement);
-
-      // Cyberpunk Grid Floor
-      gridFloor = new THREE.GridHelper(100, 50, 0x06b6d4, 0x0f172a);
-      gridFloor.position.y = -0.05;
-      scene.add(gridFloor);
-
-      // Invisible Raycast Floor Plane
-      const planeGeo = new THREE.PlaneGeometry(200, 200);
-      planeGeo.rotateX(-Math.PI / 2);
-      groundPlane = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({ visible: false }));
-      scene.add(groundPlane);
-
-      // Lights
-      const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-      scene.add(ambient);
-
-      const mainLight = new THREE.PointLight(0x38bdf8, 2, 60);
-      mainLight.position.set(0, 15, 0);
-      scene.add(mainLight);
-
-      // Build 3D Futuristic Mech Craft
-      playerMech = new THREE.Group();
-
-      const hullGeo = new THREE.ConeGeometry(0.9, 2.4, 5);
-      hullGeo.rotateX(Math.PI / 2);
-      const hullMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.2 });
-      const hull = new THREE.Mesh(hullGeo, hullMat);
-      playerMech.add(hull);
-
-      const wingGeo = new THREE.BoxGeometry(2.8, 0.1, 0.8);
-      const wingMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.1 });
-      const wings = new THREE.Mesh(wingGeo, wingMat);
-      wings.position.set(0, 0, 0.2);
-      playerMech.add(wings);
-
-      // Glowing Cockpit
-      const cockpit = new THREE.Mesh(
-        new THREE.SphereGeometry(0.35, 12, 12),
-        new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
-      );
-      cockpit.position.set(0, 0.3, -0.2);
-      playerMech.add(cockpit);
-
-      // Jet Thrusters
-      const thruster = new THREE.PointLight(0x06b6d4, 3, 4);
-      thruster.position.set(0, 0, 1.2);
-      playerMech.add(thruster);
-
-      playerMech.position.y = 0.5;
-      scene.add(playerMech);
-
-      renderLoop();
-    }
-
-    // Touch & Joystick Input Handling
-    let leftTouch = null, rightTouch = null;
-    const lBase = document.getElementById('leftJoyBase'), lThumb = document.getElementById('leftJoyThumb');
-    const rBase = document.getElementById('rightJoyBase'), rThumb = document.getElementById('rightJoyThumb');
-
-    window.addEventListener('touchstart', (e) => {
-      for (let t of e.changedTouches) {
-        if (t.clientX < window.innerWidth / 2 && leftTouch === null) {
-          leftTouch = { id: t.identifier, startX: t.clientX, startY: t.clientY };
-          lBase.style.left = (t.clientX - 60) + 'px';
-          lBase.style.top = (t.clientY - 60) + 'px';
-          lThumb.style.left = '60px'; lThumb.style.top = '60px';
-          lBase.style.display = 'block';
-        } else if (t.clientX >= window.innerWidth / 2 && rightTouch === null) {
-          rightTouch = { id: t.identifier, startX: t.clientX, startY: t.clientY };
-          rBase.style.left = (t.clientX - 60) + 'px';
-          rBase.style.top = (t.clientY - 60) + 'px';
-          rThumb.style.left = '60px'; rThumb.style.top = '60px';
-          rBase.style.display = 'block';
+    function playTone(freq, type, duration, vol = 0.1, ramp = true) {
+      if (!sfxEnabled) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        if (ramp) {
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
         }
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function soundSlash() {
+      playTone(480, 'triangle', 0.08, 0.15);
+      setTimeout(() => playTone(320, 'sine', 0.06, 0.1), 30);
+    }
+
+    function soundDash() {
+      playTone(280, 'sawtooth', 0.12, 0.2);
+    }
+
+    function soundRift() {
+      playTone(140, 'sine', 0.45, 0.3);
+      setTimeout(() => playTone(720, 'triangle', 0.35, 0.25), 100);
+    }
+
+    function soundExplode() {
+      playTone(90, 'sawtooth', 0.25, 0.3);
+    }
+
+    function soundCoin() {
+      playTone(880, 'sine', 0.08, 0.12);
+      setTimeout(() => playTone(1320, 'sine', 0.12, 0.1), 50);
+    }
+
+    /* ==========================================================================
+       2. PERSISTENCE & USER PROGRESSION DATA
+       ========================================================================== */
+    const STORAGE_KEY = 'SHADOW_RIFT_DATA_V1';
+    let userData = {
+      coins: 0,
+      highScore: 0,
+      activeOperative: 'ronin',
+      valkyrieUnlocked: false,
+      ranks: { dmg: 0, hp: 0, rift: 0 }
+    };
+
+    function loadSavedData() {
+      try {
+        const d = localStorage.getItem(STORAGE_KEY);
+        if (d) {
+          userData = Object.assign(userData, JSON.parse(d));
+        }
+      } catch (e) {}
+      updateUiDisplays();
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+      } catch (e) {}
+      updateUiDisplays();
+    }
+
+    function updateUiDisplays() {
+      document.getElementById('menuCoinBalance').innerText = '⟠ ' + userData.coins;
+      document.getElementById('labCredits').innerText = '⟠ ' + userData.coins;
+      document.getElementById('menuHighScore').innerText = userData.highScore + ' pts';
+      document.getElementById('rankDmg').innerText = userData.ranks.dmg;
+      document.getElementById('rankHp').innerText = userData.ranks.hp;
+      document.getElementById('rankRift').innerText = userData.ranks.rift;
+
+      // Update Operatives state
+      if (userData.valkyrieUnlocked) {
+        document.getElementById('valkyrieStatus').innerText = 'UNLOCKED';
+        document.getElementById('valkyrieStatus').className = 'mt-2 text-[10px] text-green-400 font-bold';
       }
+      if (userData.activeOperative === 'ronin') {
+        document.getElementById('cardRonin').className = 'p-3 rounded-2xl border-2 border-cyan-400 bg-cyan-950/30 cursor-pointer action-btn';
+        document.getElementById('cardValkyrie').className = 'p-3 rounded-2xl border border-slate-700 bg-slate-900/50 cursor-pointer action-btn';
+      } else {
+        document.getElementById('cardRonin').className = 'p-3 rounded-2xl border border-slate-700 bg-slate-900/50 cursor-pointer action-btn';
+        document.getElementById('cardValkyrie').className = 'p-3 rounded-2xl border-2 border-purple-400 bg-purple-950/30 cursor-pointer action-btn';
+      }
+    }
+
+    function buyUpgrade(type) {
+      const costs = { dmg: 50, hp: 50, rift: 75 };
+      const cost = costs[type] * (userData.ranks[type] + 1);
+      if (userData.ranks[type] >= 5) return;
+      if (userData.coins >= cost) {
+        userData.coins -= cost;
+        userData.ranks[type]++;
+        soundCoin();
+        saveData();
+      } else {
+        playTone(150, 'sawtooth', 0.15, 0.2);
+      }
+    }
+
+    function selectOperative(id) {
+      if (id === 'valkyrie' && !userData.valkyrieUnlocked) {
+        if (userData.coins >= 250) {
+          userData.coins -= 250;
+          userData.valkyrieUnlocked = true;
+          userData.activeOperative = 'valkyrie';
+          soundCoin();
+          saveData();
+        } else {
+          playTone(150, 'sawtooth', 0.15, 0.2);
+        }
+      } else {
+        userData.activeOperative = id;
+        soundDash();
+        saveData();
+      }
+    }
+
+    /* ==========================================================================
+       3. CANVAS RENDERER & GAME SYSTEMS
+       ========================================================================== */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Camera & Screen Shake
+    let screenShake = 0;
+    let cameraShakeSetting = true;
+    function addCameraShake(amount) {
+      if (cameraShakeSetting) screenShake = Math.max(screenShake, amount);
+    }
+
+    // Game Core State
+    let isRunning = false;
+    let isPaused = false;
+    let currentMode = 'survival'; // survival, bossrush, timeattack, training
+    let gameTime = 0;
+    let timeLimit = 180; // For time attack
+    let wave = 1;
+    let waveTimer = 0;
+    let score = 0;
+    let sessionCoins = 0;
+    let combo = 0;
+    let comboTimer = 0;
+
+    // Player Object
+    const player = {
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      radius: 18,
+      angle: 0,
+      hp: 100,
+      maxHp: 100,
+      xp: 0,
+      lvl: 1,
+      speed: 4.8,
+      dashCooldown: 0,
+      dashActive: 0,
+      dashTrail: [],
+      riftCooldown: 0,
+      riftMaxCooldown: 400,
+      riftActive: false,
+      riftX: 0,
+      riftY: 0,
+      riftRadius: 180,
+      riftTimer: 0,
+      isAttacking: false,
+      slashAngle: 0,
+      slashProgress: 0
+    };
+
+    // Entities Arrays
+    let enemies = [];
+    let projectiles = [];
+    let particles = [];
+    let floatTexts = [];
+    let pickups = [];
+    let activeBoss = null;
+
+    /* ==========================================================================
+       4. CONTROLS HANDLING (DESKTOP + MOBILE)
+       ========================================================================== */
+    const keys = {};
+    const mouse = { x: 0, y: 0, isDown: false };
+    let moveDir = { x: 0, y: 0 };
+
+    window.addEventListener('keydown', e => {
+      keys[e.key.toLowerCase()] = true;
+      if (e.key === 'Escape' || e.key.toLowerCase() === 'p') togglePause();
+      if (e.key === ' ' && isRunning && !isPaused) triggerDash();
+      if ((e.key.toLowerCase() === 'e' || e.key.toLowerCase() === 'q') && isRunning && !isPaused) triggerRift();
     });
-
-    window.addEventListener('touchmove', (e) => {
-      for (let t of e.changedTouches) {
-        if (leftTouch && t.identifier === leftTouch.id) {
-          let dx = t.clientX - leftTouch.startX, dy = t.clientY - leftTouch.startY;
-          let dist = Math.hypot(dx, dy);
-          if (dist > 50) { dx = (dx / dist) * 50; dy = (dy / dist) * 50; }
-          lThumb.style.left = (60 + dx) + 'px'; lThumb.style.top = (60 + dy) + 'px';
-          playerMove.x = dx / 50;
-          playerMove.z = dy / 50;
-        } else if (rightTouch && t.identifier === rightTouch.id) {
-          let dx = t.clientX - rightTouch.startX, dy = t.clientY - rightTouch.startY;
-          let dist = Math.hypot(dx, dy);
-          if (dist > 50) { dx = (dx / dist) * 50; dy = (dy / dist) * 50; }
-          rThumb.style.left = (60 + dx) + 'px'; rThumb.style.top = (60 + dy) + 'px';
-          if (dist > 12) {
-            playerLook.x = dx / dist;
-            playerLook.z = dy / dist;
-          }
-        }
-      }
-    });
-
-    function endTouches(e) {
-      for (let t of e.changedTouches) {
-        if (leftTouch && t.identifier === leftTouch.id) {
-          leftTouch = null; lBase.style.display = 'none'; playerMove = { x: 0, z: 0 };
-        }
-        if (rightTouch && t.identifier === rightTouch.id) {
-          rightTouch = null; rBase.style.display = 'none'; playerLook = { x: 0, z: 0 };
-        }
-      }
-    }
-    window.addEventListener('touchend', endTouches);
-    window.addEventListener('touchcancel', endTouches);
-
-    // Desktop Keyboard & Mouse Handling
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-    let isMouseDown = false;
-    window.addEventListener('mousedown', e => { if (e.button === 0) isMouseDown = true; });
-    window.addEventListener('mouseup', e => { if (e.button === 0) isMouseDown = false; });
     window.addEventListener('mousemove', e => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+    window.addEventListener('mousedown', e => {
+      if (e.button === 0) {
+        mouse.isDown = true;
+        if (isRunning && !isPaused) triggerAttack();
+      }
+    });
+    window.addEventListener('mouseup', e => {
+      if (e.button === 0) mouse.isDown = false;
     });
 
-    // Spawning Mechanics
-    function spawnBullet(origin, dir, spread = 0) {
-      const geo = new THREE.CylinderGeometry(0.08, 0.08, 1.2, 6);
-      geo.rotateX(Math.PI / 2);
-      const mat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-      const bullet = new THREE.Mesh(geo, mat);
+    // Touch Controls
+    let joyTouchId = null;
+    let joyCenter = { x: 0, y: 0 };
+    const joyBase = document.getElementById('joyBase');
+    const joyThumb = document.getElementById('joyThumb');
 
-      bullet.position.copy(origin);
-      const angle = Math.atan2(dir.x, dir.z) + spread;
-      bullet.rotation.y = angle;
+    window.addEventListener('touchstart', e => {
+      for (let t of e.changedTouches) {
+        if (t.clientX < window.innerWidth / 2 && joyTouchId === null) {
+          joyTouchId = t.identifier;
+          joyCenter = { x: t.clientX, y: t.clientY };
+          joyBase.style.left = joyCenter.x + 'px';
+          joyBase.style.top = joyCenter.y + 'px';
+          joyThumb.style.left = '50%';
+          joyThumb.style.top = '50%';
+          joyBase.classList.remove('hidden');
+        }
+      }
+    });
 
-      bullet.vel = new THREE.Vector3(Math.sin(angle) * 0.9, 0, Math.cos(angle) * 0.9);
-      bullet.life = 45;
+    window.addEventListener('touchmove', e => {
+      for (let t of e.changedTouches) {
+        if (t.identifier === joyTouchId) {
+          let dx = t.clientX - joyCenter.x;
+          let dy = t.clientY - joyCenter.y;
+          let dist = Math.hypot(dx, dy);
+          const maxR = 48;
+          if (dist > maxR) {
+            dx = (dx / dist) * maxR;
+            dy = (dy / dist) * maxR;
+          }
+          joyThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+          moveDir.x = dx / maxR;
+          moveDir.y = dy / maxR;
+        }
+      }
+    });
 
-      scene.add(bullet);
-      bullets.push(bullet);
-      sound(800 + Math.random() * 200, 'square', 0.04, 0.06);
+    function touchEnd(e) {
+      for (let t of e.changedTouches) {
+        if (t.identifier === joyTouchId) {
+          joyTouchId = null;
+          moveDir = { x: 0, y: 0 };
+          joyBase.classList.add('hidden');
+        }
+      }
     }
+    window.addEventListener('touchend', touchEnd);
+    window.addEventListener('touchcancel', touchEnd);
 
-    function spawnDrone() {
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 32 + Math.random() * 8;
-      const x = playerMech.position.x + Math.cos(angle) * dist;
-      const z = playerMech.position.z + Math.sin(angle) * dist;
+    // Mobile Action Button Listeners
+    document.getElementById('btnSlashTouch').addEventListener('touchstart', (e) => { e.preventDefault(); triggerAttack(); });
+    document.getElementById('btnDashTouch').addEventListener('touchstart', (e) => { e.preventDefault(); triggerDash(); });
+    document.getElementById('btnRiftTouch').addEventListener('touchstart', (e) => { e.preventDefault(); triggerRift(); });
 
-      const isElite = Math.random() > 0.85;
-      const geo = new THREE.OctahedronGeometry(isElite ? 1.0 : 0.65);
-      const mat = new THREE.MeshStandardMaterial({
-        color: isElite ? 0xf43f5e : 0xa855f7,
-        emissive: isElite ? 0x991b1b : 0x581c87,
-        metalness: 0.9,
-        roughness: 0.2
+    /* ==========================================================================
+       5. COMBAT ACTIONS & SKILLS
+       ========================================================================== */
+    function triggerAttack() {
+      if (player.isAttacking) return;
+      player.isAttacking = true;
+      player.slashProgress = 0;
+      player.slashAngle = player.angle;
+      soundSlash();
+
+      // Spawn Slicing Projectile Wave if Valkyrie or Ronin with Combo
+      const dmgBonus = 1 + (userData.ranks.dmg * 0.25);
+      const isCrit = Math.random() < (userData.activeOperative === 'ronin' ? 0.35 : 0.15);
+      const finalDmg = Math.round((userData.activeOperative === 'ronin' ? 45 : 35) * dmgBonus * (isCrit ? 2 : 1));
+
+      projectiles.push({
+        x: player.x + Math.cos(player.angle) * 20,
+        y: player.y + Math.sin(player.angle) * 20,
+        vx: Math.cos(player.angle) * 12,
+        vy: Math.sin(player.angle) * 12,
+        radius: 12,
+        damage: finalDmg,
+        isCrit,
+        life: 25,
+        color: isCrit ? '#f59e0b' : (userData.activeOperative === 'ronin' ? '#06b6d4' : '#a855f7')
       });
-      const drone = new THREE.Mesh(geo, mat);
-      drone.position.set(x, 0.6, z);
-      drone.hp = isElite ? 4 : 1;
-      drone.speed = isElite ? 0.08 : 0.12;
-      drone.isElite = isElite;
-
-      scene.add(drone);
-      enemies.push(drone);
     }
 
-    function createExplosion(pos, color) {
-      for (let i = 0; i < 15; i++) {
-        const p = new THREE.Mesh(
-          new THREE.SphereGeometry(0.12, 6, 6),
-          new THREE.MeshBasicMaterial({ color })
-        );
-        p.position.copy(pos);
-        p.vel = new THREE.Vector3(
-          (Math.random() - 0.5) * 0.5,
-          Math.random() * 0.4,
-          (Math.random() - 0.5) * 0.5
-        );
-        p.life = 30;
-        scene.add(p);
-        sparks.push(p);
+    function triggerDash() {
+      if (player.dashCooldown > 0) return;
+      player.dashActive = 12;
+      player.dashCooldown = userData.activeOperative === 'valkyrie' ? 35 : 50;
+      soundDash();
+      addCameraShake(6);
+
+      // Boost velocity in movement direction
+      const angle = (moveDir.x !== 0 || moveDir.y !== 0) 
+        ? Math.atan2(moveDir.y, moveDir.x)
+        : player.angle;
+      player.vx = Math.cos(angle) * (player.speed * 2.8);
+      player.vy = Math.sin(angle) * (player.speed * 2.8);
+    }
+
+    function triggerRift() {
+      if (player.riftCooldown > 0) return;
+      player.riftActive = true;
+      player.riftX = player.x;
+      player.riftY = player.y;
+      player.riftTimer = 90; // 1.5 seconds singularity
+      const riftReduction = 1 - (userData.ranks.rift * 0.12);
+      player.riftMaxCooldown = Math.round(360 * riftReduction);
+      player.riftCooldown = player.riftMaxCooldown;
+      soundRift();
+      addCameraShake(14);
+
+      // Create initial rift shockwave particles
+      for (let i = 0; i < 30; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 8 + 3;
+        particles.push({
+          x: player.riftX, y: player.riftY,
+          vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+          radius: Math.random() * 3 + 2,
+          color: '#c084fc', alpha: 1, life: 35
+        });
       }
-      sound(120, 'sawtooth', 0.15, 0.2);
     }
 
-    let fireTimer = 0, spawnTimer = 0;
+    function spawnFloatingText(text, x, y, color = '#fff', size = 16) {
+      floatTexts.push({ text, x, y, color, size, life: 40, vy: -1.2 });
+    }
 
-    function renderLoop() {
-      requestAnimationFrame(renderLoop);
+    /* ==========================================================================
+       6. ENEMY AI & BOSS ARCHITECTURE
+       ========================================================================== */
+    function spawnEnemyUnit(type = 'drone') {
+      const edge = Math.floor(Math.random() * 4);
+      let x, y;
+      if (edge === 0) { x = Math.random() * canvas.width; y = -40; }
+      else if (edge === 1) { x = canvas.width + 40; y = Math.random() * canvas.height; }
+      else if (edge === 2) { x = Math.random() * canvas.width; y = canvas.height + 40; }
+      else { x = -40; y = Math.random() * canvas.height; }
 
-      if (isPlaying) {
-        // Desktop Movement
-        if (!leftTouch) {
-          let mx = 0, mz = 0;
-          if (keys['w'] || keys['arrowup']) mz -= 1;
-          if (keys['s'] || keys['arrowdown']) mz += 1;
-          if (keys['a'] || keys['arrowleft']) mx -= 1;
-          if (keys['d'] || keys['arrowright']) mx += 1;
-          if (mx !== 0 && mz !== 0) { mx *= 0.7071; mz *= 0.7071; }
-          playerMove.x = mx;
-          playerMove.z = mz;
+      let hp = 40 + wave * 10;
+      let spd = 2.2;
+      let radius = 15;
+      let color = '#a855f7';
+
+      if (type === 'stalker') {
+        hp = 80 + wave * 18;
+        spd = 3.2;
+        radius = 18;
+        color = '#ef4444';
+      } else if (type === 'sniper') {
+        hp = 35 + wave * 8;
+        spd = 1.4;
+        radius = 16;
+        color = '#06b6d4';
+      }
+
+      enemies.push({
+        type, x, y, vx: 0, vy: 0,
+        hp, maxHp: hp, radius, speed: spd, color,
+        attackCooldown: Math.random() * 60 + 60,
+        telegraph: 0
+      });
+    }
+
+    function spawnGoliathBoss() {
+      const boss = {
+        type: 'boss',
+        x: canvas.width / 2,
+        y: -100,
+        targetY: 160,
+        radius: 46,
+        hp: 1200 + (wave * 450),
+        maxHp: 1200 + (wave * 450),
+        speed: 1.2,
+        color: '#f43f5e',
+        attackTick: 0,
+        attackPhase: 0,
+        slamTelegraph: 0
+      };
+      enemies.push(boss);
+      activeBoss = boss;
+      document.getElementById('bossHpContainer').classList.remove('hidden');
+      soundRift();
+      addCameraShake(20);
+    }
+
+    /* ==========================================================================
+       7. MAIN GAME LOOP & LOGIC SIMULATION
+       ========================================================================== */
+    function updateGame() {
+      if (!isRunning || isPaused) return;
+      gameTime++;
+
+      // Time attack limit
+      if (currentMode === 'timeattack') {
+        const remaining = Math.max(0, timeLimit - Math.floor(gameTime / 60));
+        document.getElementById('hudWaveCount').innerText = remaining + 's';
+        if (remaining <= 0) {
+          endGameSimulation(true);
+          return;
         }
+      }
 
-        // Apply Player Position
-        const moveSpeed = 0.22;
-        playerMech.position.x += playerMove.x * moveSpeed;
-        playerMech.position.z += playerMove.z * moveSpeed;
+      // Combo Decay
+      if (combo > 0) {
+        comboTimer--;
+        if (comboTimer <= 0) {
+          combo = 0;
+          document.getElementById('comboBanner').style.opacity = '0';
+        }
+      }
 
-        // Camera Follows with Smooth Lerp
-        camera.position.x += (playerMech.position.x - camera.position.x) * 0.08;
-        camera.position.z += (playerMech.position.z + 18 - camera.position.z) * 0.08;
+      // Time Dilation during Shadow Rift (Bullet Time for enemies)
+      const timeScale = player.riftActive ? 0.35 : 1.0;
 
-        // Desktop Aim with Mouse Raycast
-        if (!rightTouch) {
-          raycaster.setFromCamera(mouse, camera);
-          const hits = raycaster.intersectObject(groundPlane);
-          if (hits.length > 0) {
-            const hitPos = hits[0].point;
-            const lookAngle = Math.atan2(hitPos.x - playerMech.position.x, hitPos.z - playerMech.position.z);
-            playerMech.rotation.y = lookAngle;
+      // 1. Player Physics & Movement
+      let inputX = moveDir.x;
+      let inputY = moveDir.y;
+      if (inputX === 0 && inputY === 0) {
+        if (keys['w'] || keys['arrowup']) inputY -= 1;
+        if (keys['s'] || keys['arrowdown']) inputY += 1;
+        if (keys['a'] || keys['arrowleft']) inputX -= 1;
+        if (keys['d'] || keys['arrowright']) inputX += 1;
+        if (inputX !== 0 && inputY !== 0) {
+          inputX *= 0.7071;
+          inputY *= 0.7071;
+        }
+      }
+
+      if (player.dashActive > 0) {
+        player.dashActive--;
+        player.dashTrail.push({ x: player.x, y: player.y, alpha: 0.8 });
+      } else {
+        player.vx = inputX * player.speed;
+        player.vy = inputY * player.speed;
+      }
+
+      player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x + player.vx));
+      player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y + player.vy));
+
+      // Player Aim Orientation
+      if (window.innerWidth <= 768 && enemies.length > 0) {
+        // Nearest enemy auto-target for touch
+        let nearEn = enemies[0];
+        let minDist = Math.hypot(nearEn.x - player.x, nearEn.y - player.y);
+        for (let e of enemies) {
+          let d = Math.hypot(e.x - player.x, e.y - player.y);
+          if (d < minDist) { minDist = d; nearEn = e; }
+        }
+        player.angle = Math.atan2(nearEn.y - player.y, nearEn.x - player.x);
+      } else {
+        player.angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+      }
+
+      // Cooldown Timers
+      if (player.dashCooldown > 0) player.dashCooldown--;
+      if (player.riftCooldown > 0) player.riftCooldown--;
+
+      // Shadow Rift Singularity Logic
+      if (player.riftActive) {
+        player.riftTimer--;
+        // Singularity pulls and damages enemies inside zone
+        for (let en of enemies) {
+          const d = Math.hypot(player.riftX - en.x, player.riftY - en.y);
+          if (d < player.riftRadius) {
+            en.x += (player.riftX - en.x) * 0.06;
+            en.y += (player.riftY - en.y) * 0.06;
+            en.hp -= 0.6; // Constant tick damage
           }
-        } else if (playerLook.x !== 0 || playerLook.z !== 0) {
-          playerMech.rotation.y = Math.atan2(playerLook.x, playerLook.z);
         }
-
-        // Banking tilt when moving
-        playerMech.rotation.z = -playerMove.x * 0.35;
-
-        // Auto/Manual Firing
-        fireTimer++;
-        const shouldFire = isMouseDown || (rightTouch && (playerLook.x !== 0 || playerLook.z !== 0));
-        if (shouldFire && fireTimer > (weaponLevel === 1 ? 12 : 8)) {
-          const forward = new THREE.Vector3(Math.sin(playerMech.rotation.y), 0, Math.cos(playerMech.rotation.y));
-          if (weaponLevel === 1) {
-            spawnBullet(playerMech.position, forward);
-          } else {
-            // Triple Shot
-            spawnBullet(playerMech.position, forward, -0.15);
-            spawnBullet(playerMech.position, forward, 0);
-            spawnBullet(playerMech.position, forward, 0.15);
+        if (player.riftTimer <= 0) {
+          player.riftActive = false;
+          // Final Singularity Collapse Blast
+          addCameraShake(15);
+          soundExplode();
+          for (let en of enemies) {
+            const d = Math.hypot(player.riftX - en.x, player.riftY - en.y);
+            if (d < player.riftRadius) {
+              en.hp -= 80;
+              spawnFloatingText("80", en.x, en.y, '#c084fc', 20);
+            }
           }
-          fireTimer = 0;
+        }
+      }
+
+      // Melee Slash Animation
+      if (player.isAttacking) {
+        player.slashProgress += 0.22;
+        if (player.slashProgress >= 1) {
+          player.isAttacking = false;
+        }
+      }
+
+      // 2. Projectiles Update
+      for (let i = projectiles.length - 1; i >= 0; i--) {
+        const p = projectiles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+
+        // Collision Check vs Enemies
+        for (let j = enemies.length - 1; j >= 0; j--) {
+          const en = enemies[j];
+          if (Math.hypot(p.x - en.x, p.y - en.y) < p.radius + en.radius) {
+            en.hp -= p.damage;
+            spawnFloatingText(p.damage + (p.isCrit ? "!" : ""), en.x, en.y - 10, p.isCrit ? '#f59e0b' : '#38bdf8', p.isCrit ? 22 : 15);
+            addCameraShake(p.isCrit ? 6 : 2);
+            projectiles.splice(i, 1);
+
+            // Splatter spark particles
+            for (let k = 0; k < 6; k++) {
+              particles.push({
+                x: en.x, y: en.y,
+                vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+                radius: 2, color: p.color, alpha: 1, life: 15
+              });
+            }
+            break;
+          }
         }
 
-        // Enemy Waves
-        spawnTimer++;
-        const currentRate = Math.max(20, 60 - Math.floor(kills / 6));
-        if (spawnTimer > currentRate) {
-          spawnDrone();
-          spawnTimer = 0;
-        }
+        if (p.life <= 0) projectiles.splice(i, 1);
+      }
 
-        // Update Bullets
-        for (let i = bullets.length - 1; i >= 0; i--) {
-          const b = bullets[i];
-          b.position.add(b.vel);
-          b.life--;
+      // 3. Enemy AI & Behaviors
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const en = enemies[i];
 
-          // Hit Collision
-          let hit = false;
-          for (let j = enemies.length - 1; j >= 0; j--) {
-            const en = enemies[j];
-            if (b.position.distanceTo(en.position) < (en.isElite ? 1.2 : 0.8)) {
-              en.hp--;
-              createExplosion(b.position, 0x38bdf8);
-              hit = true;
+        if (en.type === 'boss') {
+          // Boss Logic
+          if (en.y < en.targetY) en.y += 1.5;
+          en.attackTick++;
 
-              if (en.hp <= 0) {
-                createExplosion(en.position, en.isElite ? 0xf43f5e : 0xa855f7);
-                scene.remove(en);
-                enemies.splice(j, 1);
-                kills++;
-                document.getElementById('killVal').innerText = kills;
+          // Periodic Bullet Hell Spread
+          if (en.attackTick % 90 === 0) {
+            for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+              projectiles.push({
+                x: en.x, y: en.y,
+                vx: Math.cos(a) * 4.5, vy: Math.sin(a) * 4.5,
+                radius: 8, damage: 18, isCrit: false, life: 90, color: '#ef4444'
+              });
+            }
+            soundExplode();
+          }
 
-                // Upgrade weapon at 15 kills
-                if (kills === 15) {
-                  weaponLevel = 2;
-                  document.getElementById('weaponBadge').innerText = "WEAPON: TRIPLE PLASMACASTER";
-                  document.getElementById('weaponBadge').classList.replace('text-amber-400', 'text-cyan-400');
-                }
+          // Ground Slam Attack
+          if (en.attackTick % 220 === 0) {
+            en.slamTelegraph = 45;
+          }
+          if (en.slamTelegraph > 0) {
+            en.slamTelegraph--;
+            if (en.slamTelegraph === 0) {
+              addCameraShake(22);
+              soundExplode();
+              if (Math.hypot(player.x - en.x, player.y - en.y) < 220 && player.dashActive === 0) {
+                damagePlayer(35);
               }
-              break;
             }
           }
 
-          if (hit || b.life <= 0) {
-            scene.remove(b);
-            bullets.splice(i, 1);
-          }
-        }
+          document.getElementById('bossHpFill').style.width = Math.max(0, (en.hp / en.maxHp) * 100) + '%';
+          document.getElementById('bossHpPercent').innerText = Math.round((en.hp / en.maxHp) * 100) + '%';
+        } else {
+          // Standard Enemy AI
+          const ang = Math.atan2(player.y - en.y, player.x - en.x);
+          en.x += Math.cos(ang) * (en.speed * timeScale);
+          en.y += Math.sin(ang) * (en.speed * timeScale);
 
-        // Update Drones
-        for (let i = enemies.length - 1; i >= 0; i--) {
-          const en = enemies[i];
-          const dir = new THREE.Vector3().subVectors(playerMech.position, en.position).normalize();
-          en.position.addScaledVector(dir, en.speed);
-          en.rotation.x += 0.05;
-          en.rotation.y += 0.03;
-
-          // Drone Attacks Mech
-          if (en.position.distanceTo(playerMech.position) < 1.1) {
-            playerHp -= en.isElite ? 25 : 12;
-            createExplosion(playerMech.position, 0xef4444);
-            scene.remove(en);
-            enemies.splice(i, 1);
-
-            document.getElementById('hpBar').style.width = Math.max(0, playerHp) + '%';
-            document.getElementById('hpText').innerText = Math.max(0, playerHp) + '%';
-
-            if (playerHp <= 0) {
-              endGame();
-              break;
+          // Contact Attack with Player
+          if (Math.hypot(player.x - en.x, player.y - en.y) < player.radius + en.radius) {
+            if (player.dashActive === 0) {
+              damagePlayer(en.type === 'stalker' ? 22 : 12);
             }
           }
         }
 
-        // Update Sparks / Particles
-        for (let i = sparks.length - 1; i >= 0; i--) {
-          const sp = sparks[i];
-          sp.position.add(sp.vel);
-          sp.life--;
-          sp.scale.multiplyScalar(0.92);
-          if (sp.life <= 0) {
-            scene.remove(sp);
-            sparks.splice(i, 1);
+        // Enemy Death Processing
+        if (en.hp <= 0) {
+          soundExplode();
+          addCameraShake(en.type === 'boss' ? 25 : 5);
+          
+          // Spawn Pickups (XP, Health, Credits)
+          pickups.push({
+            x: en.x, y: en.y,
+            type: Math.random() < 0.25 ? 'health' : (Math.random() < 0.5 ? 'coin' : 'xp'),
+            val: en.type === 'boss' ? 200 : 15,
+            life: 400
+          });
+
+          // Combo Multiplier Increment
+          combo++;
+          comboTimer = 180; // 3 seconds streak window
+          score += 50 * combo;
+          document.getElementById('hudScore').innerText = score;
+          document.getElementById('comboCounter').innerText = combo + 'x';
+          document.getElementById('comboBanner').style.opacity = '1';
+
+          if (en.type === 'boss') {
+            activeBoss = null;
+            document.getElementById('bossHpContainer').classList.add('hidden');
+            score += 2500;
+            sessionCoins += 100;
+            wave++;
+            document.getElementById('hudWaveCount').innerText = 'WAVE ' + wave;
           }
+
+          enemies.splice(i, 1);
         }
       }
 
-      renderer.render(scene, camera);
+      // 4. Wave Progression Logic
+      waveTimer++;
+      if (currentMode === 'survival') {
+        const spawnInterval = Math.max(25, 80 - wave * 4);
+        if (waveTimer % spawnInterval === 0 && enemies.length < 35) {
+          const r = Math.random();
+          spawnEnemyUnit(r < 0.6 ? 'drone' : (r < 0.85 ? 'stalker' : 'sniper'));
+        }
+        // Boss Wave every 5 waves
+        if (waveTimer % 1800 === 0 && !activeBoss) {
+          spawnGoliathBoss();
+        }
+      } else if (currentMode === 'bossrush') {
+        if (!activeBoss && enemies.length === 0) {
+          spawnGoliathBoss();
+        }
+      }
+
+      // 5. Pickups Collection
+      for (let i = pickups.length - 1; i >= 0; i--) {
+        const p = pickups[i];
+        p.life--;
+        // Magnet effect toward player
+        const d = Math.hypot(player.x - p.x, player.y - p.y);
+        if (d < 120) {
+          p.x += (player.x - p.x) * 0.12;
+          p.y += (player.y - p.y) * 0.12;
+        }
+
+        if (d < player.radius + 15) {
+          if (p.type === 'health') {
+            player.hp = Math.min(player.maxHp, player.hp + 25);
+            spawnFloatingText("+25 HP", player.x, player.y - 15, '#10b981', 16);
+          } else if (p.type === 'coin') {
+            sessionCoins += 5;
+            soundCoin();
+            document.getElementById('hudCoins').innerText = '⟠ ' + sessionCoins;
+          } else if (p.type === 'xp') {
+            player.xp += p.val;
+            if (player.xp >= player.lvl * 80) {
+              player.xp = 0;
+              player.lvl++;
+              player.maxHp += 10;
+              player.hp = player.maxHp;
+              document.getElementById('hudLevelBadge').innerText = 'LVL ' + player.lvl;
+              spawnFloatingText("LEVEL UP!", player.x, player.y - 25, '#c084fc', 22);
+              soundRift();
+            }
+          }
+          pickups.splice(i, 1);
+        } else if (p.life <= 0) {
+          pickups.splice(i, 1);
+        }
+      }
+
+      // 6. Particles & Floating Texts
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const pt = particles[i];
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.alpha -= 0.025;
+        if (pt.alpha <= 0) particles.splice(i, 1);
+      }
+      for (let i = floatTexts.length - 1; i >= 0; i--) {
+        const ft = floatTexts[i];
+        ft.y += ft.vy;
+        ft.life--;
+        if (ft.life <= 0) floatTexts.splice(i, 1);
+      }
+
+      // Update HUD Status Bars
+      document.getElementById('hpFill').style.width = Math.max(0, (player.hp / player.maxHp) * 100) + '%';
+      document.getElementById('xpFill').style.width = Math.min(100, (player.xp / (player.lvl * 80)) * 100) + '%';
     }
 
-    function initGame() {
-      document.getElementById('modal').classList.add('hidden');
-      // Clear Arena
-      bullets.forEach(b => scene.remove(b));
-      enemies.forEach(e => scene.remove(e));
-      sparks.forEach(s => scene.remove(s));
-      bullets = []; enemies = []; sparks = [];
-
-      playerMech.position.set(0, 0.5, 0);
-      playerHp = 100;
-      kills = 0;
-      weaponLevel = 1;
-      document.getElementById('hpBar').style.width = '100%';
-      document.getElementById('hpText').innerText = '100%';
-      document.getElementById('killVal').innerText = '0';
-      document.getElementById('weaponBadge').innerText = "WEAPON: PLASMA BLASTER";
-      isPlaying = true;
-      sound(440, 'triangle', 0.2);
+    function damagePlayer(amount) {
+      player.hp -= amount;
+      addCameraShake(12);
+      playTone(120, 'sawtooth', 0.15, 0.25);
+      if (player.hp <= 0) {
+        endGameSimulation(false);
+      }
     }
 
-    function endGame() {
-      isPlaying = false;
-      document.getElementById('modalTitle').innerText = "HULL BREACHED";
-      document.getElementById('modalDesc').innerText = "Your mech succumbed to the combat swarm.";
-      document.getElementById('scoreBox').classList.remove('hidden');
-      document.getElementById('finalScore').innerText = kills;
-      document.getElementById('startBtn').innerText = "REPAIR & RE-ENGAGE";
-      document.getElementById('modal').classList.remove('hidden');
+    /* ==========================================================================
+       8. RENDERING ENGINE (2D Canvas Cyberpunk Aesthetics)
+       ========================================================================== */
+    function render() {
+      ctx.save();
+
+      // Screen Shake Translation
+      if (screenShake > 0) {
+        const rx = (Math.random() - 0.5) * screenShake;
+        const ry = (Math.random() - 0.5) * screenShake;
+        ctx.translate(rx, ry);
+        screenShake *= 0.88;
+        if (screenShake < 0.5) screenShake = 0;
+      }
+
+      // Dark Cyberpunk Background Wipe
+      ctx.fillStyle = '#05020a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Neon Grid Lines
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.08)';
+      ctx.lineWidth = 1;
+      const gs = 60;
+      for (let x = 0; x < canvas.width; x += gs) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gs) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Shadow Rift Singularity Aura
+      if (player.riftActive) {
+        const rad = player.riftRadius;
+        const grad = ctx.createRadialGradient(player.riftX, player.riftY, 10, player.riftX, player.riftY, rad);
+        grad.addColorStop(0, 'rgba(192, 132, 252, 0.5)');
+        grad.addColorStop(0.7, 'rgba(147, 51, 234, 0.25)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(player.riftX, player.riftY, rad, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pulsing Event Horizon Rings
+        ctx.strokeStyle = 'rgba(216, 180, 254, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(player.riftX, player.riftY, (player.riftTimer % 30) * (rad / 30), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Render Pickups
+      for (let p of pickups) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = p.type === 'health' ? '#10b981' : (p.type === 'coin' ? '#f59e0b' : '#a855f7');
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // Render Dash Ghost Trails
+      for (let i = player.dashTrail.length - 1; i >= 0; i--) {
+        const t = player.dashTrail[i];
+        t.alpha -= 0.08;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, t.alpha);
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, player.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#06b6d4';
+        ctx.fill();
+        ctx.restore();
+        if (t.alpha <= 0) player.dashTrail.splice(i, 1);
+      }
+
+      // Render Player Operative
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(player.angle);
+
+      // Chassis Body
+      ctx.beginPath();
+      ctx.moveTo(player.radius + 6, 0);
+      ctx.lineTo(-player.radius, -player.radius + 4);
+      ctx.lineTo(-player.radius / 2, 0);
+      ctx.lineTo(-player.radius, player.radius - 4);
+      ctx.closePath();
+      ctx.fillStyle = userData.activeOperative === 'ronin' ? '#06b6d4' : '#a855f7';
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = 15;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Katana Blade Slash Arc Animation
+      if (player.isAttacking) {
+        ctx.beginPath();
+        ctx.arc(0, 0, player.radius + 24, -Math.PI / 3, Math.PI / 3);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+      ctx.restore();
+
+      // Render Enemies & Boss
+      for (let en of enemies) {
+        ctx.save();
+        ctx.translate(en.x, en.y);
+
+        if (en.type === 'boss') {
+          // Boss Slam Telegraph Warning Ring
+          if (en.slamTelegraph > 0) {
+            ctx.beginPath();
+            ctx.arc(0, 0, 220, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.18)';
+            ctx.fill();
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+          // Boss Hull
+          ctx.beginPath();
+          ctx.arc(0, 0, en.radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#dc2626';
+          ctx.shadowColor = '#dc2626';
+          ctx.shadowBlur = 25;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        } else {
+          // Swarm Units
+          ctx.beginPath();
+          ctx.arc(0, 0, en.radius, 0, Math.PI * 2);
+          ctx.fillStyle = en.color;
+          ctx.shadowColor = en.color;
+          ctx.shadowBlur = 10;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+        ctx.restore();
+      }
+
+      // Render Projectiles
+      for (let p of projectiles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // Render Particles
+      for (let pt of particles) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, pt.alpha);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+        ctx.fillStyle = pt.color;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Render Floating Damage Numbers
+      for (let ft of floatTexts) {
+        ctx.font = `900 ${ft.size}px 'Segoe UI', system-ui`;
+        ctx.fillStyle = ft.color;
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 6;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.restore();
     }
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    function mainEngineLoop() {
+      updateGame();
+      render();
+      requestAnimationFrame(mainEngineLoop);
+    }
 
-    build3DWorld();
+    /* ==========================================================================
+       9. SYSTEM MODALS & MENU NAVIGATION
+       ========================================================================== */
+    function showMenu(menuId) {
+      const menus = ['mainMenu', 'modesMenu', 'operativesMenu', 'labMenu', 'settingsMenu', 'pauseMenu', 'gameOverModal'];
+      menus.forEach(m => document.getElementById(m).classList.add('hidden'));
+      document.getElementById('menuContainer').classList.remove('hidden');
+      document.getElementById(menuId).classList.remove('hidden');
+      updateUiDisplays();
+    }
+
+    function startGameMode(mode) {
+      currentMode = mode;
+      document.getElementById('menuContainer').classList.add('hidden');
+      document.getElementById('hud').classList.remove('hidden');
+
+      // Initialize Player Stats with Upgrades
+      player.x = canvas.width / 2;
+      player.y = canvas.height / 2;
+      player.maxHp = 100 + (userData.ranks.hp * 20);
+      player.hp = player.maxHp;
+      player.xp = 0;
+      player.lvl = 1;
+      player.dashCooldown = 0;
+      player.riftCooldown = 0;
+      player.dashTrail = [];
+      player.isAttacking = false;
+
+      // Reset Simulation State
+      enemies = [];
+      projectiles = [];
+      particles = [];
+      floatTexts = [];
+      pickups = [];
+      activeBoss = null;
+      wave = 1;
+      waveTimer = 0;
+      score = 0;
+      sessionCoins = 0;
+      combo = 0;
+      gameTime = 0;
+
+      document.getElementById('hudScore').innerText = '0';
+      document.getElementById('hudCoins').innerText = '⟠ 0';
+      document.getElementById('hudWaveCount').innerText = 'WAVE 1';
+      document.getElementById('hudOpName').innerText = userData.activeOperative === 'ronin' ? 'CYBER RONIN' : 'VALKYRIE 09';
+      document.getElementById('bossHpContainer').classList.add('hidden');
+
+      isRunning = true;
+      isPaused = false;
+      soundRift();
+    }
+
+    function togglePause() {
+      if (!isRunning) return;
+      isPaused = !isPaused;
+      if (isPaused) {
+        showMenu('pauseMenu');
+      } else {
+        document.getElementById('menuContainer').classList.add('hidden');
+      }
+    }
+
+    function endGameSimulation(isVictory) {
+      isRunning = false;
+      // Save Persistent Stats
+      userData.coins += sessionCoins;
+      if (score > userData.highScore) {
+        userData.highScore = score;
+      }
+      saveData();
+
+      document.getElementById('endTitle').innerText = isVictory ? "MISSION ACCOMPLISHED" : "OPERATIVE FALLEN";
+      document.getElementById('endTitle').className = isVictory ? "text-3xl font-black text-green-400 mb-1" : "text-3xl font-black text-red-500 mb-1";
+      document.getElementById('endSubtitle').innerText = isVictory ? "Simulation completed within designated parameters." : "Hull integrity reached critical zero.";
+      document.getElementById('endWave').innerText = currentMode === 'timeattack' ? 'Completed' : 'Wave ' + wave;
+      document.getElementById('endKills').innerText = score / 50;
+      document.getElementById('endCoins').innerText = '⟠ ' + sessionCoins;
+      document.getElementById('endScore').innerText = score;
+
+      showMenu('gameOverModal');
+      playTone(110, 'sawtooth', 0.4, 0.3);
+    }
+
+    function restartCurrentMode() {
+      startGameMode(currentMode);
+    }
+
+    function quitToMainMenu() {
+      isRunning = false;
+      isPaused = false;
+      document.getElementById('hud').classList.add('hidden');
+      document.getElementById('bossHpContainer').classList.add('hidden');
+      showMenu('mainMenu');
+    }
+
+    function saveConfig() {
+      sfxEnabled = document.getElementById('cfgSfx').checked;
+      cameraShakeSetting = document.getElementById('cfgShake').checked;
+    }
+
+    // Startup Execution
+    loadSavedData();
+    mainEngineLoop();
   </script>
 </body>
 </html>

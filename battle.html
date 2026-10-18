@@ -3,144 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>THE LAST LIGHT: BLACKWOOD (3D Horror Survival)</title>
+  <title>REAL CITY - CORE PLAYABLE</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Three.js 3D Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     * { touch-action: none; user-select: none; -webkit-user-select: none; box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidden; background: #010204; font-family: monospace; color: #fff; }
-    #canvas3d { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 0; display: block; }
-    .horror-text { text-shadow: 0 0 10px rgba(220, 38, 38, 0.8), 0 0 20px rgba(0,0,0,1); }
-    .vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%); z-index: 5; }
-    .blood-screen { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(185, 28, 28, 0.6) 100%); opacity: 0; transition: opacity 0.3s; z-index: 6; }
-    .joy-stick-base { width: 110px; height: 110px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(220, 38, 38, 0.3); position: absolute; pointer-events: none; display: none; transform: translate(-50%, -50%); }
-    .joy-stick-thumb { width: 44px; height: 44px; border-radius: 50%; background: #dc2626; position: absolute; transform: translate(-50%, -50%); left: 50%; top: 50%; box-shadow: 0 0 15px #dc2626; }
+    html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidden; background: #38bdf8; font-family: monospace; }
+    #canvas3d { position: fixed; inset: 0; width: 100vw; height: 100dvh; display: block; z-index: 0; }
+    .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .joy-stick-base { width: 100px; height: 100px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(56, 189, 248, 0.5); position: absolute; pointer-events: none; display: none; transform: translate(-50%, -50%); z-index: 30; }
+    .joy-stick-thumb { width: 40px; height: 40px; border-radius: 50%; background: #38bdf8; position: absolute; transform: translate(-50%, -50%); left: 50%; top: 50%; box-shadow: 0 0 10px #0284c7; }
   </style>
 </head>
 <body class="relative">
 
   <canvas id="canvas3d"></canvas>
-  <div class="vignette"></div>
-  <div id="bloodOverlay" class="blood-screen"></div>
 
-  <!-- HUD Interface -->
-  <div id="hud" class="fixed inset-0 pointer-events-none flex flex-col justify-between p-4 sm:p-6 z-20 hidden">
-    <!-- Top HUD: Objective, Battery, Health -->
-    <div class="flex justify-between items-start gap-4">
-      <div class="bg-black/80 backdrop-blur-md p-3.5 rounded-2xl border border-red-950/60 flex flex-col gap-2 max-w-xs sm:max-w-md pointer-events-auto">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
-          <span class="text-[10px] tracking-widest uppercase font-bold text-red-500">CURRENT PROTOCOL</span>
-        </div>
-        <p id="objectiveText" class="text-xs sm:text-sm font-semibold text-slate-200 leading-snug">
-          Explore the asylum. Find the Emergency Generator in the basement.
-        </p>
+  <!-- MINIMAL CLEAN HUD -->
+  <div id="hud" class="fixed inset-0 pointer-events-none flex flex-col justify-between p-3 sm:p-5 z-10 text-white">
+    <!-- Top Info -->
+    <div class="flex justify-between items-start gap-2">
+      <div class="glass px-3.5 py-2 rounded-xl flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="modeTag" class="text-xs font-black text-cyan-300">ON FOOT</span>
       </div>
 
-      <div class="flex flex-col items-end gap-2">
-        <!-- Flashlight Battery -->
-        <div class="bg-black/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-800 flex items-center gap-2">
-          <span class="text-xs">🔦</span>
-          <div class="w-16 sm:w-24 h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
-            <div id="batteryBar" class="h-full bg-amber-400 transition-all duration-200" style="width: 100%;"></div>
-          </div>
-        </div>
-        <!-- Stamina Bar -->
-        <div class="bg-black/80 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-800 flex items-center gap-2">
-          <span class="text-[10px] text-slate-400 font-bold">RUN</span>
-          <div class="w-16 sm:w-24 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
-            <div id="staminaBar" class="h-full bg-cyan-400 transition-all duration-100" style="width: 100%;"></div>
-          </div>
-        </div>
-        <!-- Inventory Indicator -->
-        <div id="inventoryBadge" class="bg-black/80 backdrop-blur-md px-3 py-1 rounded-lg border border-red-900/40 text-[10px] text-slate-400">
-          BAG: <span id="invItems" class="text-white font-bold">Empty</span>
+      <div class="flex flex-col items-end gap-1.5 pointer-events-auto">
+        <button onclick="resetEntityPosition()" class="glass px-3 py-1.5 rounded-xl text-[11px] font-bold text-amber-300 active:scale-95">
+          ↺ RESET POSITION
+        </button>
+        <div id="speedHud" class="glass px-3 py-1.5 rounded-xl text-right hidden">
+          <div class="text-[9px] uppercase font-bold text-slate-400">Speed</div>
+          <div id="speedVal" class="text-xl font-black text-cyan-300">0 KM/H</div>
         </div>
       </div>
     </div>
 
-    <!-- Center Interaction Prompt -->
-    <div id="interactPrompt" class="self-center bg-red-950/80 border border-red-500/80 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg shadow-red-950 hidden">
-      [E] or TAP to Interact
+    <!-- Center Interaction Tooltip -->
+    <div id="interactPrompt" class="self-center glass px-4 py-2 rounded-xl border-cyan-400 text-xs sm:text-sm font-black text-white shadow-lg hidden">
+      [E] ENTER VEHICLE
     </div>
 
-    <!-- Heartbeat Warning when Monster is close -->
-    <div id="proximityAlert" class="self-center text-center opacity-0 transition-opacity duration-300">
-      <div class="text-2xl sm:text-4xl font-black text-red-600 horror-text tracking-widest animate-ping">IT'S NEAR</div>
-    </div>
-
-    <!-- Bottom Controls for Mobile (Visible on Mobile only) -->
+    <!-- Mobile Touch Action Buttons -->
     <div class="flex justify-between items-end pb-2 sm:hidden pointer-events-none">
-      <div class="text-[10px] text-slate-500 font-bold pl-2 pb-1">[DRAG TO MOVE]</div>
+      <div class="text-[9px] text-slate-800 font-bold bg-white/70 px-2 py-1 rounded">DRAG LEFT = MOVE | RIGHT = CAM</div>
       <div class="flex gap-2 pointer-events-auto">
-        <button id="btnFlashTouch" class="w-14 h-14 rounded-full bg-black/80 border border-amber-500/60 flex flex-col items-center justify-center active:scale-95 text-xs text-amber-400 font-bold">
-          🔦 FL
+        <button id="btnAction" class="w-16 h-16 rounded-full glass border-2 border-cyan-400 flex flex-col items-center justify-center active:scale-95 text-xs text-white font-black shadow-lg">
+          <span class="text-lg">🚗</span>
+          <span id="btnActionLabel" class="text-[8px]">ENTER</span>
         </button>
-        <button id="btnRunTouch" class="w-14 h-14 rounded-full bg-black/80 border border-cyan-500/60 flex flex-col items-center justify-center active:scale-95 text-xs text-cyan-400 font-bold">
-          ⚡ RUN
-        </button>
-        <button id="btnActionTouch" class="w-16 h-16 rounded-full bg-red-950/90 border-2 border-red-500 flex flex-col items-center justify-center active:scale-95 text-xs text-white font-black shadow-lg shadow-red-950">
-          ✋ ACT
+        <button id="btnSprint" class="w-14 h-14 rounded-full glass border border-amber-400 flex flex-col items-center justify-center active:scale-95 text-xs text-amber-300 font-bold">
+          ⚡ SPRINT
         </button>
       </div>
     </div>
   </div>
 
   <!-- Touch Joystick -->
-  <div id="joyBase" class="joy-stick-base z-30"><div id="joyThumb" class="joy-stick-thumb"></div></div>
-
-  <!-- Menus / Modals System -->
-  <div id="modalOverlay" class="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-40 p-4">
-    <div id="mainMenu" class="bg-slate-950 border border-red-900/60 max-w-md w-full p-6 sm:p-8 rounded-3xl text-center shadow-2xl shadow-red-950/40">
-      <div class="inline-block p-1.5 px-3 bg-red-950/40 rounded-full border border-red-600/40 text-[10px] font-black uppercase tracking-widest text-red-400 mb-3">
-        Psychological 3D Horror Survival
-      </div>
-      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-red-600 horror-text mb-2">
-        THE LAST LIGHT
-      </h1>
-      <div class="text-xs sm:text-sm font-bold tracking-widest text-slate-400 uppercase mb-6">Chapter I: Blackwood Asylum</div>
-      
-      <p class="text-xs text-slate-400 mb-6 leading-relaxed">
-        Trapped inside the condemned Blackwood Psychiatric Hospital. A blind mutant stalker hunts by sound. 
-        Collect the <strong>Spare Fuse</strong>, fire up the <strong>Generator</strong>, and find the <strong>Master Exit Key</strong> to escape.
-      </p>
-
-      <button onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-black text-sm tracking-widest uppercase rounded-2xl shadow-lg shadow-red-900/50 active:scale-95 transition">
-        ENTER BLACKWOOD
-      </button>
-
-      <div class="mt-6 pt-4 border-t border-slate-900 text-[10px] text-slate-500">
-        Desktop: WASD = Move | Shift = Run | E = Interact | F = Flashlight | Mouse = Look Around
-      </div>
-    </div>
-
-    <!-- Death Modal -->
-    <div id="deathMenu" class="bg-slate-950 border border-red-900/80 max-w-sm w-full p-6 rounded-3xl text-center shadow-2xl hidden">
-      <h2 class="text-3xl font-black text-red-600 horror-text mb-2">YOU DIED</h2>
-      <p id="deathReason" class="text-xs text-slate-400 mb-6">The Stalker caught your scent in the dark.</p>
-      <button onclick="restartLevel()" class="w-full py-3.5 bg-red-800 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl active:scale-95">
-        TRY AGAIN
-      </button>
-    </div>
-
-    <!-- Victory Modal -->
-    <div id="victoryMenu" class="bg-slate-950 border border-emerald-900/80 max-w-sm w-full p-6 rounded-3xl text-center shadow-2xl hidden">
-      <h2 class="text-3xl font-black text-emerald-500 mb-2">ESCAPED</h2>
-      <p class="text-xs text-slate-400 mb-6">You unlocked the perimeter gate and survived the night at Blackwood Asylum.</p>
-      <button onclick="restartLevel()" class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl active:scale-95">
-        REPLAY CHAPTER
-      </button>
-    </div>
-  </div>
+  <div id="joyBase" class="joy-stick-base"><div id="joyThumb" class="joy-stick-thumb"></div></div>
 
   <script>
-    /* ==========================================================================
-       1. SYNTHESIZED HORROR AUDIO ENGINE (Zero External Asset Dependency)
-       ========================================================================== */
+    // --- 1. AUDIO SYNTH (Procedural feedback) ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playTone(freq, type, dur, vol = 0.1) {
+    function playAudio(freq, type, dur, vol = 0.08) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       try {
         const osc = audioCtx.createOscillator();
@@ -156,350 +81,204 @@
       } catch (e) {}
     }
 
-    function soundFootstep(isRun = false) {
-      playTone(isRun ? 110 : 80, 'triangle', 0.08, isRun ? 0.18 : 0.08);
+    // --- 2. THREE.JS SCENE SETUP ---
+    const canvas = document.getElementById('canvas3d');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x7dd3fc); // Daylight Sky
+    scene.fog = new THREE.FogExp2(0x7dd3fc, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400);
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+
+    // Lighting
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.85);
+    scene.add(hemiLight);
+
+    const sun = new THREE.DirectionalLight(0xfffbeb, 1.3);
+    sun.position.set(50, 80, 40);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 1024;
+    sun.shadow.mapSize.height = 1024;
+    scene.add(sun);
+
+    // --- 3. ENVIRONMENT & WORLD BOUNDARIES ---
+    const colliders = [];
+
+    // Ground plane
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Road Grid (Asphalt Crossways)
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+    const mainRoad = new THREE.Mesh(new THREE.PlaneGeometry(24, 300), roadMat);
+    mainRoad.rotation.x = -Math.PI / 2;
+    mainRoad.position.y = 0.02;
+    scene.add(mainRoad);
+
+    const crossRoad = new THREE.Mesh(new THREE.PlaneGeometry(300, 24), roadMat);
+    crossRoad.rotation.x = -Math.PI / 2;
+    crossRoad.position.y = 0.02;
+    scene.add(crossRoad);
+
+    // Road Markings
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    for (let i = -140; i <= 140; i += 12) {
+      const line1 = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 6), lineMat);
+      line1.rotation.x = -Math.PI / 2;
+      line1.position.set(0, 0.03, i);
+      scene.add(line1);
+
+      const line2 = new THREE.Mesh(new THREE.PlaneGeometry(6, 0.5), lineMat);
+      line2.rotation.x = -Math.PI / 2;
+      line2.position.set(i, 0.03, 0);
+      scene.add(line2);
     }
 
-    function soundHeartbeat() {
-      playTone(55, 'sine', 0.15, 0.35);
-      setTimeout(() => playTone(45, 'sine', 0.18, 0.25), 180);
-    }
+    // Skyscrapers with Static Box Colliders
+    const bldgColors = [0x334155, 0x1e293b, 0x0f172a, 0x0284c7, 0x475569];
+    for (let x = -100; x <= 100; x += 45) {
+      for (let z = -100; z <= 100; z += 45) {
+        if (Math.abs(x) < 25 || Math.abs(z) < 25) continue; // Keep roads clear
+        const h = 18 + Math.random() * 32;
+        const bldg = new THREE.Mesh(
+          new THREE.BoxGeometry(26, h, 26),
+          new THREE.MeshStandardMaterial({ color: bldgColors[Math.floor(Math.random() * bldgColors.length)], roughness: 0.3 })
+        );
+        bldg.position.set(x, h / 2, z);
+        bldg.castShadow = true;
+        bldg.receiveShadow = true;
+        scene.add(bldg);
 
-    function soundJumpscare() {
-      playTone(180, 'sawtooth', 0.6, 0.4);
-      playTone(90, 'square', 0.8, 0.3);
-    }
-
-    function soundClick() {
-      playTone(1200, 'triangle', 0.04, 0.1);
-    }
-
-    function soundGenerator() {
-      playTone(60, 'sawtooth', 1.2, 0.25);
-    }
-
-    /* ==========================================================================
-       2. THREE.JS 3D SCENE & WORLD GENERATION
-       ========================================================================== */
-    let scene, camera, renderer, playerGroup, flashlight, flashlightLight;
-    let monsterMesh;
-    let isPlaying = false, isDead = false;
-    let battery = 100, stamina = 100, isRunning = false;
-    let inventory = { fuse: false, generatorOn: false, exitKey: false };
-
-    // Player Physics & Camera Control
-    const player = {
-      x: 0, z: 25,
-      rotY: Math.PI,
-      speed: 0.12,
-      runSpeed: 0.24,
-      targetAngle: Math.PI
-    };
-    let cameraYaw = Math.PI, cameraPitch = 0.25;
-
-    // Interactive Objects in World
-    let interactables = [];
-    let focusedObject = null;
-
-    function init3DWorld() {
-      const canvas = document.getElementById('canvas3d');
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x020306, 0.055);
-
-      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 150);
-
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-      // Dark Ambient & Spooky Blue Fill
-      const ambientLight = new THREE.AmbientLight(0x0a101d, 0.8);
-      scene.add(ambientLight);
-
-      // Player Third-Person Mesh (Humanoid Silhouette)
-      playerGroup = new THREE.Group();
-
-      const bodyGeo = new THREE.CylinderGeometry(0.35, 0.35, 1.4, 8);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = 0.7;
-      body.castShadow = true;
-      playerGroup.add(body);
-
-      const headGeo = new THREE.SphereGeometry(0.24, 8, 8);
-      const headMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
-      const head = new THREE.Mesh(headGeo, headMat);
-      head.position.y = 1.6;
-      head.castShadow = true;
-      playerGroup.add(head);
-
-      // Flashlight on Player's Hand
-      flashlight = new THREE.Group();
-      flashlight.position.set(0.3, 1.0, 0.2);
-
-      flashlightLight = new THREE.SpotLight(0xfff7ed, 4.5, 32, Math.PI / 5, 0.4, 1.2);
-      flashlightLight.castShadow = true;
-      flashlightLight.shadow.mapSize.width = 1024;
-      flashlightLight.shadow.mapSize.height = 1024;
-      flashlight.add(flashlightLight);
-      flashlight.add(flashlightLight.target);
-      flashlightLight.target.position.set(0, -0.2, 8);
-
-      playerGroup.add(flashlight);
-      playerGroup.position.set(player.x, 0, player.z);
-      scene.add(playerGroup);
-
-      // Build Asylum Complex (Halls, Walls, Rooms, Prop details)
-      buildAsylumLevel();
-
-      // Build & Spawn Monster
-      createStalkerMonster();
-
-      animate();
-    }
-
-    // Procedural Level Geometry Generator
-    function buildAsylumLevel() {
-      const wallMat = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.9 });
-      const floorMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.5 });
-      const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 1.0 });
-
-      // Ground Floor
-      const floorGeo = new THREE.PlaneGeometry(80, 80);
-      floorGeo.rotateX(-Math.PI / 2);
-      const floor = new THREE.Mesh(floorGeo, floorMat);
-      floor.receiveShadow = true;
-      scene.add(floor);
-
-      // Ceiling
-      const ceiling = new THREE.Mesh(floorGeo, ceilingMat);
-      ceiling.position.y = 4.2;
-      ceiling.rotation.x = Math.PI;
-      scene.add(ceiling);
-
-      // Asylum Hallways Structure (Walls)
-      function addWall(x, z, w, d, h = 4.2) {
-        const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
-        wall.position.set(x, h / 2, z);
-        wall.castShadow = true;
-        wall.receiveShadow = true;
-        scene.add(wall);
-        return wall;
+        // Store bounding box for collision detection
+        colliders.push({ minX: x - 13.5, maxX: x + 13.5, minZ: z - 13.5, maxZ: z + 13.5 });
       }
-
-      // Outer Perimeter Boundaries
-      addWall(0, -35, 70, 2);
-      addWall(0, 35, 70, 2);
-      addWall(-35, 0, 2, 70);
-      addWall(35, 0, 2, 70);
-
-      // Main Corridor & Room Partitions
-      addWall(-12, 10, 24, 1.5);
-      addWall(16, 10, 20, 1.5);
-      addWall(-15, -10, 18, 1.5);
-      addWall(15, -10, 22, 1.5);
-      addWall(-8, -22, 2, 24);
-      addWall(10, 22, 2, 24);
-
-      // Flickering Emergency Red Light in Generator Room
-      const redLight = new THREE.PointLight(0xdc2626, 1.2, 14);
-      redLight.position.set(-24, 3, -24);
-      scene.add(redLight);
-
-      // Spooky Blood Decal on Floor
-      const blood = new THREE.Mesh(
-        new THREE.CircleGeometry(2.2, 12),
-        new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.4 })
-      );
-      blood.rotation.x = -Math.PI / 2;
-      blood.position.set(4, 0.02, 12);
-      scene.add(blood);
-
-      // 1. Fuse Item (Found in Hospital Ward)
-      const fuseMesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.15, 0.15, 0.6, 8),
-        new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7 })
-      );
-      fuseMesh.position.set(22, 0.6, 22);
-      scene.add(fuseMesh);
-      interactables.push({
-        id: 'fuse',
-        mesh: fuseMesh,
-        pos: new THREE.Vector3(22, 0.6, 22),
-        prompt: "Take [Electrical Fuse]",
-        action: () => {
-          inventory.fuse = true;
-          fuseMesh.visible = false;
-          updateInvText();
-          document.getElementById('objectiveText').innerText = "Fuse acquired! Install it into the Basement Generator at South-West wing.";
-          soundClick();
-        }
-      });
-
-      // 2. Generator Machine (Basement Wing)
-      const genMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(2.4, 2.0, 2.4),
-        new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 })
-      );
-      genMesh.position.set(-24, 1.0, -24);
-      scene.add(genMesh);
-      interactables.push({
-        id: 'generator',
-        mesh: genMesh,
-        pos: new THREE.Vector3(-24, 1.0, -24),
-        prompt: "Repair [Emergency Generator]",
-        action: () => {
-          if (!inventory.fuse) {
-            document.getElementById('objectiveText').innerText = "Generator is missing a 240V Fuse! Search the North-East Medical Ward.";
-            soundClick();
-            return;
-          }
-          if (inventory.generatorOn) return;
-          inventory.generatorOn = true;
-          soundGenerator();
-          redLight.color.setHex(0x10b981); // Green light
-          document.getElementById('objectiveText').innerText = "POWER RESTORED! The Exit Security Lock is released. Find the Exit Door Key!";
-          // Spawn Exit Key on desk
-          keyMesh.visible = true;
-        }
-      });
-
-      // 3. Exit Key (Spawns or appears in Morgue room)
-      const keyMesh = new THREE.Mesh(
-        new THREE.TorusGeometry(0.2, 0.05, 8, 12),
-        new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xb45309 })
-      );
-      keyMesh.position.set(-20, 0.8, 18);
-      keyMesh.visible = false; // Becomes available after power
-      scene.add(keyMesh);
-      interactables.push({
-        id: 'exitKey',
-        mesh: keyMesh,
-        pos: new THREE.Vector3(-20, 0.8, 18),
-        prompt: "Pick up [Perimeter Gate Key]",
-        action: () => {
-          if (!keyMesh.visible) return;
-          inventory.exitKey = true;
-          keyMesh.visible = false;
-          updateInvText();
-          document.getElementById('objectiveText').innerText = "You have the Master Key! RUN TO THE MAIN EXIT at the North Wall!";
-          soundClick();
-        }
-      });
-
-      // 4. Main Exit Gate (Escape point)
-      const exitDoor = new THREE.Mesh(
-        new THREE.BoxGeometry(3.6, 3.8, 0.5),
-        new THREE.MeshStandardMaterial({ color: 0x991b1b, metalness: 0.8 })
-      );
-      exitDoor.position.set(0, 1.9, -34);
-      scene.add(exitDoor);
-      interactables.push({
-        id: 'exitDoor',
-        mesh: exitDoor,
-        pos: new THREE.Vector3(0, 1.9, -34),
-        prompt: "Unlock [Perimeter Gate]",
-        action: () => {
-          if (!inventory.generatorOn) {
-            document.getElementById('objectiveText').innerText = "Gate locked electronically! Power the generator first!";
-            soundClick();
-            return;
-          }
-          if (!inventory.exitKey) {
-            document.getElementById('objectiveText').innerText = "You need the Perimeter Master Key to open this door!";
-            soundClick();
-            return;
-          }
-          // Victory trigger!
-          triggerVictory();
-        }
-      });
     }
 
-    function updateInvText() {
-      const items = [];
-      if (inventory.fuse) items.push("Fuse");
-      if (inventory.exitKey) items.push("Master Key");
-      document.getElementById('invItems').innerText = items.length ? items.join(", ") : "Empty";
-    }
+    // --- 4. PLAYER & THIRD-PERSON RIG ---
+    const playerGroup = new THREE.Group();
 
-    // 3D Stalker Monster Creation (Procedural Terrifying Mesh)
-    const monster = {
-      x: 18, z: -18,
-      speed: 0.07,
-      chaseSpeed: 0.17,
-      state: 'patrol', // patrol, search, chase
-      targetPos: new THREE.Vector3(18, 0, -18),
-      patrolPoints: [
-        new THREE.Vector3(18, 0, -18),
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(-20, 0, 10),
-        new THREE.Vector3(15, 0, 15)
-      ],
-      currentPatrolIdx: 0,
-      detectionDist: 14,
-      chaseLostTimer: 0
+    // Body
+    const pBody = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.35, 0.35, 1.3, 8),
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 })
+    );
+    pBody.position.y = 0.65;
+    pBody.castShadow = true;
+    playerGroup.add(pBody);
+
+    // Head
+    const pHead = new THREE.Mesh(
+      new THREE.SphereGeometry(0.25, 8, 8),
+      new THREE.MeshStandardMaterial({ color: 0xfde047 })
+    );
+    pHead.position.y = 1.48;
+    pHead.castShadow = true;
+    playerGroup.add(pHead);
+
+    playerGroup.position.set(0, 0, 10);
+    scene.add(playerGroup);
+
+    const player = {
+      x: 0, z: 10,
+      vx: 0, vz: 0,
+      rotY: 0,
+      speed: 0.14,
+      sprintSpeed: 0.26
     };
 
-    function createStalkerMonster() {
-      monsterMesh = new THREE.Group();
+    let camYaw = 0, camPitch = 0.3;
 
-      // Slender mutated torso
-      const torsoGeo = new THREE.CylinderGeometry(0.2, 0.35, 2.6, 6);
-      const skinMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.95 });
-      const torso = new THREE.Mesh(torsoGeo, skinMat);
-      torso.position.y = 1.6;
-      monsterMesh.add(torso);
+    // --- 5. VEHICLE SYSTEM (PHYSICS MODEL) ---
+    const carGroup = new THREE.Group();
 
-      // Deformed Spooky Head with Glowing White Eyes
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), skinMat);
-      head.position.y = 3.1;
-      monsterMesh.add(head);
+    // Chassis
+    const carBody = new THREE.Mesh(
+      new THREE.BoxGeometry(2.0, 0.85, 4.4),
+      new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.4, roughness: 0.3 })
+    );
+    carBody.position.y = 0.65;
+    carBody.castShadow = true;
+    carGroup.add(carBody);
 
-      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), eyeMat);
-      eyeL.position.set(0.12, 3.15, 0.3);
-      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), eyeMat);
-      eyeR.position.set(-0.12, 3.15, 0.3);
-      monsterMesh.add(eyeL);
-      monsterMesh.add(eyeR);
+    // Cabin Glass
+    const carCabin = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 0.65, 2.2),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 })
+    );
+    carCabin.position.set(0, 1.25, -0.2);
+    carGroup.add(carCabin);
 
-      // Long Claws / Limbs
-      const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 2.2);
-      const armL = new THREE.Mesh(armGeo, skinMat);
-      armL.position.set(0.55, 1.8, 0);
-      armL.rotation.z = -0.25;
-      const armR = new THREE.Mesh(armGeo, skinMat);
-      armR.position.set(-0.55, 1.8, 0);
-      armR.rotation.z = 0.25;
-      monsterMesh.add(armL);
-      monsterMesh.add(armR);
+    // Front Wheels (pivot for steering)
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+    const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.3, 8);
+    wheelGeo.rotateZ(Math.PI / 2);
 
-      monsterMesh.position.set(monster.x, 0, monster.z);
-      scene.add(monsterMesh);
-    }
+    const fWheelL = new THREE.Mesh(wheelGeo, wheelMat);
+    fWheelL.position.set(-1.05, 0.38, 1.3);
+    const fWheelR = new THREE.Mesh(wheelGeo, wheelMat);
+    fWheelR.position.set(1.05, 0.38, 1.3);
+    const bWheelL = new THREE.Mesh(wheelGeo, wheelMat);
+    bWheelL.position.set(-1.05, 0.38, -1.3);
+    const bWheelR = new THREE.Mesh(wheelGeo, wheelMat);
+    bWheelR.position.set(1.05, 0.38, -1.3);
 
-    /* ==========================================================================
-       3. INPUT & RESPONSIVE CONTROLS (PC + MOBILE)
-       ========================================================================== */
+    carGroup.add(fWheelL);
+    carGroup.add(fWheelR);
+    carGroup.add(bWheelL);
+    carGroup.add(bWheelR);
+
+    // Headlights
+    const headLightL = new THREE.SpotLight(0xffffff, 2.5, 30, Math.PI / 6, 0.3);
+    headLightL.position.set(0.7, 0.7, 2.2);
+    headLightL.target.position.set(0.7, 0, 15);
+    carGroup.add(headLightL);
+    carGroup.add(headLightL.target);
+
+    const headLightR = new THREE.SpotLight(0xffffff, 2.5, 30, Math.PI / 6, 0.3);
+    headLightR.position.set(-0.7, 0.7, 2.2);
+    headLightR.target.position.set(-0.7, 0, 15);
+    carGroup.add(headLightR);
+    carGroup.add(headLightR.target);
+
+    carGroup.position.set(5, 0, 6);
+    scene.add(carGroup);
+
+    const car = {
+      group: carGroup,
+      x: 5, z: 6,
+      rotY: 0,
+      speed: 0,
+      steerAngle: 0,
+      accel: 0.014,
+      maxSpeed: 0.7,
+      maxReverse: -0.25,
+      friction: 0.975,
+      steerSpeed: 0.04
+    };
+
+    let inVehicle = false;
+
+    // --- 6. INPUT ENGINE (KEYBOARD & TOUCH) ---
     const keys = {};
-    let isMouseDown = false;
-    let prevMouseX = 0, prevMouseY = 0;
-    let touchMoveDir = { x: 0, y: 0 };
-    let joyTouchId = null, joyCenter = { x: 0, y: 0 };
+    let isMouseDown = false, prevMouseX = 0, prevMouseY = 0;
+    let touchMove = { x: 0, y: 0 };
+    let joyId = null, joyCenter = { x: 0, y: 0 };
     let camTouchId = null, prevTouchX = 0, prevTouchY = 0;
+    let touchSprint = false;
 
-    // Desktop Keyboard Listeners
     window.addEventListener('keydown', e => {
       keys[e.key.toLowerCase()] = true;
-      if (e.key.toLowerCase() === 'e') tryInteract();
-      if (e.key.toLowerCase() === 'f') toggleFlashlight();
+      if (e.key.toLowerCase() === 'e') toggleVehicle();
     });
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-    // Desktop Mouse Drag Look
+    // Mouse camera controls
     window.addEventListener('mousedown', e => {
       if (e.button === 0 && e.clientX > 100) {
         isMouseDown = true;
@@ -508,34 +287,30 @@
       }
     });
     window.addEventListener('mousemove', e => {
-      if (isMouseDown && isPlaying) {
-        const dx = e.clientX - prevMouseX;
-        const dy = e.clientY - prevMouseY;
+      if (isMouseDown) {
+        camYaw -= (e.clientX - prevMouseX) * 0.005;
+        camPitch = Math.max(0.08, Math.min(0.85, camPitch + (e.clientY - prevMouseY) * 0.004));
         prevMouseX = e.clientX;
         prevMouseY = e.clientY;
-        cameraYaw -= dx * 0.005;
-        cameraPitch = Math.max(0.05, Math.min(0.85, cameraPitch + dy * 0.005));
       }
     });
     window.addEventListener('mouseup', () => isMouseDown = false);
 
-    // Mobile Virtual Joystick & Touch Camera Drag
+    // Mobile Virtual Joystick & Touch Look
     const joyBase = document.getElementById('joyBase');
     const joyThumb = document.getElementById('joyThumb');
 
     window.addEventListener('touchstart', e => {
       for (let t of e.changedTouches) {
-        // Left screen for movement joystick
-        if (t.clientX < window.innerWidth * 0.45 && joyTouchId === null) {
-          joyTouchId = t.identifier;
+        if (t.clientX < window.innerWidth * 0.45 && joyId === null) {
+          joyId = t.identifier;
           joyCenter = { x: t.clientX, y: t.clientY };
           joyBase.style.left = joyCenter.x + 'px';
           joyBase.style.top = joyCenter.y + 'px';
-          joyThumb.style.left = '50%'; joyThumb.style.top = '50%';
+          joyThumb.style.left = '50%';
+          joyThumb.style.top = '50%';
           joyBase.style.display = 'block';
-        }
-        // Right screen for camera look around
-        else if (t.clientX >= window.innerWidth * 0.45 && camTouchId === null) {
+        } else if (t.clientX >= window.innerWidth * 0.45 && camTouchId === null) {
           camTouchId = t.identifier;
           prevTouchX = t.clientX;
           prevTouchY = t.clientY;
@@ -545,213 +320,214 @@
 
     window.addEventListener('touchmove', e => {
       for (let t of e.changedTouches) {
-        if (t.identifier === joyTouchId) {
+        if (t.identifier === joyId) {
           let dx = t.clientX - joyCenter.x;
           let dy = t.clientY - joyCenter.y;
-          let dist = Math.hypot(dx, dy);
-          if (dist > 45) { dx = (dx / dist) * 45; dy = (dy / dist) * 45; }
+          let d = Math.hypot(dx, dy);
+          if (d > 45) { dx = (dx / d) * 45; dy = (dy / d) * 45; }
           joyThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-          touchMoveDir.x = dx / 45;
-          touchMoveDir.y = dy / 45;
+          touchMove.x = dx / 45;
+          touchMove.y = dy / 45;
         } else if (t.identifier === camTouchId) {
           let dx = t.clientX - prevTouchX;
           let dy = t.clientY - prevTouchY;
+          camYaw -= dx * 0.006;
+          camPitch = Math.max(0.08, Math.min(0.85, camPitch + dy * 0.005));
           prevTouchX = t.clientX;
           prevTouchY = t.clientY;
-          cameraYaw -= dx * 0.007;
-          cameraPitch = Math.max(0.05, Math.min(0.85, cameraPitch + dy * 0.007));
         }
       }
     });
 
-    function endTouches(e) {
+    function touchEnd(e) {
       for (let t of e.changedTouches) {
-        if (t.identifier === joyTouchId) {
-          joyTouchId = null;
-          touchMoveDir = { x: 0, y: 0 };
+        if (t.identifier === joyId) {
+          joyId = null;
+          touchMove = { x: 0, y: 0 };
           joyBase.style.display = 'none';
         }
-        if (t.identifier === camTouchId) {
-          camTouchId = null;
+        if (t.identifier === camTouchId) camTouchId = null;
+      }
+    }
+    window.addEventListener('touchend', touchEnd);
+    window.addEventListener('touchcancel', touchEnd);
+
+    // Mobile Action Button
+    document.getElementById('btnAction').addEventListener('touchstart', e => {
+      e.preventDefault();
+      toggleVehicle();
+    });
+    document.getElementById('btnSprint').addEventListener('touchstart', e => {
+      e.preventDefault();
+      touchSprint = true;
+    });
+    document.getElementById('btnSprint').addEventListener('touchend', e => {
+      e.preventDefault();
+      touchSprint = false;
+    });
+
+    function toggleVehicle() {
+      if (inVehicle) {
+        // Exit
+        inVehicle = false;
+        player.x = car.group.position.x + 2.0;
+        player.z = car.group.position.z;
+        playerGroup.position.set(player.x, 0, player.z);
+        playerGroup.visible = true;
+
+        document.getElementById('modeTag').innerText = "ON FOOT";
+        document.getElementById('modeTag').className = "text-xs font-black text-cyan-300";
+        document.getElementById('speedHud').classList.add('hidden');
+        document.getElementById('btnActionLabel').innerText = "ENTER";
+        playAudio(440, 'triangle', 0.1);
+      } else {
+        // Check Distance to Car
+        const dist = Math.hypot(player.x - car.group.position.x, player.z - car.group.position.z);
+        if (dist < 4.2) {
+          inVehicle = true;
+          playerGroup.visible = false;
+
+          document.getElementById('modeTag').innerText = "DRIVING GT COUPE";
+          document.getElementById('modeTag').className = "text-xs font-black text-amber-300";
+          document.getElementById('speedHud').classList.remove('hidden');
+          document.getElementById('btnActionLabel').innerText = "EXIT";
+          document.getElementById('interactPrompt').classList.add('hidden');
+          playAudio(120, 'sawtooth', 0.25);
         }
       }
     }
-    window.addEventListener('touchend', endTouches);
-    window.addEventListener('touchcancel', endTouches);
 
-    // Mobile Action Button Binds
-    document.getElementById('btnActionTouch').addEventListener('touchstart', (e) => { e.preventDefault(); tryInteract(); });
-    document.getElementById('btnFlashTouch').addEventListener('touchstart', (e) => { e.preventDefault(); toggleFlashlight(); });
-    document.getElementById('btnRunTouch').addEventListener('touchstart', (e) => { e.preventDefault(); isRunning = true; });
-    document.getElementById('btnRunTouch').addEventListener('touchend', (e) => { e.preventDefault(); isRunning = false; });
-
-    function toggleFlashlight() {
-      if (battery <= 0) return;
-      flashlightLight.visible = !flashlightLight.visible;
-      soundClick();
+    function checkCollision(x, z, radius = 0.6) {
+      // Bounds
+      if (x < -140 || x > 140 || z < -140 || z > 140) return true;
+      // Building Colliders
+      for (let c of colliders) {
+        if (x + radius > c.minX && x - radius < c.maxX && z + radius > c.minZ && z - radius < c.maxZ) {
+          return true;
+        }
+      }
+      return false;
     }
 
-    function tryInteract() {
-      if (focusedObject && focusedObject.action) {
-        focusedObject.action();
+    function resetEntityPosition() {
+      if (inVehicle) {
+        car.group.position.set(0, 0, 10);
+        car.speed = 0;
+        car.rotY = 0;
+      } else {
+        player.x = 0;
+        player.z = 10;
+        playerGroup.position.set(0, 0, 10);
       }
     }
 
-    /* ==========================================================================
-       4. GAME SIMULATION LOOP & AI LOGIC
-       ========================================================================== */
-    let footstepTimer = 0;
-    let heartbeatTick = 0;
+    // --- 7. MAIN ENGINE LOOP ---
+    function update() {
+      let mx = touchMove.x;
+      let my = touchMove.y;
 
-    function animate() {
-      requestAnimationFrame(animate);
+      if (mx === 0 && my === 0) {
+        if (keys['w'] || keys['arrowup']) my -= 1;
+        if (keys['s'] || keys['arrowdown']) my += 1;
+        if (keys['a'] || keys['arrowleft']) mx -= 1;
+        if (keys['d'] || keys['arrowright']) mx += 1;
+        if (mx !== 0 && my !== 0) { mx *= 0.7071; my *= 0.7071; }
+      }
 
-      if (isPlaying && !isDead) {
-        // 1. Player Movement Computation relative to Camera Yaw
-        let mx = touchMoveDir.x;
-        let my = touchMoveDir.y;
-        if (mx === 0 && my === 0) {
-          if (keys['w'] || keys['arrowup']) my -= 1;
-          if (keys['s'] || keys['arrowdown']) my += 1;
-          if (keys['a'] || keys['arrowleft']) mx -= 1;
-          if (keys['d'] || keys['arrowright']) mx += 1;
-          if (mx !== 0 && my !== 0) { mx *= 0.7071; my *= 0.7071; }
-        }
+      // === DRIVING LOGIC ===
+      if (inVehicle) {
+        // Handbrake
+        const handbrake = keys[' '];
 
-        // Sprint Mechanic
-        const isSprinting = (keys['shift'] || isRunning) && stamina > 5 && (mx !== 0 || my !== 0);
-        if (isSprinting) {
-          stamina = Math.max(0, stamina - 0.35);
+        // Acceleration / Reverse
+        if (my < -0.1) {
+          car.speed = Math.min(car.maxSpeed, car.speed + car.accel);
+        } else if (my > 0.1) {
+          car.speed = Math.max(car.maxReverse, car.speed - car.accel);
         } else {
-          stamina = Math.min(100, stamina + 0.2);
+          car.speed *= car.friction;
         }
-        document.getElementById('staminaBar').style.width = stamina + '%';
 
-        const curSpeed = isSprinting ? player.runSpeed : player.speed;
+        if (handbrake) {
+          car.speed *= 0.88;
+        }
+
+        // Steering Physics
+        if (Math.abs(mx) > 0.05) {
+          car.steerAngle = THREE.MathUtils.lerp(car.steerAngle, -mx * 0.5, 0.15);
+        } else {
+          car.steerAngle = THREE.MathUtils.lerp(car.steerAngle, 0, 0.2);
+        }
+
+        fWheelL.rotation.y = car.steerAngle;
+        fWheelR.rotation.y = car.steerAngle;
+
+        // Apply turning with forward momentum
+        if (Math.abs(car.speed) > 0.01) {
+          car.rotY += car.steerAngle * (car.speed / car.maxSpeed) * 0.08;
+          car.group.rotation.y = car.rotY;
+        }
+
+        // Test next position with collision
+        const nextX = car.group.position.x + Math.sin(car.rotY) * car.speed;
+        const nextZ = car.group.position.z + Math.cos(car.rotY) * car.speed;
+
+        if (!checkCollision(nextX, nextZ, 1.3)) {
+          car.group.position.x = nextX;
+          car.group.position.z = nextZ;
+        } else {
+          car.speed = -car.speed * 0.3; // Rebound bounce
+          playAudio(80, 'square', 0.1);
+        }
+
+        // Speedometer UI
+        const kmh = Math.round(Math.abs(car.speed) * 160);
+        document.getElementById('speedVal').innerText = `${kmh} KM/H`;
+
+        // Chase Camera Follows Car
+        const camDist = 6.8;
+        camera.position.x = car.group.position.x - Math.sin(car.rotY) * camDist;
+        camera.position.z = car.group.position.z - Math.cos(car.rotY) * camDist;
+        camera.position.y = car.group.position.y + 2.8;
+        camera.lookAt(car.group.position.x, car.group.position.y + 1.1, car.group.position.z);
+      }
+
+      // === ON FOOT LOGIC ===
+      else {
+        const isSprint = keys['shift'] || touchSprint;
+        const currentSpeed = isSprint ? player.sprintSpeed : player.speed;
 
         if (mx !== 0 || my !== 0) {
-          // Transform input by camera direction
-          const forwardX = -Math.sin(cameraYaw);
-          const forwardZ = -Math.cos(cameraYaw);
-          const sideX = -Math.cos(cameraYaw);
-          const sideZ = Math.sin(cameraYaw);
+          // Camera-relative forward & right vectors
+          const fwdX = -Math.sin(camYaw);
+          const fwdZ = -Math.cos(camYaw);
+          const sideX = -Math.cos(camYaw);
+          const sideZ = Math.sin(camYaw);
 
-          const moveX = (forwardX * -my) + (sideX * mx);
-          const moveZ = (forwardZ * -my) + (sideZ * mx);
+          const moveX = (fwdX * -my) + (sideX * mx);
+          const moveZ = (fwdZ * -my) + (sideZ * mx);
 
-          player.x += moveX * curSpeed;
-          player.z += moveZ * curSpeed;
+          const nextX = player.x + moveX * currentSpeed;
+          const nextZ = player.z + moveZ * currentSpeed;
 
-          // Wall Boundary limits
-          player.x = Math.max(-32, Math.min(32, player.x));
-          player.z = Math.max(-32, Math.min(32, player.z));
+          if (!checkCollision(nextX, player.z, 0.45)) player.x = nextX;
+          if (!checkCollision(player.x, nextZ, 0.45)) player.z = nextZ;
 
-          player.targetAngle = Math.atan2(moveX, moveZ);
           playerGroup.position.set(player.x, 0, player.z);
-
-          // Footstep Audio Cadence
-          footstepTimer++;
-          if (footstepTimer > (isSprinting ? 14 : 26)) {
-            soundFootstep(isSprinting);
-            footstepTimer = 0;
-            // Running alerts monster from greater distance!
-            if (isSprinting && monster.state !== 'chase') {
-              const d = Math.hypot(monster.x - player.x, monster.z - player.z);
-              if (d < 24) {
-                monster.state = 'chase';
-                soundJumpscare();
-              }
-            }
-          }
+          playerGroup.rotation.y = Math.atan2(moveX, moveZ);
         }
 
-        // Smooth Player Rotation to movement direction
-        let diff = player.targetAngle - playerGroup.rotation.y;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        playerGroup.rotation.y += diff * 0.15;
+        // Orbit Camera Position
+        const camDist = 4.8;
+        camera.position.x = player.x + Math.sin(camYaw) * camDist * Math.cos(camPitch);
+        camera.position.z = player.z + Math.cos(camYaw) * camDist * Math.cos(camPitch);
+        camera.position.y = 1.35 + Math.sin(camPitch) * camDist;
+        camera.lookAt(player.x, 1.25, player.z);
 
-        // Flashlight Battery Drain
-        if (flashlightLight.visible) {
-          battery = Math.max(0, battery - 0.02);
-          document.getElementById('batteryBar').style.width = battery + '%';
-          if (battery <= 0) flashlightLight.visible = false;
-        }
-
-        // 2. Camera Positioning (Third-Person Spring Arm)
-        const camDist = 4.2;
-        camera.position.x = player.x + Math.sin(cameraYaw) * camDist * Math.cos(cameraPitch);
-        camera.position.z = player.z + Math.cos(cameraYaw) * camDist * Math.cos(cameraPitch);
-        camera.position.y = 1.6 + Math.sin(cameraPitch) * camDist;
-        camera.lookAt(player.x, 1.4, player.z);
-
-        // 3. Stalker Monster AI State Machine
-        const distToPlayer = Math.hypot(monster.x - player.x, monster.z - player.z);
-
-        if (monster.state === 'patrol') {
-          const target = monster.patrolPoints[monster.currentPatrolIdx];
-          const ang = Math.atan2(target.x - monster.x, target.z - monster.z);
-          monster.x += Math.sin(ang) * monster.speed;
-          monster.z += Math.cos(ang) * monster.speed;
-          monsterMesh.rotation.y = ang;
-
-          if (Math.hypot(target.x - monster.x, target.z - monster.z) < 1.0) {
-            monster.currentPatrolIdx = (monster.currentPatrolIdx + 1) % monster.patrolPoints.length;
-          }
-
-          // Player Detection Check (Sight + Flashlight Exposure)
-          if (distToPlayer < monster.detectionDist && flashlightLight.visible) {
-            monster.state = 'chase';
-            soundJumpscare();
-          }
-        } else if (monster.state === 'chase') {
-          // Relentless Pursuit
-          const ang = Math.atan2(player.x - monster.x, player.z - monster.z);
-          monster.x += Math.sin(ang) * monster.chaseSpeed;
-          monster.z += Math.cos(ang) * monster.chaseSpeed;
-          monsterMesh.rotation.y = ang;
-
-          // If player escapes beyond 26 units and cuts flashlight
-          if (distToPlayer > 26 || (!flashlightLight.visible && distToPlayer > 16)) {
-            monster.chaseLostTimer++;
-            if (monster.chaseLostTimer > 180) {
-              monster.state = 'patrol';
-              monster.chaseLostTimer = 0;
-            }
-          }
-
-          // Jumpscare Death Catch!
-          if (distToPlayer < 1.4) {
-            triggerDeath();
-          }
-        }
-
-        monsterMesh.position.set(monster.x, 0, monster.z);
-
-        // Dynamic Heartbeat Sound & Alert based on Proximity
-        if (distToPlayer < 18) {
-          heartbeatTick++;
-          const rate = Math.max(20, Math.floor(distToPlayer * 3));
-          if (heartbeatTick % rate === 0) soundHeartbeat();
-          document.getElementById('proximityAlert').style.opacity = '1';
-          document.getElementById('bloodOverlay').style.opacity = (1 - (distToPlayer / 18)) * 0.7;
-        } else {
-          document.getElementById('proximityAlert').style.opacity = '0';
-          document.getElementById('bloodOverlay').style.opacity = '0';
-        }
-
-        // 4. Interaction Detection Check
-        focusedObject = null;
-        for (let obj of interactables) {
-          if (obj.mesh.visible && Math.hypot(obj.pos.x - player.x, obj.pos.z - player.z) < 2.5) {
-            focusedObject = obj;
-            break;
-          }
-        }
-
+        // Interaction Check with Car
+        const distToCar = Math.hypot(player.x - car.group.position.x, player.z - car.group.position.z);
         const prompt = document.getElementById('interactPrompt');
-        if (focusedObject) {
-          prompt.innerText = `[E] ${focusedObject.prompt}`;
+        if (distToCar < 4.2) {
           prompt.classList.remove('hidden');
         } else {
           prompt.classList.add('hidden');
@@ -759,73 +535,17 @@
       }
 
       renderer.render(scene, camera);
+      requestAnimationFrame(update);
     }
 
-    /* ==========================================================================
-       5. GAME STATE & MENU HANDLERS
-       ========================================================================== */
-    function startGame() {
-      document.getElementById('modalOverlay').classList.add('hidden');
-      document.getElementById('hud').classList.remove('hidden');
-      isPlaying = true;
-      isDead = false;
-      soundClick();
-    }
-
-    function triggerDeath() {
-      isDead = true;
-      isPlaying = false;
-      soundJumpscare();
-      document.getElementById('bloodOverlay').style.opacity = '1';
-      document.getElementById('deathMenu').classList.remove('hidden');
-      document.getElementById('modalOverlay').classList.remove('hidden');
-    }
-
-    function triggerVictory() {
-      isPlaying = false;
-      document.getElementById('victoryMenu').classList.remove('hidden');
-      document.getElementById('modalOverlay').classList.remove('hidden');
-      playTone(520, 'sine', 0.8, 0.3);
-    }
-
-    function restartLevel() {
-      player.x = 0; player.z = 25;
-      cameraYaw = Math.PI; cameraPitch = 0.25;
-      playerGroup.position.set(0, 0, 25);
-
-      monster.x = 18; monster.z = -18;
-      monster.state = 'patrol';
-      monsterMesh.position.set(18, 0, -18);
-
-      battery = 100; stamina = 100;
-      flashlightLight.visible = true;
-      inventory = { fuse: false, generatorOn: false, exitKey: false };
-
-      document.getElementById('deathMenu').classList.add('hidden');
-      document.getElementById('victoryMenu').classList.add('hidden');
-      document.getElementById('modalOverlay').classList.add('hidden');
-      document.getElementById('bloodOverlay').style.opacity = '0';
-      document.getElementById('objectiveText').innerText = "Explore the asylum. Find the Emergency Generator in the basement.";
-      updateInvText();
-
-      // Reset interactive meshes
-      interactables.forEach(o => {
-        if (o.id === 'fuse') o.mesh.visible = true;
-        if (o.id === 'exitKey') o.mesh.visible = false;
-      });
-
-      isDead = false;
-      isPlaying = true;
-    }
-
-    // Viewport Resizing Handler (Enforces 100vw x 100dvh without distortion)
+    // Responsive Viewport Resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    init3DWorld();
+    update();
   </script>
 </body>
 </html>

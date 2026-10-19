@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>REAL CITY: LIFE OF A LEGEND - DETAILED EDITION</title>
+  <title>REAL CITY: LIFE OF A LEGEND - FIXED CONTROLS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     * { touch-action: none; user-select: none; -webkit-user-select: none; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidden; background: #0b1329; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     #canvas3d { position: fixed; inset: 0; width: 100vw; height: 100dvh; display: block; z-index: 0; }
-    .glass { background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
-    .joy-stick-base { width: 110px; height: 110px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(56, 189, 248, 0.45); position: absolute; pointer-events: none; display: none; transform: translate(-50%, -50%); z-index: 30; }
+    .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); }
+    .joy-stick-base { width: 110px; height: 110px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); border: 2px solid rgba(56, 189, 248, 0.5); position: absolute; pointer-events: none; display: none; transform: translate(-50%, -50%); z-index: 30; }
     .joy-stick-thumb { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #38bdf8 0%, #0284c7 100%); position: absolute; transform: translate(-50%, -50%); left: 50%; top: 50%; box-shadow: 0 0 15px #0284c7; }
   </style>
 </head>
@@ -19,30 +19,29 @@
 
   <canvas id="canvas3d"></canvas>
 
-  <!-- GAME HUD OVERLAY -->
+  <!-- HUD INTERFACE -->
   <div id="hud" class="fixed inset-0 pointer-events-none flex flex-col justify-between p-3 sm:p-5 z-10">
-    <!-- Top Header -->
     <div class="flex justify-between items-start gap-2">
-      <!-- Player Status & Cash -->
-      <div class="glass px-3.5 py-2.5 rounded-2xl flex flex-col gap-0.5 pointer-events-auto">
+      <!-- Status & Cash -->
+      <div class="glass px-4 py-2.5 rounded-2xl flex flex-col gap-0.5 pointer-events-auto">
         <div class="flex items-center gap-1.5">
-          <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="playerStateTag" class="text-[11px] font-black uppercase tracking-wider text-cyan-300">ON FOOT</span>
         </div>
         <div class="text-base sm:text-xl font-black text-emerald-400" id="hudCash">₹ 2,500</div>
       </div>
 
-      <!-- Active Mission Banner -->
+      <!-- Mission Info -->
       <div class="glass px-4 py-2 rounded-2xl max-w-xs text-center border-amber-400/40 pointer-events-auto">
         <div class="text-[10px] font-black uppercase text-amber-300 tracking-wider flex items-center justify-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span> MISSION: CENTRAL DELIVERY
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span> ACTIVE CONTRACT
         </div>
-        <div id="missionTargetText" class="text-xs text-slate-200 font-semibold mt-0.5">Drive the red GT Coupe to the glowing yellow zone.</div>
+        <div id="missionTargetText" class="text-xs text-slate-200 font-semibold mt-0.5">Drive car into the yellow glowing checkpoint.</div>
       </div>
 
       <!-- Controls & Speed -->
       <div class="flex flex-col items-end gap-2 pointer-events-auto">
-        <button onclick="resetPosition()" class="glass px-3 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:text-white active:scale-95 transition">
+        <button onclick="resetPosition()" class="glass px-3 py-1.5 rounded-xl text-xs font-bold text-amber-300 active:scale-95 transition">
           ↺ RESET
         </button>
         <div id="speedHud" class="glass px-3.5 py-2 rounded-xl text-right hidden">
@@ -52,9 +51,9 @@
       </div>
     </div>
 
-    <!-- Center Interaction Tooltip -->
-    <div id="interactPrompt" class="self-center glass px-5 py-2.5 rounded-2xl border-cyan-400 text-xs sm:text-sm font-black text-white shadow-xl shadow-cyan-950/50 hidden">
-      [E] ENTER RED GT COUPE
+    <!-- Center Prompt -->
+    <div id="interactPrompt" class="self-center glass px-5 py-2.5 rounded-2xl border-cyan-400 text-xs sm:text-sm font-black text-white shadow-xl hidden">
+      [E] ENTER VEHICLE
     </div>
 
     <!-- Mobile Touch Controls -->
@@ -72,11 +71,10 @@
     </div>
   </div>
 
-  <!-- Touch Joystick -->
   <div id="joyBase" class="joy-stick-base"><div id="joyThumb" class="joy-stick-thumb"></div></div>
 
   <script>
-    // --- 1. PROCEDURAL SOUND SYNTHESIZER ---
+    // Audio Synth
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playAudio(freq, type, dur, vol = 0.08) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -94,21 +92,20 @@
       } catch (e) {}
     }
 
-    // --- 2. THREE.JS 3D SCENE & LIGHTING ---
+    // Three.js Scene Setup
     const canvas = document.getElementById('canvas3d');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x93c5fd); // Clear daytime sky
-    scene.fog = new THREE.FogExp2(0x93c5fd, 0.012);
+    scene.background = new THREE.Color(0xa0c4e2);
+    scene.fog = new THREE.FogExp2(0xa0c4e2, 0.012);
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 450);
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Realistic Sun & Hemisphere Lights
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x475569, 0.75);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x475569, 0.85);
     scene.add(hemiLight);
 
     const sun = new THREE.DirectionalLight(0xfff7ed, 1.4);
@@ -116,25 +113,19 @@
     sun.castShadow = true;
     sun.shadow.mapSize.width = 1024;
     sun.shadow.mapSize.height = 1024;
-    sun.shadow.camera.near = 10;
-    sun.shadow.camera.far = 250;
-    sun.shadow.camera.left = -60;
-    sun.shadow.camera.right = 60;
-    sun.shadow.camera.top = 60;
-    sun.shadow.camera.bottom = -60;
     scene.add(sun);
 
-    // --- 3. DENSE DETAILED CITY ENVIRONMENT ---
+    // City Environment Setup
     const colliders = [];
 
-    // Asphalt Ground Plane
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(280, 280), groundMat);
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(300, 300),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 })
+    );
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Concrete Sidewalks / Pavements
     const walkMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
     function makeSidewalk(x, z, w, d) {
       const walk = new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, d), walkMat);
@@ -147,67 +138,38 @@
     makeSidewalk(0, -24, 260, 20);
     makeSidewalk(0, 24, 260, 20);
 
-    // Road Markings (White Stripes & Yellow Center)
-    const whiteLineMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
-    const yellowLineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
-
+    const yMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
     for (let i = -120; i <= 120; i += 12) {
-      const yLine = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 6), yellowLineMat);
-      yLine.rotation.x = -Math.PI / 2;
-      yLine.position.set(0, 0.02, i);
-      scene.add(yLine);
+      const yL1 = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 6), yMat);
+      yL1.rotation.x = -Math.PI / 2;
+      yL1.position.set(0, 0.02, i);
+      scene.add(yL1);
 
-      const xLine = new THREE.Mesh(new THREE.PlaneGeometry(6, 0.35), yellowLineMat);
-      xLine.rotation.x = -Math.PI / 2;
-      xLine.position.set(i, 0.02, 0);
-      scene.add(xLine);
+      const yL2 = new THREE.Mesh(new THREE.PlaneGeometry(6, 0.35), yMat);
+      yL2.rotation.x = -Math.PI / 2;
+      yL2.position.set(i, 0.02, 0);
+      scene.add(yL2);
     }
 
-    // Pedestrian Zebra Crossings
-    for (let i = -7; i <= 7; i += 1.8) {
-      const zLine1 = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 3.5), whiteLineMat);
-      zLine1.rotation.x = -Math.PI / 2;
-      zLine1.position.set(i, 0.02, 14);
-      scene.add(zLine1);
-
-      const zLine2 = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 3.5), whiteLineMat);
-      zLine2.rotation.x = -Math.PI / 2;
-      zLine2.position.set(i, 0.02, -14);
-      scene.add(zLine2);
-    }
-
-    // Detailed 3D Buildings with Windows & Rooftop Props
     function makeSkyscraper(x, z, w, d, h, baseColor) {
       const bldgGroup = new THREE.Group();
-
       const body = new THREE.Mesh(
         new THREE.BoxGeometry(w, h, d),
-        new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.4, metalness: 0.15 })
+        new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.4 })
       );
       body.position.y = h / 2;
       body.castShadow = true;
       body.receiveShadow = true;
       bldgGroup.add(body);
 
-      // Window Rows (Glass Pattern)
       const winMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.1, metalness: 0.8 });
       for (let y = 4; y < h - 4; y += 4.5) {
-        const winSlab = new THREE.Mesh(new THREE.BoxGeometry(w + 0.1, 1.8, d + 0.1), winMat);
-        winSlab.position.y = y;
-        bldgGroup.add(winSlab);
+        const win = new THREE.Mesh(new THREE.BoxGeometry(w + 0.1, 1.8, d + 0.1), winMat);
+        win.position.y = y;
+        bldgGroup.add(win);
       }
-
-      // Rooftop AC / Antenna Unit
-      const acUnit = new THREE.Mesh(
-        new THREE.BoxGeometry(3.5, 2.0, 3.5),
-        new THREE.MeshStandardMaterial({ color: 0x334155 })
-      );
-      acUnit.position.set(0, h + 1, 0);
-      bldgGroup.add(acUnit);
-
       bldgGroup.position.set(x, 0, z);
       scene.add(bldgGroup);
-
       colliders.push({ minX: x - w / 2 - 0.5, maxX: x + w / 2 + 0.5, minZ: z - d / 2 - 0.5, maxZ: z + d / 2 + 0.5 });
     }
 
@@ -217,67 +179,44 @@
       [48, -48, 26, 26, 36, 0x334155],
       [48, 48, 26, 26, 46, 0x0284c7],
       [-80, -48, 24, 24, 28, 0x475569],
-      [-80, 48, 24, 24, 34, 0x1e293b],
-      [80, -48, 24, 24, 40, 0x1e293b],
-      [80, 48, 24, 24, 30, 0x334155],
+      [80, 48, 24, 24, 40, 0x1e293b],
       [-48, -80, 24, 24, 35, 0x0f172a],
-      [48, -80, 24, 24, 45, 0x0284c7],
-      [-48, 80, 24, 24, 32, 0x475569],
       [48, 80, 24, 24, 38, 0x334155]
     ];
     cityLayout.forEach(b => makeSkyscraper(...b));
 
-    // Street Lamps with Spotlights
-    function makeStreetLight(x, z) {
-      const pole = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.12, 0.15, 6, 8),
-        new THREE.MeshStandardMaterial({ color: 0x94a3b8 })
-      );
-      pole.position.set(x, 3, z);
-      pole.castShadow = true;
-      scene.add(pole);
-
-      const arm = new THREE.Mesh(
-        new THREE.BoxGeometry(1.6, 0.1, 0.1),
-        new THREE.MeshStandardMaterial({ color: 0x94a3b8 })
-      );
-      arm.position.set(x > 0 ? x - 0.7 : x + 0.7, 5.8, z);
-      scene.add(arm);
-
-      const lampLight = new THREE.PointLight(0xfef08a, 0.6, 16);
-      lampLight.position.set(x > 0 ? x - 1.3 : x + 1.3, 5.5, z);
-      scene.add(lampLight);
+    // Trees
+    function makeTree(x, z) {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 2.2), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+      trunk.position.set(x, 1.1, z);
+      trunk.castShadow = true;
+      const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(1.4), new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.8 }));
+      leaves.position.set(x, 2.8, z);
+      leaves.castShadow = true;
+      scene.add(trunk);
+      scene.add(leaves);
     }
-    makeStreetLight(13.5, 30);
-    makeStreetLight(13.5, -30);
-    makeStreetLight(-13.5, 30);
-    makeStreetLight(-13.5, -30);
+    makeTree(12, 18);
+    makeTree(12, -18);
+    makeTree(-12, 18);
+    makeTree(-12, -18);
 
-    // --- 4. ARTICULATED 3D HUMANOID CHARACTER ---
+    // Humanoid Character Rig
     const characterRig = new THREE.Group();
-
-    // Materials
     const skinMat = new THREE.MeshStandardMaterial({ color: 0xfbcfe8, roughness: 0.6 });
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 });
-    const jacketMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
-    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
-    const shoeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
+    const jacketMat = new THREE.MeshStandardMaterial({ color: 0x0284c7 });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+    const shoeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
 
-    // Hips / Root
     const hips = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.22, 0.3), pantsMat);
     hips.position.y = 0.95;
     characterRig.add(hips);
 
-    // Torso / Jacket
     const torso = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.62, 0.34), jacketMat);
     torso.position.y = 1.35;
     torso.castShadow = true;
     characterRig.add(torso);
-
-    // Neck & Head
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.12), skinMat);
-    neck.position.y = 1.7;
-    characterRig.add(neck);
 
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.32, 0.32), skinMat);
     head.position.y = 1.9;
@@ -288,179 +227,101 @@
     hair.position.set(0, 2.06, -0.02);
     characterRig.add(hair);
 
-    // Limbs - Pivot Points for Real-Time Walk Animation
-    // Left Leg
     const legLGroup = new THREE.Group();
     legLGroup.position.set(-0.16, 0.9, 0);
     const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.85, 0.2), pantsMat);
     legL.position.y = -0.42;
-    legL.castShadow = true;
     const footL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.14, 0.32), shoeMat);
     footL.position.set(0, -0.85, 0.06);
-    legLGroup.add(legL);
-    legLGroup.add(footL);
+    legLGroup.add(legL); legLGroup.add(footL);
     characterRig.add(legLGroup);
 
-    // Right Leg
     const legRGroup = new THREE.Group();
     legRGroup.position.set(0.16, 0.9, 0);
     const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.85, 0.2), pantsMat);
     legR.position.y = -0.42;
-    legR.castShadow = true;
     const footR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.14, 0.32), shoeMat);
     footR.position.set(0, -0.85, 0.06);
-    legRGroup.add(legR);
-    legRGroup.add(footR);
+    legRGroup.add(legR); legRGroup.add(footR);
     characterRig.add(legRGroup);
 
-    // Left Arm
     const armLGroup = new THREE.Group();
     armLGroup.position.set(-0.36, 1.6, 0);
     const armL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.72, 0.16), jacketMat);
     armL.position.y = -0.36;
-    armL.castShadow = true;
-    const handL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), skinMat);
-    handL.position.y = -0.76;
     armLGroup.add(armL);
-    armLGroup.add(handL);
     characterRig.add(armLGroup);
 
-    // Right Arm
     const armRGroup = new THREE.Group();
     armRGroup.position.set(0.36, 1.6, 0);
     const armR = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.72, 0.16), jacketMat);
     armR.position.y = -0.36;
-    armR.castShadow = true;
-    const handR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), skinMat);
-    handR.position.y = -0.76;
     armRGroup.add(armR);
-    armRGroup.add(handR);
     characterRig.add(armRGroup);
 
     characterRig.position.set(0, 0, 8);
     scene.add(characterRig);
 
-    const player = {
-      x: 0, z: 8,
-      speed: 0.14,
-      sprintSpeed: 0.28,
-      animCycle: 0
-    };
-
+    const player = { x: 0, z: 8, speed: 0.14, sprintSpeed: 0.28, animCycle: 0 };
     let camYaw = 0, camPitch = 0.28;
 
-    // --- 5. DETAILED SPORTS COUPE 3D MODEL & PHYSICS ---
+    // Detailed 3D Car
     const carGroup = new THREE.Group();
-
-    // Bodywork
     const carPaintMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.7, roughness: 0.25 });
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.8 });
 
-    // Lower Wedge Chassis
     const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.55, 4.6), carPaintMat);
     chassis.position.y = 0.5;
-    chassis.castShadow = true;
     carGroup.add(chassis);
 
-    // Tapered Hood & Aerodynamic Nose
     const nose = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.35, 1.2), carPaintMat);
     nose.position.set(0, 0.6, 1.8);
     carGroup.add(nose);
 
-    // Cabin / Roof
     const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 2.2), glassMat);
     cabin.position.set(0, 1.05, -0.3);
     carGroup.add(cabin);
 
-    // Rear Spoiler Wing
-    const wing = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.08, 0.4), carPaintMat);
-    wing.position.set(0, 1.05, -2.1);
-    const strutL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 0.1), carPaintMat);
-    strutL.position.set(-0.7, 0.9, -2.1);
-    const strutR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 0.1), carPaintMat);
-    strutR.position.set(0.7, 0.9, -2.1);
-    carGroup.add(wing); carGroup.add(strutL); carGroup.add(strutR);
-
-    // Detailed Wheels with Rims & Tires
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.9 });
-    const rimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.1 });
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
     const wheelGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.32, 16);
     wheelGeo.rotateZ(Math.PI / 2);
 
-    function createDetailedWheel() {
-      const wGroup = new THREE.Group();
-      const tire = new THREE.Mesh(wheelGeo, tireMat);
-      tire.castShadow = true;
-      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.34, 12), rimMat);
-      rim.rotation.z = Math.PI / 2;
-      wGroup.add(tire);
-      wGroup.add(rim);
-      return wGroup;
+    function createWheel() {
+      const w = new THREE.Mesh(wheelGeo, tireMat);
+      w.castShadow = true;
+      const g = new THREE.Group();
+      g.add(w);
+      return g;
     }
 
-    const wheelFL = createDetailedWheel();
-    wheelFL.position.set(-1.12, 0.42, 1.4);
-    const wheelFR = createDetailedWheel();
-    wheelFR.position.set(1.12, 0.42, 1.4);
-    const wheelBL = createDetailedWheel();
-    wheelBL.position.set(-1.12, 0.42, -1.4);
-    const wheelBR = createDetailedWheel();
-    wheelBR.position.set(1.12, 0.42, -1.4);
-
-    carGroup.add(wheelFL);
-    carGroup.add(wheelFR);
-    carGroup.add(wheelBL);
-    carGroup.add(wheelBR);
-
-    // Headlight Spot Beams
-    const headL = new THREE.SpotLight(0xfffbeb, 3.5, 45, Math.PI / 6, 0.4);
-    headL.position.set(0.7, 0.6, 2.3);
-    headL.target.position.set(0.7, 0, 18);
-    carGroup.add(headL); carGroup.add(headL.target);
-
-    const headR = new THREE.SpotLight(0xfffbeb, 3.5, 45, Math.PI / 6, 0.4);
-    headR.position.set(-0.7, 0.6, 2.3);
-    headR.target.position.set(-0.7, 0, 18);
-    carGroup.add(headR); carGroup.add(headR.target);
+    const wheelFL = createWheel(); wheelFL.position.set(-1.12, 0.42, 1.4);
+    const wheelFR = createWheel(); wheelFR.position.set(1.12, 0.42, 1.4);
+    const wheelBL = createWheel(); wheelBL.position.set(-1.12, 0.42, -1.4);
+    const wheelBR = createWheel(); wheelBR.position.set(1.12, 0.42, -1.4);
+    carGroup.add(wheelFL); carGroup.add(wheelFR); carGroup.add(wheelBL); carGroup.add(wheelBR);
 
     carGroup.position.set(5.5, 0, 4);
     scene.add(carGroup);
 
-    const vehicle = {
-      x: 5.5, z: 4,
-      rotY: 0,
-      speed: 0,
-      steer: 0,
-      maxSpeed: 0.75,
-      accel: 0.018,
-      friction: 0.97
-    };
-
+    const vehicle = { x: 5.5, z: 4, rotY: 0, speed: 0, steer: 0, maxSpeed: 0.75, accel: 0.018, friction: 0.97 };
     let inVehicle = false;
 
-    // --- 6. MISSION DESTINATION CHECKPOINT ---
+    // Mission Checkpoint
     const marker = new THREE.Group();
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(2.4, 3.0, 24),
-      new THREE.MeshBasicMaterial({ color: 0xfbbf24, side: THREE.DoubleSide })
-    );
+    const ring = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.0, 24), new THREE.MeshBasicMaterial({ color: 0xfbbf24, side: THREE.DoubleSide }));
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.05;
     marker.add(ring);
 
-    const beacon = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.12, 0.12, 22),
-      new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.45 })
-    );
+    const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 22), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.45 }));
     beacon.position.y = 11;
     marker.add(beacon);
-
     marker.position.set(0, 0, -65);
     scene.add(marker);
 
     let playerCash = 2500;
 
-    // --- 7. INPUT HANDLING (KEYBOARD + TOUCH) ---
+    // Input Management
     const keys = {};
     let isMouseDown = false, prevMouseX = 0, prevMouseY = 0;
     let touchMove = { x: 0, y: 0 };
@@ -474,7 +335,6 @@
     });
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-    // Mouse camera look
     window.addEventListener('mousedown', e => {
       if (e.button === 0 && e.clientX > 80) {
         isMouseDown = true;
@@ -492,7 +352,6 @@
     });
     window.addEventListener('mouseup', () => isMouseDown = false);
 
-    // Mobile Virtual Joystick & Camera Swipe
     const joyBase = document.getElementById('joyBase');
     const joyThumb = document.getElementById('joyThumb');
 
@@ -547,14 +406,12 @@
     window.addEventListener('touchend', endTouches);
     window.addEventListener('touchcancel', endTouches);
 
-    // Touch Action Buttons
     document.getElementById('btnAction').addEventListener('touchstart', e => { e.preventDefault(); toggleCarRide(); });
     document.getElementById('btnSprint').addEventListener('touchstart', e => { e.preventDefault(); isSprinting = true; });
     document.getElementById('btnSprint').addEventListener('touchend', e => { e.preventDefault(); isSprinting = false; });
 
     function toggleCarRide() {
       if (inVehicle) {
-        // Exit
         inVehicle = false;
         player.x = carGroup.position.x + 2.2;
         player.z = carGroup.position.z;
@@ -567,7 +424,6 @@
         document.getElementById('btnActionLabel').innerText = 'DRIVE';
         playAudio(500, 'triangle', 0.1);
       } else {
-        // Check Distance to Car
         const dist = Math.hypot(player.x - carGroup.position.x, player.z - carGroup.position.z);
         if (dist < 4.5) {
           inVehicle = true;
@@ -605,26 +461,36 @@
       }
     }
 
-    // --- 8. GAME ANIMATION & PHYSICS LOOP ---
+    // MAIN GAME ENGINE LOOP WITH CORRECTED VECTOR MATHEMATICS
     function updateEngine() {
-      let mx = touchMove.x;
-      let my = touchMove.y;
+      // Input Polling:
+      // inX > 0: D / Right Arrow (Right)
+      // inX < 0: A / Left Arrow (Left)
+      // inY < 0: W / Up Arrow (Forward)
+      // inY > 0: S / Down Arrow (Backward)
+      let inX = touchMove.x;
+      let inY = touchMove.y;
 
-      if (mx === 0 && my === 0) {
-        if (keys['w'] || keys['arrowup']) my -= 1;
-        if (keys['s'] || keys['arrowdown']) my += 1;
-        if (keys['a'] || keys['arrowleft']) mx -= 1;
-        if (keys['d'] || keys['arrowright']) mx += 1;
-        if (mx !== 0 && my !== 0) { mx *= 0.7071; my *= 0.7071; }
+      if (inX === 0 && inY === 0) {
+        if (keys['w'] || keys['arrowup']) inY -= 1;
+        if (keys['s'] || keys['arrowdown']) inY += 1;
+        if (keys['a'] || keys['arrowleft']) inX -= 1;
+        if (keys['d'] || keys['arrowright']) inX += 1;
+
+        if (inX !== 0 && inY !== 0) {
+          inX *= 0.707106;
+          inY *= 0.707106;
+        }
       }
 
-      // === 1. DRIVING STATE ===
+      // === 1. CAR DRIVING CONTROLS ===
       if (inVehicle) {
         const handbrake = keys[' '];
 
-        if (my < -0.1) {
+        // Acceleration (W) / Braking-Reverse (S)
+        if (inY < -0.1) {
           vehicle.speed = Math.min(vehicle.maxSpeed, vehicle.speed + vehicle.accel);
-        } else if (my > 0.1) {
+        } else if (inY > 0.1) {
           vehicle.speed = Math.max(-0.25, vehicle.speed - vehicle.accel);
         } else {
           vehicle.speed *= vehicle.friction;
@@ -632,15 +498,13 @@
 
         if (handbrake) vehicle.speed *= 0.88;
 
-        // Steering lerp
-        if (Math.abs(mx) > 0.05) {
-          vehicle.steer = THREE.MathUtils.lerp(vehicle.steer, -mx * 0.45, 0.15);
-        } else {
-          vehicle.steer = THREE.MathUtils.lerp(vehicle.steer, 0, 0.2);
-        }
+        // Steering: inX > 0 (D/Right) steers RIGHT. inX < 0 (A/Left) steers LEFT.
+        const targetSteer = inX * 0.45;
+        vehicle.steer = THREE.MathUtils.lerp(vehicle.steer, targetSteer, 0.18);
 
-        wheelFL.rotation.y = vehicle.steer;
-        wheelFR.rotation.y = vehicle.steer;
+        // Visual front wheel rotation matches steering direction
+        wheelFL.rotation.y = -vehicle.steer;
+        wheelFR.rotation.y = -vehicle.steer;
 
         // Wheel Roll Rotation
         const rollDelta = vehicle.speed * 2.2;
@@ -649,28 +513,29 @@
         wheelBL.children[0].rotation.x += rollDelta;
         wheelBR.children[0].rotation.x += rollDelta;
 
+        // Yaw Rotation:
+        // When driving forward (speed > 0), steering right (positive steer) must rotate the car clockwise (decreasing rotY).
         if (Math.abs(vehicle.speed) > 0.01) {
-          vehicle.rotY += vehicle.steer * (vehicle.speed / vehicle.maxSpeed) * 0.075;
+          const forwardFactor = vehicle.speed >= 0 ? 1 : -1;
+          vehicle.rotY -= vehicle.steer * (Math.abs(vehicle.speed) / vehicle.maxSpeed) * 0.07 * forwardFactor;
           carGroup.rotation.y = vehicle.rotY;
         }
 
-        // Test next position with building bounds
-        const nX = carGroup.position.x + Math.sin(vehicle.rotY) * vehicle.speed;
-        const nZ = carGroup.position.z + Math.cos(vehicle.rotY) * vehicle.speed;
+        const nextX = carGroup.position.x + Math.sin(vehicle.rotY) * vehicle.speed;
+        const nextZ = carGroup.position.z + Math.cos(vehicle.rotY) * vehicle.speed;
 
-        if (!checkCollision(nX, nZ, 1.4)) {
-          carGroup.position.x = nX;
-          carGroup.position.z = nZ;
+        if (!checkCollision(nextX, nextZ, 1.4)) {
+          carGroup.position.x = nextX;
+          carGroup.position.z = nextZ;
         } else {
           vehicle.speed = -vehicle.speed * 0.35;
           playAudio(70, 'square', 0.08);
         }
 
-        // Speedometer UI
         const kmh = Math.round(Math.abs(vehicle.speed) * 165);
         document.getElementById('speedVal').innerHTML = `${kmh} <span class="text-xs text-slate-400">KM/H</span>`;
 
-        // Smooth Camera Follow behind car
+        // Third-person camera follow behind car
         const camDist = 7.0;
         camera.position.x = carGroup.position.x - Math.sin(vehicle.rotY) * camDist;
         camera.position.z = carGroup.position.z - Math.cos(vehicle.rotY) * camDist;
@@ -678,20 +543,30 @@
         camera.lookAt(carGroup.position.x, carGroup.position.y + 1.2, carGroup.position.z);
       }
 
-      // === 2. ON FOOT CHARACTER STATE ===
+      // === 2. ON-FOOT WALKING CONTROLS ===
       else {
         const run = keys['shift'] || isSprinting;
         const curSpeed = run ? player.sprintSpeed : player.speed;
-        const isMoving = (mx !== 0 || my !== 0);
+        const isMoving = (inX !== 0 || inY !== 0);
 
         if (isMoving) {
+          // Accurate Horizontal Camera-Relative Vectors:
+          // Camera position relative to player: (sin(yaw), cos(yaw))
+          // Therefore, forward direction (from camera towards player) projected onto XZ is:
           const fwdX = -Math.sin(camYaw);
           const fwdZ = -Math.cos(camYaw);
-          const sideX = -Math.cos(camYaw);
-          const sideZ = Math.sin(camYaw);
 
-          const moveX = (fwdX * -my) + (sideX * mx);
-          const moveZ = (fwdZ * -my) + (sideZ * mx);
+          // Right direction (90 deg clockwise from Forward on XZ plane):
+          // (fwdX, fwdZ) rotated -90 deg:
+          const rightX = -fwdZ; // Math.cos(camYaw)
+          const rightZ = fwdX;  // -Math.sin(camYaw)
+
+          // W (inY < 0): +Forward
+          // S (inY > 0): -Forward
+          // D (inX > 0): +Right
+          // A (inX < 0): -Right
+          const moveX = (fwdX * (-inY)) + (rightX * inX);
+          const moveZ = (fwdZ * (-inY)) + (rightZ * inX);
 
           const nextX = player.x + moveX * curSpeed;
           const nextZ = player.z + moveZ * curSpeed;
@@ -700,9 +575,11 @@
           if (!checkCollision(player.x, nextZ, 0.4)) player.z = nextZ;
 
           characterRig.position.set(player.x, 0, player.z);
+
+          // Turn character to face exactly along movement vector
           characterRig.rotation.y = Math.atan2(moveX, moveZ);
 
-          // Articulated Limb Walking & Running Animation Engine
+          // Limb animations
           player.animCycle += run ? 0.32 : 0.18;
           const legSwing = Math.sin(player.animCycle) * (run ? 0.85 : 0.55);
           const armSwing = Math.sin(player.animCycle) * (run ? 0.75 : 0.45);
@@ -711,11 +588,8 @@
           legRGroup.rotation.x = -legSwing;
           armLGroup.rotation.x = -armSwing;
           armRGroup.rotation.x = armSwing;
-
-          // Bobbing torso motion
           torso.position.y = 1.35 + Math.abs(Math.sin(player.animCycle)) * 0.05;
         } else {
-          // Smooth return to neutral idle stance
           legLGroup.rotation.x = THREE.MathUtils.lerp(legLGroup.rotation.x, 0, 0.2);
           legRGroup.rotation.x = THREE.MathUtils.lerp(legRGroup.rotation.x, 0, 0.2);
           armLGroup.rotation.x = THREE.MathUtils.lerp(armLGroup.rotation.x, 0, 0.2);
@@ -730,7 +604,7 @@
         camera.position.y = 1.6 + Math.sin(camPitch) * camDist;
         camera.lookAt(player.x, 1.4, player.z);
 
-        // Vehicle Proximity Check
+        // Interaction Check with Car
         const distToCar = Math.hypot(player.x - carGroup.position.x, player.z - carGroup.position.z);
         const prompt = document.getElementById('interactPrompt');
         if (distToCar < 4.5) {
@@ -740,7 +614,7 @@
         }
       }
 
-      // === 3. MISSION CHECKPOINT ROTATION & ARRIVAL ===
+      // Checkpoint rotation & cash reward
       marker.rotation.y += 0.02;
       const activePos = inVehicle ? carGroup.position : characterRig.position;
       if (activePos.distanceTo(marker.position) < 4.8) {
@@ -748,7 +622,6 @@
         document.getElementById('hudCash').innerText = `₹ ${playerCash.toLocaleString('en-IN')}`;
         playAudio(880, 'sine', 0.15, 0.15);
 
-        // Move to next spot in city
         const spots = [[-55, 0, 50], [45, 0, -45], [0, 0, 70], [-60, 0, -60]];
         const next = spots[Math.floor(Math.random() * spots.length)];
         marker.position.set(next[0], 0, next[2]);
@@ -758,7 +631,7 @@
       requestAnimationFrame(updateEngine);
     }
 
-    // Responsive Canvas Resizing
+    // Viewport resize handling
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();

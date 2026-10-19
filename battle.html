@@ -29,7 +29,6 @@
       display: block;
       z-index: 1;
     }
-    /* HUD & UI */
     #ui-layer {
       position: absolute;
       top: 0;
@@ -53,25 +52,22 @@
     .status-card {
       background: rgba(13, 22, 35, 0.85);
       border-left: 4px solid #f59e0b;
-      padding: 10px 14px;
+      padding: 8px 14px;
       border-radius: 4px;
       backdrop-filter: blur(8px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      min-width: 220px;
+      min-width: 200px;
     }
     .status-title {
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
       color: #94a3b8;
-      margin-bottom: 4px;
     }
     .stat-val {
       font-size: 18px;
       font-weight: 800;
       color: #f8fafc;
-      letter-spacing: 0.5px;
     }
     #wanted-stars {
       color: #ef4444;
@@ -81,17 +77,15 @@
     #mission-tracker {
       top: 16px;
       right: 16px;
-      width: 320px;
+      width: 300px;
       background: rgba(15, 23, 42, 0.9);
       border-top: 3px solid #3b82f6;
       border-radius: 6px;
-      padding: 14px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      padding: 12px;
     }
     .mission-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       margin-bottom: 6px;
     }
     .mission-badge {
@@ -101,82 +95,168 @@
       padding: 2px 8px;
       border-radius: 12px;
       text-transform: uppercase;
-      letter-spacing: 1px;
     }
     .mission-name {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       color: #e2e8f0;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .mission-objective {
-      font-size: 13px;
+      font-size: 12px;
       color: #cbd5e1;
       line-height: 1.4;
     }
     .mission-timer {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       color: #f59e0b;
       margin-top: 6px;
     }
-    /* Minimap */
     #minimap-container {
       bottom: 20px;
       left: 20px;
-      width: 140px;
-      height: 140px;
+      width: 130px;
+      height: 130px;
       background: rgba(15, 23, 42, 0.85);
-      border: 2px solid rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.25);
       border-radius: 50%;
       overflow: hidden;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.6);
     }
     #minimap-canvas {
       width: 100%;
       height: 100%;
     }
-    /* Subtitles / Dialogues */
-    #dialogue-container {
-      bottom: 30px;
+    #crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      pointer-events: none;
+      display: none;
+    }
+    #action-prompt {
+      bottom: 160px;
       left: 50%;
       transform: translateX(-50%);
-      width: min(90%, 650px);
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(0,0,0,0.8);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.3);
+      display: none;
+    }
+    #dialogue-container {
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(90%, 600px);
+      background: rgba(15, 23, 42, 0.95);
       border-left: 5px solid #10b981;
-      padding: 14px 20px;
+      padding: 12px 18px;
       border-radius: 6px;
       display: none;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
     }
     .speaker-name {
       font-size: 12px;
       font-weight: 800;
-      letter-spacing: 1.5px;
       text-transform: uppercase;
       color: #10b981;
-      margin-bottom: 4px;
     }
     .dialogue-text {
-      font-size: 15px;
-      line-height: 1.45;
+      font-size: 14px;
       color: #f1f5f9;
+      margin-top: 3px;
     }
-    /* On-Screen Prompt */
-    #action-prompt {
-      bottom: 180px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.75);
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      border: 1px solid rgba(255,255,255,0.25);
+    /* Garage UI Modal */
+    #garage-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 15, 26, 0.88);
       display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 90;
+      pointer-events: auto;
     }
-    /* Mobile Controls */
+    .garage-card {
+      background: #111827;
+      border: 1px solid #374151;
+      padding: 24px;
+      border-radius: 8px;
+      width: 360px;
+      text-align: center;
+    }
+    .garage-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      padding: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    /* Main Start / Restart Modal */
+    .game-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(8, 12, 20, 0.88);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      pointer-events: auto;
+    }
+    .modal-content {
+      background: #111827;
+      border: 1px solid #374151;
+      padding: 32px 36px;
+      border-radius: 10px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+    .modal-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .modal-desc {
+      font-size: 14px;
+      color: #9ca3af;
+      line-height: 1.5;
+      margin: 16px 0 24px;
+    }
+    .game-btn {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+    .game-btn:hover {
+      background: #1d4ed8;
+    }
+    /* Mobile Touch Buttons */
     #mobile-controls {
       position: absolute;
       bottom: 0;
@@ -188,9 +268,9 @@
     }
     .touch-btn {
       position: absolute;
-      width: 60px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.15);
+      width: 55px;
+      height: 55px;
+      background: rgba(255, 255, 255, 0.18);
       border: 2px solid rgba(255, 255, 255, 0.4);
       border-radius: 50%;
       display: flex;
@@ -199,83 +279,31 @@
       font-weight: bold;
       color: #fff;
       pointer-events: auto;
-      touch-action: none;
     }
-    #btn-action { right: 30px; bottom: 120px; background: rgba(59, 130, 246, 0.4); }
-    #btn-gas { right: 30px; bottom: 30px; background: rgba(16, 185, 129, 0.4); }
-    #btn-brake { right: 100px; bottom: 30px; background: rgba(239, 68, 68, 0.4); }
-    #dpad-left { left: 30px; bottom: 50px; }
-    #dpad-right { left: 100px; bottom: 50px; }
-    #dpad-up { left: 65px; bottom: 110px; }
-    #dpad-down { left: 65px; bottom: 10px; }
-    /* Modals & Screens */
-    .game-modal {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(8, 12, 20, 0.85);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-    }
-    .modal-content {
-      background: #111827;
-      border: 1px solid #374151;
-      padding: 36px 40px;
-      border-radius: 10px;
-      max-width: 500px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-    }
-    .modal-title {
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-    }
-    .modal-desc {
-      font-size: 15px;
-      color: #9ca3af;
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
-    .game-btn {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .game-btn:hover {
-      background: #1d4ed8;
-      transform: translateY(-1px);
-    }
+    #btn-shoot { right: 95px; bottom: 110px; background: rgba(239, 68, 68, 0.4); }
+    #btn-action { right: 25px; bottom: 110px; background: rgba(59, 130, 246, 0.4); }
+    #btn-gas { right: 25px; bottom: 30px; background: rgba(16, 185, 129, 0.4); }
+    #btn-brake { right: 95px; bottom: 30px; background: rgba(239, 68, 68, 0.4); }
+    #dpad-left { left: 20px; bottom: 45px; }
+    #dpad-right { left: 90px; bottom: 45px; }
+    #dpad-up { left: 55px; bottom: 105px; }
+    #dpad-down { left: 55px; bottom: 10px; }
   </style>
-  <!-- Three.js from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
   <canvas id="game-canvas"></canvas>
+  <div id="crosshair"></div>
 
   <div id="ui-layer">
-    <!-- Top-Left Player Status -->
     <div id="top-left-hud" class="hud-panel">
       <div class="status-card">
         <div class="status-title">Player Balance</div>
-        <div class="stat-val" id="ui-cash">₹ 1,500</div>
+        <div class="stat-val" id="ui-cash">₹ 2,000</div>
+      </div>
+      <div class="status-card" id="ammo-card">
+        <div class="status-title">Weapon / Ammo</div>
+        <div class="stat-val" id="ui-ammo">Pistol (30/30)</div>
       </div>
       <div class="status-card" id="wanted-card" style="display: none; border-left-color: #ef4444;">
         <div class="status-title">Police Alert Level</div>
@@ -283,7 +311,6 @@
       </div>
     </div>
 
-    <!-- Top-Right Mission Tracker -->
     <div id="mission-tracker" class="hud-panel">
       <div class="mission-header">
         <span class="mission-badge" id="mission-chapter">Act 1</span>
@@ -294,36 +321,55 @@
       <div class="mission-timer" id="mission-time" style="display: none;">Time Left: 02:00</div>
     </div>
 
-    <!-- On-screen Context Prompt -->
     <div id="action-prompt" class="hud-panel">Press [E] to Enter Vehicle</div>
 
-    <!-- Minimap Radar -->
     <div id="minimap-container" class="hud-panel">
-      <canvas id="minimap-canvas" width="140" height="140"></canvas>
+      <canvas id="minimap-canvas" width="130" height="130"></canvas>
     </div>
 
-    <!-- Dialogue / Subtitle Bar -->
     <div id="dialogue-container" class="hud-panel">
       <div class="speaker-name" id="dialogue-speaker">Marcus</div>
-      <div class="dialogue-text" id="dialogue-body">"Look, just take this package over to the industrial lot. Easy cash. Don't ask questions."</div>
+      <div class="dialogue-text" id="dialogue-body">"Hop into the car. Let's make this quick."</div>
     </div>
 
-    <!-- Mobile Virtual Controls -->
+    <!-- Mobile Virtual Keys -->
     <div id="mobile-controls">
       <div class="touch-btn" id="dpad-up">▲</div>
       <div class="touch-btn" id="dpad-down">▼</div>
       <div class="touch-btn" id="dpad-left">◀</div>
       <div class="touch-btn" id="dpad-right">▶</div>
+      <div class="touch-btn" id="btn-shoot">FIRE</div>
       <div class="touch-btn" id="btn-action">E</div>
       <div class="touch-btn" id="btn-gas">GAS</div>
       <div class="touch-btn" id="btn-brake">BRK</div>
     </div>
 
-    <!-- Modal: Mission Complete / Failed / Intro -->
-    <div id="modal-screen" class="game-modal" style="display: flex;">
+    <!-- Tuning Garage UI -->
+    <div id="garage-screen">
+      <div class="garage-card">
+        <h2 style="color: #f59e0b; margin-bottom: 6px;">CUSTOMS GARAGE</h2>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">Tune your vehicle for high-speed chases.</p>
+        <div class="garage-item">
+          <span style="font-size: 14px;">Engine Turbo (+25% Speed)</span>
+          <button class="game-btn" style="padding: 6px 12px; font-size: 12px;" onclick="buyUpgrade('speed', 3000)">₹ 3,000</button>
+        </div>
+        <div class="garage-item">
+          <span style="font-size: 14px;">Sport Paint (Midnight Red)</span>
+          <button class="game-btn" style="padding: 6px 12px; font-size: 12px;" onclick="paintCar(0xdc2626, 1000)">₹ 1,000</button>
+        </div>
+        <div class="garage-item">
+          <span style="font-size: 14px;">Neon Cyan Paint</span>
+          <button class="game-btn" style="padding: 6px 12px; font-size: 12px;" onclick="paintCar(0x06b6d4, 1000)">₹ 1,000</button>
+        </div>
+        <button class="game-btn" style="margin-top: 14px; width: 100%; background: #475569;" onclick="closeGarage()">Exit Garage</button>
+      </div>
+    </div>
+
+    <!-- Start / Result Screen -->
+    <div id="modal-screen" class="game-modal">
       <div class="modal-content">
         <h2 class="modal-title" id="modal-title" style="color: #3b82f6;">REAL CITY</h2>
-        <div style="font-size: 13px; color: #f59e0b; font-weight: 800; letter-spacing: 2px; margin-bottom: 12px;">RISE TO POWER</div>
+        <div style="font-size: 12px; color: #f59e0b; font-weight: 800; letter-spacing: 2px;">RISE TO POWER</div>
         <p class="modal-desc" id="modal-body">
           You arrive in the concrete sprawl with empty pockets. Your old acquaintance Marcus offered you a quick delivery job with big payouts. 
           Step into the car, reach the cargo drop, and watch your back.
@@ -334,10 +380,7 @@
   </div>
 
   <script>
-    /* ==========================================================================
-       SYNTHESIZED SOUND ENGINE (Web Audio API)
-       Pure programmatic engine sounds, sirens, chimes, and impacts.
-       ========================================================================== */
+    /* Audio System */
     class SoundEngine {
       constructor() {
         this.ctx = null;
@@ -345,14 +388,16 @@
         this.engineGain = null;
         this.sirenOsc = null;
         this.sirenGain = null;
-        this.isMuted = false;
       }
       init() {
-        if (this.ctx) return;
+        if (this.ctx) {
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+          return;
+        }
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
         this.ctx = new AudioCtx();
 
-        // Engine rumble
         this.engineOsc = this.ctx.createOscillator();
         this.engineGain = this.ctx.createGain();
         this.engineOsc.type = 'sawtooth';
@@ -364,12 +409,25 @@
       }
       setEngineSpeed(ratio) {
         if (!this.ctx || !this.engineGain) return;
-        const freq = 40 + ratio * 140;
-        this.engineOsc.frequency.setTargetAtTime(freq, this.ctx.currentTime, 0.05);
+        this.engineOsc.frequency.setTargetAtTime(40 + ratio * 140, this.ctx.currentTime, 0.05);
         this.engineGain.gain.setTargetAtTime(ratio > 0.02 ? 0.08 : 0.02, this.ctx.currentTime, 0.08);
       }
       stopEngine() {
-        if (this.engineGain) this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
+        if (this.engineGain && this.ctx) this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
+      }
+      playGunshot() {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.12);
       }
       playChime(success = true) {
         if (!this.ctx) return;
@@ -378,30 +436,20 @@
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         const t = this.ctx.currentTime;
-        if (success) {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523.25, t); // C5
-          osc.frequency.exponentialRampToValueAtTime(783.99, t + 0.15); // G5
-          gain.gain.setValueAtTime(0.25, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
-          osc.start(t);
-          osc.stop(t + 0.45);
-        } else {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(220, t);
-          osc.frequency.linearRampToValueAtTime(110, t + 0.3);
-          gain.gain.setValueAtTime(0.3, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-          osc.start(t);
-          osc.stop(t + 0.4);
-        }
+        osc.type = success ? 'triangle' : 'sawtooth';
+        osc.frequency.setValueAtTime(success ? 523 : 220, t);
+        osc.frequency.exponentialRampToValueAtTime(success ? 784 : 110, t + 0.2);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        osc.start(t);
+        osc.stop(t + 0.35);
       }
       playImpact() {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'square';
-        osc.frequency.setValueAtTime(90, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(80, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(20, this.ctx.currentTime + 0.15);
         gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
@@ -416,7 +464,7 @@
           this.sirenOsc = this.ctx.createOscillator();
           this.sirenGain = this.ctx.createGain();
           this.sirenOsc.type = 'sine';
-          this.sirenGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+          this.sirenGain.gain.setValueAtTime(0.06, this.ctx.currentTime);
           this.sirenOsc.connect(this.sirenGain);
           this.sirenGain.connect(this.ctx.destination);
           this.sirenOsc.start();
@@ -432,19 +480,17 @@
       updateSiren(delta) {
         if (this.sirenOsc && this.ctx) {
           this.sirenCycle = (this.sirenCycle || 0) + delta * 3.5;
-          const freq = 650 + Math.sin(this.sirenCycle) * 250;
-          this.sirenOsc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          this.sirenOsc.frequency.setValueAtTime(650 + Math.sin(this.sirenCycle) * 250, this.ctx.currentTime);
         }
       }
     }
 
     const sound = new SoundEngine();
 
-    /* ==========================================================================
-       GAME STATE & MISSION MANAGER
-       ========================================================================== */
+    /* Game State */
     const GAME = {
-      cash: parseInt(localStorage.getItem('rc_cash') || '1500', 10),
+      cash: parseInt(localStorage.getItem('rc_cash') || '2000', 10),
+      ammo: 30,
       currentMissionIndex: 0,
       inVehicle: false,
       activeVehicle: null,
@@ -452,58 +498,48 @@
       missionActive: false,
       timerRemaining: 0,
       policeActive: false,
-      checkpoints: [],
-      currentMarker: null
+      bullets: [],
+      enemies: []
     };
 
     const MISSIONS = [
       {
         id: 1,
         title: "FIRST JOB: Package Pickup",
-        desc: "Get into Marcus's blue sedan and retrieve the cargo behind the warehouse.",
+        desc: "Get into the blue sedan and retrieve cargo behind the south warehouse.",
         pickup: { x: 45, z: -110 },
         dropoff: { x: -80, z: 90 },
-        timeLimit: 120,
+        timeLimit: 130,
         reward: 5000,
-        dialogue: [
-          { speaker: "Marcus", text: "Hop in the ride parked out front. Drive down to the South Warehouse and grab the bag." },
-          { speaker: "Player", text: "Got it. Let's make this quick." }
-        ]
+        dialogue: "Hop in the ride parked out front. Drive to the South Warehouse and grab the bag."
       },
       {
         id: 2,
-        title: "THE AMBUSH: Clean Escape",
-        desc: "It was a setup! Rival crews tipped the cops. Evade pursuit and reach the Safehouse alley.",
+        title: "THE AMBUSH: Syndicate Shootout",
+        desc: "Eliminate the rival gang guards and escape to the safehouse garage.",
         destination: { x: 120, z: 80 },
-        timeLimit: 75,
-        reward: 9000,
-        dialogue: [
-          { speaker: "Radio Scanner", text: "Dispatch, we have suspects leaving the industrial sector. Box them in!" },
-          { speaker: "Player", text: "Marcus set me up! I have to shake them off and get to the underground garage." }
-        ]
+        timeLimit: 90,
+        reward: 9500,
+        enemies: [ { x: 110, z: 75 }, { x: 125, z: 85 } ],
+        dialogue: "Ambush! Rival syndicate gunmen are blocking the hideout. Take them down!"
       },
       {
         id: 3,
-        title: "INVESTIGATION: Confronting the Mole",
-        desc: "Meet up with Detective Vance in the downtown plaza to identify Marcus's suppliers.",
+        title: "POLICE PURSUIT: The Great Escape",
+        desc: "High-speed pursuit! Evade the police cruisers and deliver the evidence.",
         destination: { x: -30, z: -40 },
-        timeLimit: 90,
-        reward: 14000,
-        dialogue: [
-          { speaker: "Det. Vance", text: "Marcus operates under a cartel ring known as The Syndicate. Deliver his ledger to me." }
-        ]
+        timeLimit: 80,
+        reward: 15000,
+        dialogue: "Multiple police units inbound! Shake them off using sharp alley turns."
       }
     ];
 
-    /* ==========================================================================
-       GRAPHICS, 3D SCENE & WORLD GENERATION
-       ========================================================================== */
+    /* Three.js Setup */
     const canvas = document.getElementById('game-canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0c1322);
@@ -511,339 +547,171 @@
 
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-    // Lighting
     const ambientLight = new THREE.AmbientLight(0x7c8ba1, 0.7);
     scene.add(ambientLight);
 
     const sunLight = new THREE.DirectionalLight(0xfff1cf, 1.2);
     sunLight.position.set(60, 110, 40);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 10;
-    sunLight.shadow.camera.far = 300;
-    const shadowSize = 120;
-    sunLight.shadow.camera.left = -shadowSize;
-    sunLight.shadow.camera.right = shadowSize;
-    sunLight.shadow.camera.top = shadowSize;
-    sunLight.shadow.camera.bottom = -shadowSize;
     scene.add(sunLight);
 
-    // Collision array
     const colliders = [];
 
-    /* ---------------------------------------------------------
-       HUMAN CHARACTER (Detailed procedural humanoid with limbs)
-       --------------------------------------------------------- */
-    function createHumanCharacter() {
-      const group = new THREE.Group();
+    /* Human Character */
+    function createHumanMesh(color = 0x1e293b) {
+      const g = new THREE.Group();
+      const skin = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+      const clothes = new THREE.MeshLambertMaterial({ color });
+      const pants = new THREE.MeshLambertMaterial({ color: 0x334155 });
 
-      const skinMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
-      const clothesMat = new THREE.MeshLambertMaterial({ color: 0x1e293b }); // dark bomber jacket
-      const pantsMat = new THREE.MeshLambertMaterial({ color: 0x334155 }); // denim pants
-      const shoesMat = new THREE.MeshLambertMaterial({ color: 0x0f172a });
-      const hairMat = new THREE.MeshLambertMaterial({ color: 0x18181b });
-
-      // Torso
-      const torsoGeo = new THREE.BoxGeometry(0.55, 0.75, 0.28);
-      const torso = new THREE.Mesh(torsoGeo, clothesMat);
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 0.28), clothes);
       torso.position.y = 1.15;
-      torso.castShadow = true;
-      group.add(torso);
+      g.add(torso);
 
-      // Head
-      const headGeo = new THREE.BoxGeometry(0.3, 0.32, 0.3);
-      const head = new THREE.Mesh(headGeo, skinMat);
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.32, 0.3), skin);
       head.position.y = 1.72;
-      head.castShadow = true;
-      group.add(head);
+      g.add(head);
 
-      // Hair
-      const hairGeo = new THREE.BoxGeometry(0.32, 0.12, 0.32);
-      const hair = new THREE.Mesh(hairGeo, hairMat);
-      hair.position.y = 1.88;
-      group.add(hair);
-
-      // Arms & Shoulders (Left & Right Pivots)
       const armGeo = new THREE.BoxGeometry(0.16, 0.65, 0.16);
       armGeo.translate(0, -0.28, 0);
 
-      const leftArm = new THREE.Mesh(armGeo, clothesMat);
+      const leftArm = new THREE.Mesh(armGeo, clothes);
       leftArm.position.set(-0.36, 1.45, 0);
-      leftArm.castShadow = true;
-      group.add(leftArm);
+      g.add(leftArm);
 
-      const rightArm = new THREE.Mesh(armGeo, clothesMat);
+      const rightArm = new THREE.Mesh(armGeo, clothes);
       rightArm.position.set(0.36, 1.45, 0);
-      rightArm.castShadow = true;
-      group.add(rightArm);
+      g.add(rightArm);
 
-      // Legs (Left & Right Pivots)
+      // Weapon in right hand
+      const gunMesh = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.15, 0.35), new THREE.MeshBasicMaterial({ color: 0x111827 }));
+      gunMesh.position.set(0, -0.5, 0.2);
+      rightArm.add(gunMesh);
+
       const legGeo = new THREE.BoxGeometry(0.2, 0.75, 0.2);
       legGeo.translate(0, -0.35, 0);
 
-      const leftLeg = new THREE.Mesh(legGeo, pantsMat);
+      const leftLeg = new THREE.Mesh(legGeo, pants);
       leftLeg.position.set(-0.16, 0.75, 0);
-      leftLeg.castShadow = true;
-      group.add(leftLeg);
+      g.add(leftLeg);
 
-      const rightLeg = new THREE.Mesh(legGeo, pantsMat);
+      const rightLeg = new THREE.Mesh(legGeo, pants);
       rightLeg.position.set(0.16, 0.75, 0);
-      rightLeg.castShadow = true;
-      group.add(rightLeg);
+      g.add(rightLeg);
 
-      // Shoes
-      const footGeo = new THREE.BoxGeometry(0.22, 0.12, 0.3);
-      const leftFoot = new THREE.Mesh(footGeo, shoesMat);
-      leftFoot.position.set(0, -0.72, 0.05);
-      leftLeg.add(leftFoot);
-
-      const rightFoot = new THREE.Mesh(footGeo, shoesMat);
-      rightFoot.position.set(0, -0.72, 0.05);
-      rightLeg.add(rightFoot);
-
-      group.userData = {
-        leftArm, rightArm, leftLeg, rightLeg, head,
-        walkCycle: 0
-      };
-
-      return group;
+      g.userData = { leftArm, rightArm, leftLeg, rightLeg, walkCycle: 0, hp: 100 };
+      return g;
     }
 
-    const player = createHumanCharacter();
+    const player = createHumanMesh(0x1e293b);
     player.position.set(0, 0, 0);
     scene.add(player);
 
-    /* ---------------------------------------------------------
-       VEHICLE FACTORY (Detailed cars with glass, headlights, wheels)
-       --------------------------------------------------------- */
-    function createVehicleMesh(colorHex = 0x2563eb, isPolice = false) {
+    /* Vehicle Factory */
+    function createVehicle(color = 0x2563eb, isPolice = false) {
       const car = new THREE.Group();
+      const bodyMat = new THREE.MeshStandardMaterial({ color, metalness: 0.5, roughness: 0.3 });
+      car.userData.bodyMat = bodyMat;
 
-      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.6, roughness: 0.3 });
-      const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, transparent: true, opacity: 0.85 });
-      const wheelMat = new THREE.MeshLambertMaterial({ color: 0x111827 });
-      const rimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.8 });
-      const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const tailMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
-
-      // Main Chassis
-      const chassisGeo = new THREE.BoxGeometry(2.1, 0.65, 4.4);
-      const chassis = new THREE.Mesh(chassisGeo, bodyMat);
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.65, 4.4), bodyMat);
       chassis.position.y = 0.55;
-      chassis.castShadow = true;
-      chassis.receiveShadow = true;
       car.add(chassis);
 
-      // Cabin / Roof
-      const cabinGeo = new THREE.BoxGeometry(1.8, 0.6, 2.4);
-      const cabin = new THREE.Mesh(cabinGeo, darkGlassMat);
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.6, 2.4), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 }));
       cabin.position.set(0, 1.1, -0.2);
-      cabin.castShadow = true;
       car.add(cabin);
 
-      // Roof Cover
-      const roofGeo = new THREE.BoxGeometry(1.7, 0.08, 2.2);
-      const roof = new THREE.Mesh(roofGeo, bodyMat);
-      roof.position.set(0, 1.42, -0.2);
-      car.add(roof);
-
-      // Headlights & Tail Lights
-      const hlGeo = new THREE.BoxGeometry(0.4, 0.15, 0.1);
-      const hlL = new THREE.Mesh(hlGeo, lightMat);
-      hlL.position.set(-0.7, 0.6, 2.2);
-      const hlR = hlL.clone();
-      hlR.position.x = 0.7;
-      car.add(hlL);
-      car.add(hlR);
-
-      const tlGeo = new THREE.BoxGeometry(0.4, 0.15, 0.1);
-      const tlL = new THREE.Mesh(tlGeo, tailMat);
-      tlL.position.set(-0.7, 0.6, -2.2);
-      const tlR = tlL.clone();
-      tlR.position.x = 0.7;
-      car.add(tlL);
-      car.add(tlR);
-
-      // Police Strobe Bar
       if (isPolice) {
-        const barGeo = new THREE.BoxGeometry(0.9, 0.15, 0.3);
-        const barMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6 });
-        const lightBar = new THREE.Mesh(barGeo, barMat);
-        lightBar.position.set(0, 1.5, -0.2);
-        car.add(lightBar);
-        car.userData.sirenLight = lightBar;
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.15, 0.3), new THREE.MeshBasicMaterial({ color: 0x3b82f6 }));
+        bar.position.set(0, 1.45, -0.2);
+        car.add(bar);
+        car.userData.sirenLight = bar;
       }
 
-      // Wheels
       const wheels = [];
-      const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 18);
-      wheelGeo.rotateZ(Math.PI / 2);
+      const wGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 16);
+      wGeo.rotateZ(Math.PI / 2);
+      const wMat = new THREE.MeshLambertMaterial({ color: 0x111827 });
 
-      const wheelPositions = [
-        [-0.95, 0.38, 1.3],
-        [0.95, 0.38, 1.3],
-        [-0.95, 0.38, -1.3],
-        [0.95, 0.38, -1.3]
-      ];
-
-      wheelPositions.forEach(pos => {
-        const wGroup = new THREE.Group();
-        const wMesh = new THREE.Mesh(wheelGeo, wheelMat);
-        wMesh.castShadow = true;
-        const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.29, 12), rimMat);
-        rim.rotateZ(Math.PI / 2);
-        wGroup.add(wMesh);
-        wGroup.add(rim);
-        wGroup.position.set(pos[0], pos[1], pos[2]);
-        car.add(wGroup);
-        wheels.push(wGroup);
+      [[-0.95, 0.38, 1.3], [0.95, 0.38, 1.3], [-0.95, 0.38, -1.3], [0.95, 0.38, -1.3]].forEach(pos => {
+        const w = new THREE.Mesh(wGeo, wMat);
+        w.position.set(pos[0], pos[1], pos[2]);
+        car.add(w);
+        wheels.push(w);
       });
 
-      car.userData = {
-        wheels,
-        speed: 0,
-        steerAngle: 0,
-        isPolice,
-        maxSpeed: isPolice ? 34 : 30,
-        accel: 24,
-        brake: 32,
-        reverse: 12
-      };
-
+      car.userData.wheels = wheels;
+      car.userData.speed = 0;
+      car.userData.steerAngle = 0;
+      car.userData.maxSpeed = isPolice ? 35 : 30;
+      car.userData.accel = 24;
       return car;
     }
 
-    // Player Sedan
-    const playerCar = createVehicleMesh(0x2563eb, false);
+    const playerCar = createVehicle(0x2563eb, false);
     playerCar.position.set(5, 0, -8);
     scene.add(playerCar);
 
-    // Police Interceptor
-    const policeCar = createVehicleMesh(0x0f172a, true);
-    policeCar.position.set(200, 0, 200); // starts far away
+    const policeCar = createVehicle(0x0f172a, true);
+    policeCar.position.set(200, 0, 200);
     scene.add(policeCar);
 
-    /* ---------------------------------------------------------
-       CITY ENVIRONMENT GENERATION (Streets, Blocks, Props)
-       --------------------------------------------------------- */
-    const CITY_SIZE = 400;
-    const BLOCK_SIZE = 50;
-    const ROAD_WIDTH = 14;
+    /* City Construction */
+    const CITY_SIZE = 360;
+    const BLOCK = 48;
+    const ROAD = 14;
 
     function buildCity() {
-      // Ground plane / Grass & asphalt foundation
-      const groundGeo = new THREE.PlaneGeometry(CITY_SIZE, CITY_SIZE);
-      const groundMat = new THREE.MeshLambertMaterial({ color: 0x111827 });
-      const ground = new THREE.Mesh(groundGeo, groundMat);
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(CITY_SIZE, CITY_SIZE), new THREE.MeshLambertMaterial({ color: 0x111827 }));
       ground.rotation.x = -Math.PI / 2;
-      ground.receiveShadow = true;
       scene.add(ground);
 
-      // Building Materials
-      const buildingColors = [0x1f2937, 0x1e293b, 0x27272a, 0x334155, 0x1e1b4b];
-      const windowMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
-
-      // Grid of Blocks
+      const bColors = [0x1f2937, 0x1e293b, 0x334155];
       const half = CITY_SIZE / 2;
-      for (let x = -half + 30; x < half - 30; x += BLOCK_SIZE) {
-        for (let z = -half + 30; z < half - 30; z += BLOCK_SIZE) {
-          // Skip origin for starting court
-          if (Math.abs(x) < 20 && Math.abs(z) < 20) continue;
 
-          // Building footprint
-          const bW = BLOCK_SIZE - ROAD_WIDTH;
-          const bD = BLOCK_SIZE - ROAD_WIDTH;
-          const bH = 15 + Math.random() * 45;
+      for (let x = -half + 30; x < half - 30; x += BLOCK) {
+        for (let z = -half + 30; z < half - 30; z += BLOCK) {
+          if (Math.abs(x) < 15 && Math.abs(z) < 15) continue;
 
-          const bMat = new THREE.MeshStandardMaterial({
-            color: buildingColors[Math.floor(Math.random() * buildingColors.length)],
-            roughness: 0.8
-          });
+          const w = BLOCK - ROAD;
+          const h = 18 + Math.random() * 35;
+          const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), new THREE.MeshStandardMaterial({
+            color: bColors[Math.floor(Math.random() * bColors.length)]
+          }));
+          b.position.set(x, h / 2, z);
+          scene.add(b);
 
-          const bMesh = new THREE.Mesh(new THREE.BoxGeometry(bW, bH, bD), bMat);
-          bMesh.position.set(x, bH / 2, z);
-          bMesh.castShadow = true;
-          bMesh.receiveShadow = true;
-          scene.add(bMesh);
-
-          // Add Box Collider
-          colliders.push({
-            minX: x - bW / 2 - 0.5,
-            maxX: x + bW / 2 + 0.5,
-            minZ: z - bD / 2 - 0.5,
-            maxZ: z + bD / 2 + 0.5
-          });
-
-          // Add glowing window bands
-          const winMesh = new THREE.Mesh(new THREE.BoxGeometry(bW + 0.1, 0.8, bD + 0.1), windowMat);
-          winMesh.position.set(x, bH * 0.65, z);
-          scene.add(winMesh);
+          colliders.push({ minX: x - w / 2 - 0.5, maxX: x + w / 2 + 0.5, minZ: z - w / 2 - 0.5, maxZ: z + w / 2 + 0.5 });
         }
       }
 
-      // Road markings & Streetlights
-      const lampGeo = new THREE.CylinderGeometry(0.12, 0.15, 6, 8);
-      const lampMat = new THREE.MeshLambertMaterial({ color: 0x64748b });
-      const lightBulbMat = new THREE.MeshBasicMaterial({ color: 0xffedd5 });
-
-      for (let r = -half + 50; r < half - 50; r += BLOCK_SIZE) {
-        // Horizontal road light
-        const lamp = new THREE.Mesh(lampGeo, lampMat);
-        lamp.position.set(r + 8, 3, 0);
-        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), lightBulbMat);
-        bulb.position.y = 3;
-        lamp.add(bulb);
-        scene.add(lamp);
-      }
+      // Garage Marker Zone
+      const garageZone = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.2, 24), new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.4 }));
+      garageZone.position.set(0, 0.1, 40);
+      scene.add(garageZone);
     }
-
     buildCity();
 
-    /* ---------------------------------------------------------
-       MISSION OBJECTIVE MARKER & WAYPOINTS
-       --------------------------------------------------------- */
-    function createObjectiveMarker() {
-      const group = new THREE.Group();
-      // Glowing pillar
-      const cylinder = new THREE.Mesh(
-        new THREE.CylinderGeometry(2.5, 2.5, 12, 16, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
-      );
-      cylinder.position.y = 6;
-      group.add(cylinder);
-
-      // Rotating diamond marker on top
-      const diamond = new THREE.Mesh(
-        new THREE.OctahedronGeometry(1.2, 0),
-        new THREE.MeshBasicMaterial({ color: 0xf59e0b })
-      );
-      diamond.position.y = 12;
-      group.add(diamond);
-
-      group.userData = { diamond, cylinder };
-      return group;
-    }
-
-    const objectiveMarker = createObjectiveMarker();
+    /* Objective Pillar */
+    const objectiveMarker = new THREE.Group();
+    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 10, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.45 }));
+    pillar.position.y = 5;
+    objectiveMarker.add(pillar);
+    const diamond = new THREE.Mesh(new THREE.OctahedronGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
+    diamond.position.y = 11;
+    objectiveMarker.add(diamond);
     scene.add(objectiveMarker);
 
-    /* ==========================================================================
-       CONTROLS & INPUT SYSTEM (Desktop WASD + Mobile Buttons)
-       ========================================================================== */
-    const keys = { w: false, s: false, a: false, d: false, e: false, space: false };
+    /* Input Handling */
+    const keys = { w: false, s: false, a: false, d: false };
 
     window.addEventListener('keydown', (e) => {
-      sound.init();
       const k = e.key.toLowerCase();
       if (k === 'w' || k === 'arrowup') keys.w = true;
       if (k === 's' || k === 'arrowdown') keys.s = true;
       if (k === 'a' || k === 'arrowleft') keys.a = true;
       if (k === 'd' || k === 'arrowright') keys.d = true;
-      if (k === ' ' ) keys.space = true;
-      if (k === 'e') {
-        toggleVehicleInteraction();
-      }
+      if (k === 'e') toggleVehicle();
     });
 
     window.addEventListener('keyup', (e) => {
@@ -852,490 +720,386 @@
       if (k === 's' || k === 'arrowdown') keys.s = false;
       if (k === 'a' || k === 'arrowleft') keys.a = false;
       if (k === 'd' || k === 'arrowright') keys.d = false;
-      if (k === ' ') keys.space = false;
     });
 
-    // Touch Detection & Mobile Button Hooks
+    window.addEventListener('click', (e) => {
+      if (modalScreen.style.display === 'flex' || document.getElementById('garage-screen').style.display === 'flex') return;
+      if (!GAME.inVehicle) shootWeapon();
+    });
+
+    // Touch controls
     const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isMobile) {
       document.getElementById('mobile-controls').style.display = 'block';
-
-      const bindTouch = (id, onDown, onUp) => {
+      const bind = (id, down, up) => {
         const el = document.getElementById(id);
-        el.addEventListener('touchstart', (e) => { e.preventDefault(); sound.init(); onDown(); });
-        el.addEventListener('touchend', (e) => { e.preventDefault(); onUp(); });
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); down(); });
+        el.addEventListener('touchend', (e) => { e.preventDefault(); up(); });
       };
-
-      bindTouch('dpad-up', () => keys.w = true, () => keys.w = false);
-      bindTouch('dpad-down', () => keys.s = true, () => keys.s = false);
-      bindTouch('dpad-left', () => keys.a = true, () => keys.a = false);
-      bindTouch('dpad-right', () => keys.d = true, () => keys.d = false);
-      bindTouch('btn-gas', () => keys.w = true, () => keys.w = false);
-      bindTouch('btn-brake', () => keys.s = true, () => keys.s = false);
-      document.getElementById('btn-action').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        sound.init();
-        toggleVehicleInteraction();
-      });
+      bind('dpad-up', () => keys.w = true, () => keys.w = false);
+      bind('dpad-down', () => keys.s = true, () => keys.s = false);
+      bind('dpad-left', () => keys.a = true, () => keys.a = false);
+      bind('dpad-right', () => keys.d = true, () => keys.d = false);
+      bind('btn-gas', () => keys.w = true, () => keys.w = false);
+      bind('btn-brake', () => keys.s = true, () => keys.s = false);
+      document.getElementById('btn-action').addEventListener('touchstart', (e) => { e.preventDefault(); toggleVehicle(); });
+      document.getElementById('btn-shoot').addEventListener('touchstart', (e) => { e.preventDefault(); shootWeapon(); });
     }
 
-    /* ---------------------------------------------------------
-       VEHICLE ENTRY / EXIT LOGIC
-       --------------------------------------------------------- */
-    const actionPrompt = document.getElementById('action-prompt');
-
-    function checkProximityToVehicle() {
-      if (GAME.inVehicle) {
-        actionPrompt.style.display = 'block';
-        actionPrompt.innerText = isMobile ? 'Tap [E] to Exit Vehicle' : 'Press [E] to Exit Vehicle';
-        return;
+    function checkCollision(nx, nz, r = 0.6) {
+      for (let i = 0; i < colliders.length; i++) {
+        const c = colliders[i];
+        if (nx + r > c.minX && nx - r < c.maxX && nz + r > c.minZ && nz - r < c.maxZ) return true;
       }
-      const dist = player.position.distanceTo(playerCar.position);
-      if (dist < 4.5) {
-        actionPrompt.style.display = 'block';
-        actionPrompt.innerText = isMobile ? 'Tap [E] to Drive Car' : 'Press [E] to Enter Vehicle';
-      } else {
-        actionPrompt.style.display = 'none';
-      }
+      return Math.abs(nx) > CITY_SIZE / 2 - 4 || Math.abs(nz) > CITY_SIZE / 2 - 4;
     }
 
-    function toggleVehicleInteraction() {
+    /* Combat / Shooting Mechanic */
+    function shootWeapon() {
+      if (GAME.ammo <= 0) return;
+      GAME.ammo--;
+      document.getElementById('ui-ammo').innerText = `Pistol (${GAME.ammo}/30)`;
+      sound.playGunshot();
+
+      const dir = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
+      const bullet = new THREE.Mesh(new THREE.SphereGeometry(0.12), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+      bullet.position.copy(player.position).add(new THREE.Vector3(0, 1.4, 0));
+      bullet.userData = { vel: dir.multiplyScalar(60), life: 1.5 };
+      scene.add(bullet);
+      GAME.bullets.push(bullet);
+    }
+
+    /* Vehicle Mechanics */
+    function toggleVehicle() {
       if (GAME.inVehicle) {
-        // Exit
         GAME.inVehicle = false;
         GAME.activeVehicle = null;
         player.visible = true;
         player.position.set(playerCar.position.x - 2, 0, playerCar.position.z);
         sound.stopEngine();
+        document.getElementById('crosshair').style.display = 'block';
       } else {
-        // Enter
-        const dist = player.position.distanceTo(playerCar.position);
-        if (dist < 4.5) {
+        if (player.position.distanceTo(playerCar.position) < 4.5) {
           GAME.inVehicle = true;
           GAME.activeVehicle = playerCar;
           player.visible = false;
           sound.playChime(true);
+          document.getElementById('crosshair').style.display = 'none';
         }
       }
     }
 
-    /* ---------------------------------------------------------
-       PHYSICS & COLLISION DETECTION
-       --------------------------------------------------------- */
-    function checkAABBCollision(newX, newZ, radius = 0.6) {
-      for (let i = 0; i < colliders.length; i++) {
-        const c = colliders[i];
-        if (newX + radius > c.minX && newX - radius < c.maxX &&
-            newZ + radius > c.minZ && newZ - radius < c.maxZ) {
-          return true;
-        }
+    /* Garage Interaction */
+    window.buyUpgrade = function(type, price) {
+      if (GAME.cash >= price) {
+        GAME.cash -= price;
+        updateCashDisplay();
+        playerCar.userData.maxSpeed += 8;
+        sound.playChime(true);
+        alert("Engine tuned! Top speed increased.");
+      } else {
+        alert("Insufficient cash!");
       }
-      // World Boundaries
-      const limit = CITY_SIZE / 2 - 4;
-      if (Math.abs(newX) > limit || Math.abs(newZ) > limit) return true;
-      return false;
-    }
+    };
 
-    /* ---------------------------------------------------------
-       MISSION RUNNER & PROGRESSION
-       --------------------------------------------------------- */
-    const uiCash = document.getElementById('ui-cash');
-    const missionTitle = document.getElementById('mission-title');
-    const missionDesc = document.getElementById('mission-desc');
-    const missionTime = document.getElementById('mission-time');
-    const wantedCard = document.getElementById('wanted-card');
-    const dialogueBox = document.getElementById('dialogue-container');
-    const dialogueSpeaker = document.getElementById('dialogue-speaker');
-    const dialogueBody = document.getElementById('dialogue-body');
+    window.paintCar = function(color, price) {
+      if (GAME.cash >= price) {
+        GAME.cash -= price;
+        updateCashDisplay();
+        playerCar.userData.bodyMat.color.setHex(color);
+        sound.playChime(true);
+      } else {
+        alert("Insufficient cash!");
+      }
+    };
+
+    window.closeGarage = function() {
+      document.getElementById('garage-screen').style.display = 'none';
+    };
+
+    /* Missions & UI */
     const modalScreen = document.getElementById('modal-screen');
     const modalBtn = document.getElementById('modal-btn');
 
     function updateCashDisplay() {
-      uiCash.innerText = '₹ ' + GAME.cash.toLocaleString();
+      document.getElementById('ui-cash').innerText = '₹ ' + GAME.cash.toLocaleString();
       localStorage.setItem('rc_cash', GAME.cash.toString());
     }
 
-    function showDialogue(speaker, text, duration = 4500) {
-      dialogueSpeaker.innerText = speaker;
-      dialogueBody.innerText = `"${text}"`;
-      dialogueBox.style.display = 'block';
-      clearTimeout(dialogueBox._timer);
-      dialogueBox._timer = setTimeout(() => {
-        dialogueBox.style.display = 'none';
-      }, duration);
+    function showDialogue(speaker, text) {
+      const box = document.getElementById('dialogue-container');
+      document.getElementById('dialogue-speaker').innerText = speaker;
+      document.getElementById('dialogue-body').innerText = `"${text}"`;
+      box.style.display = 'block';
+      setTimeout(() => box.style.display = 'none', 4500);
     }
 
-    function setupMission(index) {
-      const m = MISSIONS[index];
+    function setupMission(idx) {
+      const m = MISSIONS[idx];
       GAME.missionActive = true;
-      GAME.currentMissionIndex = index;
+      GAME.currentMissionIndex = idx;
       GAME.timerRemaining = m.timeLimit;
-      missionTitle.innerText = m.title;
-      missionDesc.innerText = m.desc;
+      document.getElementById('mission-title').innerText = m.title;
+      document.getElementById('mission-desc').innerText = m.desc;
       document.getElementById('mission-reward').innerText = `+₹ ${m.reward.toLocaleString()}`;
+      document.getElementById('mission-time').style.display = 'block';
 
-      if (m.timeLimit > 0) {
-        missionTime.style.display = 'block';
-      } else {
-        missionTime.style.display = 'none';
-      }
+      // Clear old enemies
+      GAME.enemies.forEach(e => scene.remove(e.mesh));
+      GAME.enemies = [];
 
-      if (index === 0) {
+      if (idx === 0) {
         objectiveMarker.position.set(m.pickup.x, 0, m.pickup.z);
         GAME.stage = 'pickup';
-      } else if (index === 1) {
+      } else if (idx === 1) {
+        objectiveMarker.position.set(m.destination.x, 0, m.destination.z);
+        // Spawn syndicate enemies
+        m.enemies.forEach(ep => {
+          const eMesh = createHumanMesh(0xdc2626);
+          eMesh.position.set(ep.x, 0, ep.z);
+          scene.add(eMesh);
+          GAME.enemies.push({ mesh: eMesh, hp: 60 });
+        });
+      } else if (idx === 2) {
         objectiveMarker.position.set(m.destination.x, 0, m.destination.z);
         GAME.wantedLevel = 2;
-        wantedCard.style.display = 'block';
+        document.getElementById('wanted-card').style.display = 'block';
         sound.setSiren(true);
-        // Spawn Police Behind
-        policeCar.position.set(playerCar.position.x - 30, 0, playerCar.position.z - 30);
+        policeCar.position.set(playerCar.position.x - 25, 0, playerCar.position.z - 25);
         GAME.policeActive = true;
-      } else if (index === 2) {
-        objectiveMarker.position.set(m.destination.x, 0, m.destination.z);
-        GAME.wantedLevel = 0;
-        wantedCard.style.display = 'none';
-        sound.setSiren(false);
-        GAME.policeActive = false;
       }
-
-      if (m.dialogue && m.dialogue.length > 0) {
-        showDialogue(m.dialogue[0].speaker, m.dialogue[0].text);
-      }
+      showDialogue("Handler", m.dialogue);
     }
 
-    function onMissionSuccess() {
-      sound.playChime(true);
-      const m = MISSIONS[GAME.currentMissionIndex];
-      GAME.cash += m.reward;
-      updateCashDisplay();
-      GAME.missionActive = false;
-
-      if (GAME.currentMissionIndex + 1 < MISSIONS.length) {
-        GAME.currentMissionIndex++;
-        document.getElementById('modal-title').innerText = "MISSION ACCOMPLISHED!";
-        document.getElementById('modal-title').style.color = "#10b981";
-        document.getElementById('modal-body').innerText = `Reward Received: ₹ ${m.reward.toLocaleString()}.\n\nNext story beat: ${MISSIONS[GAME.currentMissionIndex].title}`;
-        modalBtn.innerText = "Begin Next Mission";
-        modalScreen.style.display = 'flex';
-      } else {
-        document.getElementById('modal-title').innerText = "CITY CONQUERED";
-        document.getElementById('modal-title').style.color = "#f59e0b";
-        document.getElementById('modal-body').innerText = `You exposed the conspiracy, cleared Marcus's ring, and claimed control of the underground networks. You are now the undisputed kingpin of Real City.`;
-        modalBtn.innerText = "Free Roam & Replay";
-        modalScreen.style.display = 'flex';
-        GAME.currentMissionIndex = 0;
-      }
-    }
-
-    function onMissionFailed(reason = "Time Ran Out!") {
-      sound.playChime(false);
-      GAME.missionActive = false;
-      document.getElementById('modal-title').innerText = "MISSION FAILED";
-      document.getElementById('modal-title').style.color = "#ef4444";
-      document.getElementById('modal-body').innerText = `${reason}\nPolice or rival syndicates captured the payload. Regroup and try again.`;
-      modalBtn.innerText = "Retry Mission";
-      modalScreen.style.display = 'flex';
-    }
-
-    modalBtn.addEventListener('click', () => {
-      sound.init();
+    function startButtonAction() {
+      try {
+        sound.init();
+      } catch(e) {}
       modalScreen.style.display = 'none';
       setupMission(GAME.currentMissionIndex);
-    });
-
-    /* ---------------------------------------------------------
-       MINIMAP RADAR DRAWING
-       --------------------------------------------------------- */
-    const minimapCanvas = document.getElementById('minimap-canvas');
-    const mmCtx = minimapCanvas.getContext('2d');
-
-    function updateMinimap() {
-      const w = minimapCanvas.width;
-      const h = minimapCanvas.height;
-      mmCtx.clearRect(0, 0, w, h);
-
-      // Center around player
-      const focalPos = GAME.inVehicle ? playerCar.position : player.position;
-      const focalRot = GAME.inVehicle ? playerCar.rotation.y : player.rotation.y;
-
-      mmCtx.save();
-      mmCtx.translate(w / 2, h / 2);
-      mmCtx.rotate(-focalRot);
-
-      const scale = 0.35; // world to radar scale
-
-      // Draw City colliders/buildings
-      mmCtx.fillStyle = '#334155';
-      colliders.forEach(c => {
-        const cx = ((c.minX + c.maxX) / 2 - focalPos.x) * scale;
-        const cz = ((c.minZ + c.maxZ) / 2 - focalPos.z) * scale;
-        const bw = (c.maxX - c.minX) * scale;
-        const bh = (c.maxZ - c.minZ) * scale;
-        mmCtx.fillRect(cx - bw / 2, cz - bh / 2, bw, bh);
-      });
-
-      // Draw Objective
-      const ox = (objectiveMarker.position.x - focalPos.x) * scale;
-      const oz = (objectiveMarker.position.z - focalPos.z) * scale;
-      mmCtx.fillStyle = '#f59e0b';
-      mmCtx.beginPath();
-      mmCtx.arc(ox, oz, 5, 0, Math.PI * 2);
-      mmCtx.fill();
-
-      // Draw Police if active
-      if (GAME.policeActive) {
-        const px = (policeCar.position.x - focalPos.x) * scale;
-        const pz = (policeCar.position.z - focalPos.z) * scale;
-        mmCtx.fillStyle = '#ef4444';
-        mmCtx.beginPath();
-        mmCtx.arc(px, pz, 4.5, 0, Math.PI * 2);
-        mmCtx.fill();
-      }
-
-      mmCtx.restore();
-
-      // Draw Player Arrow at exact center
-      mmCtx.fillStyle = '#38bdf8';
-      mmCtx.beginPath();
-      mmCtx.moveTo(w / 2, h / 2 - 6);
-      mmCtx.lineTo(w / 2 + 5, h / 2 + 5);
-      mmCtx.lineTo(w / 2 - 5, h / 2 + 5);
-      mmCtx.closePath();
-      mmCtx.fill();
     }
 
-    /* ==========================================================================
-       MAIN LOOP & UPDATE STEP
-       ========================================================================== */
+    // Direct binding for fast clicks
+    modalBtn.onclick = startButtonAction;
+    modalBtn.ontouchend = (e) => { e.preventDefault(); startButtonAction(); };
+
+    /* Game Loop */
     const clock = new THREE.Clock();
 
-    function update() {
+    function animate() {
       const delta = Math.min(clock.getDelta(), 0.1);
 
-      // Objective Marker Animation
-      if (objectiveMarker.visible) {
-        objectiveMarker.userData.diamond.rotation.y += delta * 2;
-        objectiveMarker.userData.diamond.position.y = 12 + Math.sin(clock.getElapsedTime() * 3) * 0.8;
+      // Diamond animation
+      diamond.rotation.y += delta * 2;
+      diamond.position.y = 11 + Math.sin(clock.getElapsedTime() * 3) * 0.7;
+
+      // Check Garage trigger
+      if (player.position.distanceTo(new THREE.Vector3(0, 0, 40)) < 6 && !GAME.inVehicle) {
+        document.getElementById('action-prompt').style.display = 'block';
+        document.getElementById('action-prompt').innerText = "Press [G] to Enter Garage";
+        if (keys.g) document.getElementById('garage-screen').style.display = 'flex';
       }
 
-      // Proximity Prompt Check
-      checkProximityToVehicle();
-
-      /* ----------------------------------
-         1. PLAYER ON FOOT CONTROLS
-         ---------------------------------- */
+      /* 1. Player On Foot */
       if (!GAME.inVehicle) {
-        const moveSpeed = 8.5;
-        let moveX = 0;
-        let moveZ = 0;
+        let mx = 0, mz = 0;
+        if (keys.w) mz -= 1;
+        if (keys.s) mz += 1;
+        if (keys.a) mx -= 1;
+        if (keys.d) mx += 1;
 
-        if (keys.w) moveZ -= 1;
-        if (keys.s) moveZ += 1;
-        if (keys.a) moveX -= 1;
-        if (keys.d) moveX += 1;
+        if (mx !== 0 || mz !== 0) {
+          const moveDir = new THREE.Vector3(mx, 0, mz).normalize();
+          player.rotation.y = Math.atan2(moveDir.x, moveDir.z);
 
-        const isMoving = moveX !== 0 || moveZ !== 0;
+          const nx = player.position.x + moveDir.x * 9 * delta;
+          const nz = player.position.z + moveDir.z * 9 * delta;
 
-        if (isMoving) {
-          const moveDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
-          const targetRotation = Math.atan2(moveDir.x, moveDir.z);
-          player.rotation.y = targetRotation;
+          if (!checkCollision(nx, player.position.z)) player.position.x = nx;
+          if (!checkCollision(player.position.x, nz)) player.position.z = nz;
 
-          const nextX = player.position.x + moveDir.x * moveSpeed * delta;
-          const nextZ = player.position.z + moveDir.z * moveSpeed * delta;
-
-          if (!checkAABBCollision(nextX, player.position.z, 0.4)) {
-            player.position.x = nextX;
-          }
-          if (!checkAABBCollision(player.position.x, nextZ, 0.4)) {
-            player.position.z = nextZ;
-          }
-
-          // Walk Animation
           player.userData.walkCycle += delta * 12;
-          const angle = Math.sin(player.userData.walkCycle) * 0.55;
-          player.userData.leftLeg.rotation.x = angle;
-          player.userData.rightLeg.rotation.x = -angle;
-          player.userData.leftArm.rotation.x = -angle;
-          player.userData.rightArm.rotation.x = angle;
-        } else {
-          // Reset limbs to resting position
-          player.userData.leftLeg.rotation.x *= 0.8;
-          player.userData.rightLeg.rotation.x *= 0.8;
-          player.userData.leftArm.rotation.x *= 0.8;
-          player.userData.rightArm.rotation.x *= 0.8;
+          const a = Math.sin(player.userData.walkCycle) * 0.55;
+          player.userData.leftLeg.rotation.x = a;
+          player.userData.rightLeg.rotation.x = -a;
         }
 
-        // Camera Smooth Follow (Foot)
-        const targetCamX = player.position.x - Math.sin(player.rotation.y) * 8;
-        const targetCamZ = player.position.z - Math.cos(player.rotation.y) * 8;
-        camera.position.lerp(new THREE.Vector3(targetCamX, player.position.y + 4.8, targetCamZ), 0.1);
+        const camTarget = new THREE.Vector3(
+          player.position.x - Math.sin(player.rotation.y) * 7,
+          player.position.y + 4,
+          player.position.z - Math.cos(player.rotation.y) * 7
+        );
+        camera.position.lerp(camTarget, 0.15);
         camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
+
+        // Vehicle proximity check
+        const distToCar = player.position.distanceTo(playerCar.position);
+        const prompt = document.getElementById('action-prompt');
+        if (distToCar < 4.5) {
+          prompt.style.display = 'block';
+          prompt.innerText = isMobile ? "Tap [E] to Drive" : "Press [E] to Drive";
+        } else {
+          prompt.style.display = 'none';
+        }
       }
 
-      /* ----------------------------------
-         2. VEHICLE DRIVING CONTROLS
-         ---------------------------------- */
+      /* 2. Driving Vehicle */
       if (GAME.inVehicle && GAME.activeVehicle) {
         const car = GAME.activeVehicle;
         const u = car.userData;
 
-        // Steering
-        const maxSteer = 0.65;
-        if (keys.a) {
-          u.steerAngle = Math.min(u.steerAngle + delta * 2.8, maxSteer);
-        } else if (keys.d) {
-          u.steerAngle = Math.max(u.steerAngle - delta * 2.8, -maxSteer);
-        } else {
-          u.steerAngle *= 0.82;
-        }
+        if (keys.a) u.steerAngle = Math.min(u.steerAngle + delta * 2.8, 0.65);
+        else if (keys.d) u.steerAngle = Math.max(u.steerAngle - delta * 2.8, -0.65);
+        else u.steerAngle *= 0.8;
 
-        // Front wheels turn visually
         u.wheels[0].rotation.y = u.steerAngle;
         u.wheels[1].rotation.y = u.steerAngle;
 
-        // Acceleration & Braking
-        if (keys.w) {
-          u.speed = Math.min(u.speed + u.accel * delta, u.maxSpeed);
-        } else if (keys.s) {
-          u.speed = Math.max(u.speed - u.brake * delta, -u.reverse);
-        } else {
-          // Friction Drag
-          u.speed *= 0.985;
-          if (Math.abs(u.speed) < 0.05) u.speed = 0;
-        }
+        if (keys.w) u.speed = Math.min(u.speed + u.accel * delta, u.maxSpeed);
+        else if (keys.s) u.speed = Math.max(u.speed - 30 * delta, -12);
+        else u.speed *= 0.985;
 
-        // Apply Heading / Yaw
         if (Math.abs(u.speed) > 0.1) {
-          const turnDir = u.speed > 0 ? 1 : -1;
-          car.rotation.y += u.steerAngle * (u.speed / u.maxSpeed) * delta * 2.2 * turnDir;
+          car.rotation.y += u.steerAngle * (u.speed / u.maxSpeed) * delta * 2.2 * (u.speed > 0 ? 1 : -1);
         }
 
-        // Velocity translation with collision test
-        const forward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y);
-        const nextCarX = car.position.x + forward.x * u.speed * delta;
-        const nextCarZ = car.position.z + forward.z * u.speed * delta;
+        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y);
+        const nx = car.position.x + fwd.x * u.speed * delta;
+        const nz = car.position.z + fwd.z * u.speed * delta;
 
-        if (!checkAABBCollision(nextCarX, nextCarZ, 1.2)) {
-          car.position.x = nextCarX;
-          car.position.z = nextCarZ;
+        if (!checkCollision(nx, nz, 1.2)) {
+          car.position.x = nx;
+          car.position.z = nz;
         } else {
-          // Impact bounce
           sound.playImpact();
-          u.speed = -u.speed * 0.35;
+          u.speed = -u.speed * 0.3;
         }
 
-        // Wheel Rotation
-        const rollAngle = (u.speed * delta) / 0.38;
-        u.wheels.forEach(w => w.rotation.x += rollAngle);
-
-        // Sound Engine Update
         sound.setEngineSpeed(Math.abs(u.speed) / u.maxSpeed);
 
-        // Camera Smooth Follow (Car)
-        const distBehind = 9.5;
-        const camElevation = 4.2;
-        const idealCamPos = new THREE.Vector3(
-          car.position.x - forward.x * distBehind,
-          car.position.y + camElevation,
-          car.position.z - forward.z * distBehind
+        const idealCam = new THREE.Vector3(
+          car.position.x - fwd.x * 9.5,
+          car.position.y + 4.2,
+          car.position.z - fwd.z * 9.5
         );
-        camera.position.lerp(idealCamPos, 0.12);
-        camera.lookAt(car.position.x, car.position.y + 1.4, car.position.z);
+        camera.position.lerp(idealCam, 0.15);
+        camera.lookAt(car.position.x, car.position.y + 1.2, car.position.z);
       }
 
-      /* ----------------------------------
-         3. POLICE PURSUIT AI
-         ---------------------------------- */
+      /* 3. Bullets & Combat Hit Detection */
+      for (let i = GAME.bullets.length - 1; i >= 0; i--) {
+        const b = GAME.bullets[i];
+        b.position.addScaledVector(b.userData.vel, delta);
+        b.userData.life -= delta;
+
+        // Check enemy hit
+        GAME.enemies.forEach(en => {
+          if (b.position.distanceTo(en.mesh.position) < 1.2) {
+            en.hp -= 35;
+            sound.playImpact();
+            b.userData.life = 0;
+            if (en.hp <= 0) {
+              scene.remove(en.mesh);
+              GAME.enemies = GAME.enemies.filter(item => item !== en);
+            }
+          }
+        });
+
+        if (b.userData.life <= 0) {
+          scene.remove(b);
+          GAME.bullets.splice(i, 1);
+        }
+      }
+
+      /* 4. Police AI Pursuit */
       if (GAME.policeActive) {
         sound.updateSiren(delta);
-        const pCar = policeCar;
         const target = GAME.inVehicle ? playerCar.position : player.position;
+        const dx = target.x - policeCar.position.x;
+        const dz = target.z - policeCar.position.z;
+        policeCar.rotation.y += (Math.atan2(dx, dz) - policeCar.rotation.y) * delta * 2.5;
 
-        // Rotate siren flashing light
-        if (pCar.userData.sirenLight) {
-          const flash = Math.sin(clock.getElapsedTime() * 12) > 0;
-          pCar.userData.sirenLight.material.color.setHex(flash ? 0xef4444 : 0x3b82f6);
-        }
+        const pfwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), policeCar.rotation.y);
+        policeCar.position.addScaledVector(pfwd, 23 * delta);
 
-        // Simple steering towards target
-        const dx = target.x - pCar.position.x;
-        const dz = target.z - pCar.position.z;
-        const targetHeading = Math.atan2(dx, dz);
-        pCar.rotation.y += (targetHeading - pCar.rotation.y) * delta * 2.5;
-
-        // Forward driving
-        const pForward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), pCar.rotation.y);
-        const pSpeed = 22;
-        const nextPx = pCar.position.x + pForward.x * pSpeed * delta;
-        const nextPz = pCar.position.z + pForward.z * pSpeed * delta;
-
-        if (!checkAABBCollision(nextPx, nextPz, 1.2)) {
-          pCar.position.x = nextPx;
-          pCar.position.z = nextPz;
-        }
-
-        // Arrest / Ram Condition
-        const pDist = pCar.position.distanceTo(target);
-        if (pDist < 3.2) {
+        if (policeCar.position.distanceTo(target) < 3.2) {
           sound.playImpact();
-          onMissionFailed("Busted by Police! The pursuers pinned your vehicle.");
+          GAME.missionActive = false;
+          modalScreen.style.display = 'flex';
+          document.getElementById('modal-title').innerText = "BUSTED!";
+          document.getElementById('modal-title').style.color = "#ef4444";
+          document.getElementById('modal-body').innerText = "Pursuing police pinned your car.";
         }
       }
 
-      /* ----------------------------------
-         4. MISSION OBJECTIVE CHECKING
-         ---------------------------------- */
+      /* 5. Mission Timer & Triggers */
       if (GAME.missionActive) {
-        // Countdown timer
-        if (GAME.timerRemaining > 0) {
-          GAME.timerRemaining -= delta;
-          const mins = Math.floor(GAME.timerRemaining / 60);
-          const secs = Math.floor(GAME.timerRemaining % 60);
-          missionTime.innerText = `Time Left: ${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        GAME.timerRemaining -= delta;
+        const mins = Math.floor(GAME.timerRemaining / 60);
+        const secs = Math.floor(GAME.timerRemaining % 60);
+        document.getElementById('mission-time').innerText = `Time Left: ${mins < 10 ? '0':''}${mins}:${secs < 10 ? '0':''}${secs}`;
 
-          if (GAME.timerRemaining <= 0) {
-            onMissionFailed("Time expired before reaching the checkpoint.");
-          }
-        }
-
-        // Waypoint Reach Check
-        const focalPos = GAME.inVehicle ? playerCar.position : player.position;
-        const distToGoal = focalPos.distanceTo(objectiveMarker.position);
-
-        if (distToGoal < 6.5) {
-          const curIndex = GAME.currentMissionIndex;
-          if (curIndex === 0 && GAME.stage === 'pickup') {
-            sound.playChime(true);
+        const focal = GAME.inVehicle ? playerCar.position : player.position;
+        if (focal.distanceTo(objectiveMarker.position) < 6) {
+          if (GAME.currentMissionIndex === 0 && GAME.stage === 'pickup') {
             GAME.stage = 'dropoff';
-            showDialogue("Marcus", "Package secured! Now deliver it to the North Bay dock before the cops spot you.");
+            sound.playChime(true);
             objectiveMarker.position.set(MISSIONS[0].dropoff.x, 0, MISSIONS[0].dropoff.z);
-            missionDesc.innerText = "Deliver the cargo package to the North Bay dock.";
+            document.getElementById('mission-desc').innerText = "Deliver cargo to the docks!";
           } else {
-            onMissionSuccess();
+            // Mission Passed
+            sound.playChime(true);
+            GAME.cash += MISSIONS[GAME.currentMissionIndex].reward;
+            updateCashDisplay();
+            GAME.missionActive = false;
+            modalScreen.style.display = 'flex';
+            document.getElementById('modal-title').innerText = "MISSION COMPLETED!";
+            document.getElementById('modal-title').style.color = "#10b981";
+            document.getElementById('modal-body').innerText = `Payout: ₹ ${MISSIONS[GAME.currentMissionIndex].reward.toLocaleString()}`;
+            GAME.currentMissionIndex = (GAME.currentMissionIndex + 1) % MISSIONS.length;
           }
         }
       }
 
-      // 5. Update Minimap
-      updateMinimap();
+      /* 6. Minimap Radar */
+      const mm = document.getElementById('minimap-canvas');
+      const ctx = mm.getContext('2d');
+      ctx.clearRect(0, 0, 130, 130);
+      const focal = GAME.inVehicle ? playerCar.position : player.position;
 
-      // Render Scene
+      ctx.save();
+      ctx.translate(65, 65);
+      ctx.fillStyle = '#334155';
+      colliders.forEach(c => {
+        const cx = ((c.minX + c.maxX)/2 - focal.x) * 0.35;
+        const cz = ((c.minZ + c.maxZ)/2 - focal.z) * 0.35;
+        ctx.fillRect(cx - 5, cz - 5, 10, 10);
+      });
+      // Objective marker blip
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc((objectiveMarker.position.x - focal.x) * 0.35, (objectiveMarker.position.z - focal.z) * 0.35, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Center Player dot
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(65, 65, 4, 0, Math.PI * 2);
+      ctx.fill();
+
       renderer.render(scene, camera);
-      requestAnimationFrame(update);
+      requestAnimationFrame(animate);
     }
 
-    // Window Resize Handling
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Initialize Displays
     updateCashDisplay();
-    requestAnimationFrame(update);
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>

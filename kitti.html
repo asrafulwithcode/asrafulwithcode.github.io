@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CAT SPINNERS: CHAOS MODE</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000000;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #ffffff;
+    }
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+    #ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .hud-box {
+      position: absolute;
+      pointer-events: auto;
+    }
+    /* Top Status Bar */
+    #top-hud {
+      top: 18px;
+      left: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .stat-pill {
+      background: rgba(18, 18, 22, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 8px 18px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #a1a1aa;
+    }
+    .stat-number {
+      font-size: 18px;
+      font-weight: 900;
+      color: #ffffff;
+      font-feature-settings: "tnum";
+    }
+    #lives-display {
+      color: #ef4444;
+      font-size: 18px;
+      letter-spacing: 2px;
+    }
+    #combo-badge {
+      font-size: 13px;
+      font-weight: 900;
+      color: #facc15;
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.7);
+    }
+    /* Mode Indicator & Highscore */
+    #top-right-hud {
+      top: 18px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    /* Special Ability Gauge */
+    #special-card {
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 15, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      backdrop-filter: blur(8px);
+    }
+    .cooldown-bar-bg {
+      width: 140px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    #cooldown-bar {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.1s linear;
+    }
+    /* Mobile Controls Overlay */
+    #mobile-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+    }
+    .touch-btn {
+      position: absolute;
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      pointer-events: auto;
+      touch-action: none;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+    .touch-btn:active {
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(0.94);
+    }
+    #btn-left { left: 24px; bottom: 34px; }
+    #btn-right { left: 104px; bottom: 34px; }
+    #btn-ability { right: 28px; bottom: 34px; width: 72px; height: 72px; font-size: 12px; background: rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+    /* Screens / Modals */
+    .game-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.88);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      pointer-events: auto;
+      backdrop-filter: blur(10px);
+    }
+    .modal-card {
+      background: #0f1015;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 36px 42px;
+      max-width: 480px;
+      width: 88%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+    }
+    .modal-title {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .modal-subtitle {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981, #3b82f6, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+    .modal-text {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .modal-btn {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #ffffff;
+      border: none;
+      padding: 13px 36px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.95;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <div id="ui-layer">
+    <!-- Top-Left Player Stats -->
+    <div id="top-hud" class="hud-box">
+      <div class="stat-pill">
+        <span class="stat-label">Score</span>
+        <span class="stat-number" id="hud-score">0000</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Lives</span>
+        <span id="lives-display">❤❤❤</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Combo</span>
+        <span class="stat-number" id="combo-badge">1.0x</span>
+      </div>
+    </div>
+
+    <!-- Top-Right Best Score -->
+    <div id="top-right-hud" class="hud-box">
+      <div class="stat-pill">
+        <span class="stat-label">Record</span>
+        <span class="stat-number" id="hud-best">0000</span>
+      </div>
+    </div>
+
+    <!-- Special Ability Cooldown Widget -->
+    <div id="special-card" class="hud-box">
+      <span class="stat-label" id="ability-label" style="font-size: 11px;">CHAOS BURST [SPACE]</span>
+      <div class="cooldown-bar-bg">
+        <div id="cooldown-bar"></div>
+      </div>
+    </div>
+
+    <!-- Mobile Virtual Keys -->
+    <div id="mobile-controls">
+      <div class="touch-btn" id="btn-left">◀</div>
+      <div class="touch-btn" id="btn-right">▶</div>
+      <div class="touch-btn" id="btn-ability">BURST</div>
+    </div>
+
+    <!-- Start / Game-Over Modal Screen -->
+    <div id="modal-screen" class="game-modal">
+      <div class="modal-card">
+        <h1 class="modal-title" id="modal-title">CAT SPINNERS</h1>
+        <div class="modal-subtitle">CHAOS MODE</div>
+        <p class="modal-text" id="modal-desc">
+          Rotate the cosmic radial cat ring to collect bright energy orbs and dodge oncoming void anomalies.
+          Use <b>[A / D]</b> or <b>[Arrow Keys]</b> to spin, and <b>[SPACE]</b> for Chaos Burst.
+        </p>
+        <button class="modal-btn" id="modal-play-btn">START CHAOS</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       SYNTHESIZED MEME AUDIO ENGINE (Web Audio API)
+       Pure audio synthesizers for Cat Meows, Orbs, Impacts, and Chaos Burst.
+       ========================================================================== */
+    class AudioEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (this.ctx) {
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+          return;
+        }
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this.ctx = new AudioCtx();
+      }
+      playMeow(pitch = 1.0) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        // High pitched meme meow timbre (formant-like glide)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(450 * pitch, now);
+        osc.frequency.linearRampToValueAtTime(800 * pitch, now + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(320 * pitch, now + 0.35);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+      playOrbChime() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, now); // E5
+        osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.18); // E6
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+      playHit() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(35, now + 0.22);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+      playBurst() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(950, now + 0.35);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+    }
+
+    const sound = new AudioEngine();
+
+    /* ==========================================================================
+       GAME STATE & CONFIGURATION
+       ========================================================================== */
+    const GAME = {
+      score: 0,
+      best: parseInt(localStorage.getItem('cs_best') || '0', 10),
+      lives: 3,
+      combo: 1,
+      running: false,
+      rotation: 0,
+      rotVelocity: 0,
+      rotAccel: 8.5,
+      friction: 0.94,
+      abilityCooldown: 0,
+      abilityMaxCooldown: 8.0,
+      isBurstActive: false,
+      burstTimer: 0,
+      tusiCycle: 0,
+      spawnTimer: 0,
+      orbs: [],
+      obstacles: [],
+      particles: []
+    };
+
+    const SPOKE_COLORS = [
+      0xef4444, // Red[cite: 4]
+      0xf97316, // Orange[cite: 4]
+      0xfacc15, // Yellow[cite: 4]
+      0x22c55e, // Green[cite: 4]
+      0x06b6d4, // Cyan
+      0x3b82f6, // Blue
+      0x8b5cf6, // Purple
+      0xec4899, // Pink
+      0xffffff, // White
+      0xf43f5e, // Rose
+      0x10b981, // Emerald
+      0x6366f1  // Indigo
+    ];
+    const NUM_SPOKES = 12;
+    const RING_RADIUS = 7.5;
+
+    /* ==========================================================================
+       THREE.JS INITIALIZATION
+       ========================================================================== */
+    const canvas = document.getElementById('game-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000); // Strict pure black[cite: 4]
+
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 22);
+
+    // Subtle crisp lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 1.2, 50);
+    pointLight.position.set(0, 0, 10);
+    scene.add(pointLight);
+
+    /* ==========================================================================
+       CENTRAL SKULL / MEME FACE MODEL
+       ========================================================================== */
+    function createSkullFace() {
+      const group = new THREE.Group();
+
+      // Pale meme head base
+      const headMat = new THREE.MeshStandardMaterial({
+        color: 0xeeeeee,
+        roughness: 0.35,
+        metalness: 0.05
+      });
+      const skullGeo = new THREE.SphereGeometry(1.25, 32, 28);
+      skullGeo.scale(1.0, 1.15, 0.75);
+      const skull = new THREE.Mesh(skullGeo, headMat);
+      group.add(skull);
+
+      // Sunken dark eye sockets
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x050508 });
+      const eyeGeo = new THREE.SphereGeometry(0.32, 16, 16);
+      eyeGeo.scale(1.0, 1.1, 0.4);
+
+      const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+      leftEye.position.set(-0.44, 0.22, 0.62);
+      group.add(leftEye);
+
+      const rightEye = leftEye.clone();
+      rightEye.position.x = 0.44;
+      group.add(rightEye);
+
+      // Hollow nasal cavity
+      const noseMat = new THREE.MeshBasicMaterial({ color: 0x111116 });
+      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.3, 4), noseMat);
+      nose.rotation.z = Math.PI;
+      nose.position.set(0, -0.08, 0.72);
+      group.add(nose);
+
+      // Subtle gaping meme mouth slit
+      const mouthMat = new THREE.MeshBasicMaterial({ color: 0x08080c });
+      const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.14, 0.1), mouthMat);
+      mouth.position.set(0, -0.48, 0.65);
+      group.add(mouth);
+
+      return group;
+    }
+
+    const centralSkull = createSkullFace();
+    scene.add(centralSkull);
+
+    /* ==========================================================================
+       DETAILED 3D CAT MODEL GENERATOR
+       Visible head, ears, body, legs, and tail with animated walking kinematics.
+       ========================================================================== */
+    function create3DCat(furColor = 0x4a4a52, earColor = 0xf472b6) {
+      const cat = new THREE.Group();
+
+      const furMat = new THREE.MeshStandardMaterial({ color: furColor, roughness: 0.6 });
+      const innerEarMat = new THREE.MeshStandardMaterial({ color: earColor, roughness: 0.4 });
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
+      const pupilMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+
+      // Body (Torso)
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.38, 0.65, 8, 16), furMat);
+      body.rotation.z = Math.PI / 2;
+      cat.add(body);
+
+      // Head
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 16), furMat);
+      head.position.set(0.52, 0.18, 0);
+      cat.add(head);
+
+      // Ears (Triangular cones)
+      const earGeo = new THREE.ConeGeometry(0.18, 0.35, 4);
+      const earL = new THREE.Mesh(earGeo, furMat);
+      earL.position.set(0.5, 0.58, 0.22);
+      earL.rotation.set(-0.2, 0, -0.2);
+      cat.add(earL);
+
+      const earR = earL.clone();
+      earR.position.z = -0.22;
+      earR.rotation.x = 0.2;
+      cat.add(earR);
+
+      // Pink Inner Ear Liners
+      const innerEarGeo = new THREE.ConeGeometry(0.12, 0.24, 4);
+      const inL = new THREE.Mesh(innerEarGeo, innerEarMat);
+      inL.position.set(0.52, 0.58, 0.22);
+      inL.rotation.set(-0.2, 0, -0.2);
+      cat.add(inL);
+
+      const inR = inL.clone();
+      inR.position.z = -0.22;
+      inR.rotation.x = 0.2;
+      cat.add(inR);
+
+      // Eyes
+      const eyeGeo = new THREE.SphereGeometry(0.09, 8, 8);
+      const catEyeL = new THREE.Mesh(eyeGeo, pupilMat);
+      catEyeL.position.set(0.82, 0.26, 0.16);
+      cat.add(catEyeL);
+
+      const catEyeR = catEyeL.clone();
+      catEyeR.position.z = -0.16;
+      cat.add(catEyeR);
+
+      // Limbs (Pivoted Legs)
+      const legGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.45, 8);
+      legGeo.translate(0, -0.22, 0);
+
+      const fl = new THREE.Mesh(legGeo, furMat);
+      fl.position.set(0.3, -0.2, 0.22);
+      cat.add(fl);
+
+      const fr = new THREE.Mesh(legGeo, furMat);
+      fr.position.set(0.3, -0.2, -0.22);
+      cat.add(fr);
+
+      const bl = new THREE.Mesh(legGeo, furMat);
+      bl.position.set(-0.35, -0.2, 0.22);
+      cat.add(bl);
+
+      const br = new THREE.Mesh(legGeo, furMat);
+      br.position.set(-0.35, -0.2, -0.22);
+      cat.add(br);
+
+      // Tail
+      const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, 0.65, 8), furMat);
+      tail.position.set(-0.65, 0.2, 0);
+      tail.rotation.z = -Math.PI / 3;
+      cat.add(tail);
+
+      cat.userData = { fl, fr, bl, br, tail, animTime: Math.random() * 10 };
+      cat.scale.set(0.85, 0.85, 0.85);
+      return cat;
+    }
+
+    /* ==========================================================================
+       RADIAL SPOKES & TUSI-COUPLE OSCILLATING RIG
+       ========================================================================== */
+    const spinnerRig = new THREE.Group();
+    scene.add(spinnerRig);
+
+    const spokeItems = [];
+
+    // Distinct fur tones across spokes
+    const CAT_COAT_COLORS = [
+      0x475569, 0x1e293b, 0xd97706, 0x64748b,
+      0x0f172a, 0xa1a1aa, 0xb45309, 0x334155,
+      0x52525b, 0xf59e0b, 0x27272a, 0x71717a
+    ];
+
+    for (let i = 0; i < NUM_SPOKES; i++) {
+      const angle = (i * Math.PI) / NUM_SPOKES; // Spanning 180 degrees evenly
+      const spokeColor = SPOKE_COLORS[i % SPOKE_COLORS.length];
+
+      // Spoke Rod
+      const rodGeo = new THREE.CylinderGeometry(0.045, 0.045, RING_RADIUS * 2, 8);
+      const rodMat = new THREE.MeshStandardMaterial({
+        color: spokeColor,
+        roughness: 0.2,
+        emissive: spokeColor,
+        emissiveIntensity: 0.45
+      });
+      const rod = new THREE.Mesh(rodGeo, rodMat);
+      rod.rotation.z = angle + Math.PI / 2;
+      spinnerRig.add(rod);
+
+      // Spoke T-Caps on each side like in the video
+      const capMat = new THREE.MeshStandardMaterial({ color: spokeColor, emissive: spokeColor, emissiveIntensity: 0.5 });
+      const capGeo = new THREE.BoxGeometry(0.12, 1.2, 0.12);
+
+      const cap1 = new THREE.Mesh(capGeo, capMat);
+      cap1.position.set(Math.cos(angle) * RING_RADIUS, Math.sin(angle) * RING_RADIUS, 0);
+      cap1.rotation.z = angle;
+      spinnerRig.add(cap1);
+
+      const cap2 = new THREE.Mesh(capGeo, capMat);
+      cap2.position.set(-Math.cos(angle) * RING_RADIUS, -Math.sin(angle) * RING_RADIUS, 0);
+      cap2.rotation.z = angle;
+      spinnerRig.add(cap2);
+
+      // Create animated 3D cat on this track
+      const cat = create3DCat(CAT_COAT_COLORS[i % CAT_COAT_COLORS.length]);
+      spinnerRig.add(cat);
+
+      spokeItems.push({
+        angle,
+        color: spokeColor,
+        cat,
+        phaseOffset: (i * Math.PI) / NUM_SPOKES
+      });
+    }
+
+    /* ==========================================================================
+       ORBS & OBSTACLES SPAWNER
+       ========================================================================== */
+    const orbGeo = new THREE.SphereGeometry(0.45, 16, 16);
+    const orbMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x38bdf8,
+      emissiveIntensity: 1.2,
+      roughness: 0.1
+    });
+
+    function spawnOrb() {
+      const angle = Math.random() * Math.PI * 2;
+      const r = RING_RADIUS * 0.95;
+      const mesh = new THREE.Mesh(orbGeo, orbMat);
+      mesh.position.set(Math.cos(angle) * r, Math.sin(angle) * r, 0);
+      scene.add(mesh);
+      GAME.orbs.push({ mesh, pulse: 0 });
+    }
+
+    const obsGeo = new THREE.OctahedronGeometry(0.65, 0);
+    const obsMat = new THREE.MeshStandardMaterial({
+      color: 0xef4444,
+      emissive: 0xdc2626,
+      emissiveIntensity: 0.8,
+      roughness: 0.2
+    });
+
+    function spawnObstacle() {
+      const angle = Math.random() * Math.PI * 2;
+      const startDist = 18;
+      const mesh = new THREE.Mesh(obsGeo, obsMat);
+      mesh.position.set(Math.cos(angle) * startDist, Math.sin(angle) * startDist, 0);
+      scene.add(mesh);
+
+      // Moves inwards toward the center
+      const dir = new THREE.Vector3(-Math.cos(angle), -Math.sin(angle), 0).normalize();
+      GAME.obstacles.push({
+        mesh,
+        dir,
+        speed: 4.5 + Math.min(GAME.score / 250, 6.0)
+      });
+    }
+
+    /* ==========================================================================
+       PARTICLE BURST FX
+       ========================================================================== */
+    const pGeo = new THREE.BufferGeometry();
+    const pCount = 300;
+    const pPositions = new Float32Array(pCount * 3);
+    const pVelocities = [];
+
+    for (let i = 0; i < pCount; i++) {
+      pPositions[i * 3] = 999;
+      pPositions[i * 3 + 1] = 999;
+      pPositions[i * 3 + 2] = 0;
+      pVelocities.push(new THREE.Vector3(0, 0, 0));
+    }
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+    const pMat = new THREE.PointsMaterial({
+      size: 0.28,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9
+    });
+    const pColors = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount * 3; i++) pColors[i] = 1.0;
+    pGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
+    const particleSystem = new THREE.Points(pGeo, pMat);
+    scene.add(particleSystem);
+
+    let nextPIndex = 0;
+    function triggerSparks(pos, hexColor = 0x38bdf8, count = 25) {
+      const c = new THREE.Color(hexColor);
+      const posAttr = pGeo.attributes.position;
+      const colAttr = pGeo.attributes.color;
+
+      for (let i = 0; i < count; i++) {
+        const idx = (nextPIndex + i) % pCount;
+        posAttr.setXYZ(idx, pos.x, pos.y, pos.z);
+        colAttr.setXYZ(idx, c.r, c.g, c.b);
+        const theta = Math.random() * Math.PI * 2;
+        const speed = 3.5 + Math.random() * 6.0;
+        pVelocities[idx].set(Math.cos(theta) * speed, Math.sin(theta) * speed, (Math.random() - 0.5) * 3);
+      }
+      nextPIndex = (nextPIndex + count) % pCount;
+      posAttr.needsUpdate = true;
+      colAttr.needsUpdate = true;
+    }
+
+    /* ==========================================================================
+       INPUT & TOUCH SYSTEM
+       ========================================================================== */
+    const keys = { left: false, right: false };
+
+    window.addEventListener('keydown', (e) => {
+      sound.init();
+      const k = e.key.toLowerCase();
+      if (k === 'a' || k === 'arrowleft') keys.left = true;
+      if (k === 'd' || k === 'arrowright') keys.right = true;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        triggerChaosBurst();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase();
+      if (k === 'a' || k === 'arrowleft') keys.left = false;
+      if (k === 'd' || k === 'arrowright') keys.right = false;
+    });
+
+    // Touch setup
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) {
+      document.getElementById('mobile-controls').style.display = 'block';
+      const bind = (id, onDown, onUp) => {
+        const el = document.getElementById(id);
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); sound.init(); onDown(); });
+        el.addEventListener('touchend', (e) => { e.preventDefault(); onUp(); });
+      };
+      bind('btn-left', () => keys.left = true, () => keys.left = false);
+      bind('btn-right', () => keys.right = true, () => keys.right = false);
+      document.getElementById('btn-ability').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        sound.init();
+        triggerChaosBurst();
+      });
+    }
+
+    /* ==========================================================================
+       SPECIAL ABILITY: CHAOS BURST
+       Destroys all obstacles and triggers multi-meow wave.
+       ========================================================================== */
+    function triggerChaosBurst() {
+      if (!GAME.running || GAME.abilityCooldown > 0) return;
+      sound.playBurst();
+      sound.playMeow(1.4);
+      GAME.abilityCooldown = GAME.abilityMaxCooldown;
+      GAME.isBurstActive = true;
+      GAME.burstTimer = 0.5;
+
+      // Clean obstacles
+      GAME.obstacles.forEach(obs => {
+        triggerSparks(obs.mesh.position, 0xef4444, 20);
+        scene.remove(obs.mesh);
+      });
+      GAME.obstacles = [];
+
+      // Camera pulse shake
+      camera.position.z = 24.5;
+    }
+
+    /* ==========================================================================
+       UI UPDATES & GAME STATE FLOW
+       ========================================================================== */
+    const hudScore = document.getElementById('hud-score');
+    const hudBest = document.getElementById('hud-best');
+    const livesDisplay = document.getElementById('lives-display');
+    const comboBadge = document.getElementById('combo-badge');
+    const cooldownBar = document.getElementById('cooldown-bar');
+    const modalScreen = document.getElementById('modal-screen');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalPlayBtn = document.getElementById('modal-play-btn');
+
+    function updateScoreDisplay() {
+      hudScore.innerText = GAME.score.toString().padStart(4, '0');
+      hudBest.innerText = GAME.best.toString().padStart(4, '0');
+      comboBadge.innerText = GAME.combo.toFixed(1) + 'x';
+
+      let hearts = '';
+      for (let i = 0; i < 3; i++) {
+        hearts += (i < GAME.lives) ? '❤' : '🖤';
+      }
+      livesDisplay.innerText = hearts;
+    }
+
+    function startGame() {
+      sound.init();
+      sound.playMeow(1.0);
+      GAME.score = 0;
+      GAME.lives = 3;
+      GAME.combo = 1;
+      GAME.abilityCooldown = 0;
+      GAME.rotation = 0;
+      GAME.rotVelocity = 0;
+      GAME.spawnTimer = 0;
+      GAME.running = true;
+
+      // Clear entities
+      GAME.orbs.forEach(o => scene.remove(o.mesh));
+      GAME.obstacles.forEach(o => scene.remove(o.mesh));
+      GAME.orbs = [];
+      GAME.obstacles = [];
+
+      // Initial orbs
+      spawnOrb();
+      spawnOrb();
+
+      updateScoreDisplay();
+      modalScreen.style.display = 'none';
+    }
+
+    function gameOver() {
+      sound.playHit();
+      GAME.running = false;
+      if (GAME.score > GAME.best) {
+        GAME.best = GAME.score;
+        localStorage.setItem('cs_best', GAME.best.toString());
+      }
+      modalTitle.innerText = "FORMATION COLLAPSED";
+      modalTitle.style.color = "#ef4444";
+      modalDesc.innerHTML = `Your radial cat matrix scored <b>${GAME.score}</b> points.<br>Personal Record: <b>${GAME.best}</b>.`;
+      modalPlayBtn.innerText = "PLAY AGAIN";
+      modalScreen.style.display = 'flex';
+    }
+
+    modalPlayBtn.addEventListener('click', startGame);
+    modalPlayBtn.addEventListener('touchend', (e) => { e.preventDefault(); startGame(); });
+
+    /* ==========================================================================
+       RESPONSIVE VIEWPORT & AUTO-SCALE (Keep Circle Fully In Bounds)
+       ========================================================================== */
+    function onResize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+
+      // Adjust camera distance so ring is never cropped on narrow mobile screens[cite: 4]
+      const minDimension = Math.min(w, h);
+      const isNarrow = (w / h) < 1.0;
+      camera.position.z = isNarrow ? 26 : 22;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', onResize);
+    onResize();
+
+    /* ==========================================================================
+       MAIN ANIMATION & PHYSICS STEP
+       ========================================================================== */
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.08);
+
+      // Cooldown bar & ability countdown
+      if (GAME.abilityCooldown > 0) {
+        GAME.abilityCooldown = Math.max(0, GAME.abilityCooldown - delta);
+      }
+      const pct = (1 - (GAME.abilityCooldown / GAME.abilityMaxCooldown)) * 100;
+      cooldownBar.style.width = `${pct}%`;
+
+      // Central skull idle animation
+      const time = clock.getElapsedTime();
+      centralSkull.position.y = Math.sin(time * 3.5) * 0.12;
+      centralSkull.rotation.y = Math.sin(time * 2.0) * 0.25;
+
+      // Smooth camera reset
+      if (camera.position.z > 22) {
+        camera.position.z = THREE.MathUtils.lerp(camera.position.z, 22, delta * 3);
+      }
+
+      /* 1. Player Rotational Physics */
+      if (GAME.running) {
+        if (keys.left) GAME.rotVelocity += GAME.rotAccel * delta;
+        if (keys.right) GAME.rotVelocity -= GAME.rotAccel * delta;
+      }
+      GAME.rotVelocity *= GAME.friction;
+      GAME.rotation += GAME.rotVelocity * delta;
+      spinnerRig.rotation.z = GAME.rotation;
+
+      /* 2. Tusi-Couple Harmonic Cat Motion */
+      GAME.tusiCycle += delta * 2.5;
+      const catWorldPositions = [];
+
+      spokeItems.forEach((item, index) => {
+        // Linear oscillation along the line: r(t) = R * cos(omega*t + phi)
+        const disp = (RING_RADIUS - 0.8) * Math.cos(GAME.tusiCycle + item.phaseOffset);
+        const localX = Math.cos(item.angle) * disp;
+        const localY = Math.sin(item.angle) * disp;
+
+        item.cat.position.set(localX, localY, 0);
+
+        // Turn cat towards motion direction
+        const movingOutward = Math.sin(GAME.tusiCycle + item.phaseOffset) < 0;
+        item.cat.rotation.z = item.angle + (movingOutward ? 0 : Math.PI);
+
+        // Limb walking animation
+        const u = item.cat.userData;
+        u.animTime += delta * 12;
+        const legSwing = Math.sin(u.animTime) * 0.6;
+        u.fl.rotation.z = legSwing;
+        u.fr.rotation.z = -legSwing;
+        u.bl.rotation.z = -legSwing;
+        u.br.rotation.z = legSwing;
+        u.tail.rotation.x = Math.sin(u.animTime * 0.8) * 0.3;
+
+        // Sound trigger when passing through center skull[cite: 3, 4]
+        if (Math.abs(disp) < 0.25 && !item.passedCenter) {
+          item.passedCenter = true;
+          sound.playMeow(0.9 + (index / NUM_SPOKES) * 0.6);
+        } else if (Math.abs(disp) > 0.7) {
+          item.passedCenter = false;
+        }
+
+        // Cache world coords for collision checks
+        const worldPos = new THREE.Vector3();
+        item.cat.getWorldPosition(worldPos);
+        catWorldPositions.push(worldPos);
+      });
+
+      /* 3. Spawns & Entity Management */
+      if (GAME.running) {
+        GAME.spawnTimer += delta;
+        const spawnInterval = Math.max(1.1, 2.5 - (GAME.score / 600));
+
+        if (GAME.spawnTimer >= spawnInterval) {
+          GAME.spawnTimer = 0;
+          if (GAME.orbs.length < 3) spawnOrb();
+          spawnObstacle();
+        }
+
+        // Check Orb Pickup
+        for (let i = GAME.orbs.length - 1; i >= 0; i--) {
+          const orb = GAME.orbs[i];
+          orb.pulse += delta * 4;
+          orb.mesh.scale.setScalar(1.0 + Math.sin(orb.pulse) * 0.15);
+
+          let collected = false;
+          for (let c = 0; c < catWorldPositions.length; c++) {
+            if (orb.mesh.position.distanceTo(catWorldPositions[c]) < 1.3) {
+              collected = true;
+              break;
+            }
+          }
+
+          if (collected) {
+            sound.playOrbChime();
+            triggerSparks(orb.mesh.position, 0x38bdf8, 22);
+            GAME.score += Math.round(100 * GAME.combo);
+            GAME.combo = Math.min(GAME.combo + 0.2, 5.0);
+            updateScoreDisplay();
+            scene.remove(orb.mesh);
+            GAME.orbs.splice(i, 1);
+            spawnOrb();
+          }
+        }
+
+        // Move Obstacles & Collision Check
+        for (let j = GAME.obstacles.length - 1; j >= 0; j--) {
+          const obs = GAME.obstacles[j];
+          obs.mesh.position.addScaledVector(obs.dir, obs.speed * delta);
+          obs.mesh.rotation.x += delta * 3;
+          obs.mesh.rotation.y += delta * 2;
+
+          let collided = false;
+          for (let c = 0; c < catWorldPositions.length; c++) {
+            if (obs.mesh.position.distanceTo(catWorldPositions[c]) < 1.1) {
+              collided = true;
+              break;
+            }
+          }
+
+          // Center Skull hit
+          if (obs.mesh.position.length() < 1.3) {
+            collided = true;
+          }
+
+          if (collided) {
+            sound.playHit();
+            triggerSparks(obs.mesh.position, 0xef4444, 25);
+            scene.remove(obs.mesh);
+            GAME.obstacles.splice(j, 1);
+
+            GAME.lives--;
+            GAME.combo = 1.0;
+            updateScoreDisplay();
+
+            if (GAME.lives <= 0) {
+              gameOver();
+              break;
+            }
+          } else if (obs.mesh.position.length() < 0.5) {
+            // Reached void center without hitting
+            scene.remove(obs.mesh);
+            GAME.obstacles.splice(j, 1);
+          }
+        }
+      }
+
+      /* 4. Particle Physics */
+      const posAttr = pGeo.attributes.position;
+      for (let i = 0; i < pCount; i++) {
+        if (posAttr.getY(i) < 900) {
+          const v = pVelocities[i];
+          posAttr.setXYZ(
+            i,
+            posAttr.getX(i) + v.x * delta,
+            posAttr.getY(i) + v.y * delta,
+            posAttr.getZ(i) + v.z * delta
+          );
+          v.multiplyScalar(0.96);
+        }
+      }
+      posAttr.needsUpdate = true;
+
+      renderer.render(scene, camera);
+    }
+
+    updateScoreDisplay();
+    animate();
+  </script>
+</body>
+</html>

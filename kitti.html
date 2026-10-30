@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>CAT SPINNERS: CHAOS MODE</title>
-    <!-- Updated Three.js bundle supporting modern geometries like CapsuleGeometry -->
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <style>
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -15,7 +14,7 @@
             -webkit-user-select: none;
         }
 
-        body, html {
+        html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -26,8 +25,7 @@
 
         #game-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             display: block;
@@ -36,10 +34,7 @@
 
         #ui-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: 10;
             pointer-events: none;
             display: flex;
@@ -52,7 +47,6 @@
             pointer-events: auto;
         }
 
-        /* Top HUD */
         .hud-top {
             display: flex;
             justify-content: space-between;
@@ -83,7 +77,122 @@
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
-        /* Special / Chaos Meter */
+        .audio-hud-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: rgba(15, 15, 20, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #cbd5e1;
+            padding: 10px 14px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(30, 30, 45, 0.85);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #fff;
+        }
+
+        .icon-btn.muted {
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+
+        .audio-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: rgba(15, 15, 22, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 16px;
+            min-width: 220px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+
+        .audio-dropdown.visible {
+            display: flex;
+        }
+
+        .audio-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .audio-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .audio-toggle-btn {
+            background: transparent;
+            border: none;
+            color: #38bdf8;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .audio-toggle-btn.off {
+            color: #ef4444;
+        }
+
+        .audio-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.15);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .audio-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+        }
+
+        .audio-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: none;
+        }
+
         #special-card {
             position: absolute;
             bottom: 24px;
@@ -111,10 +220,9 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, #38bdf8, #818cf8);
-            transition: width 0.1s linear;
+            transition: width 0.05s linear;
         }
 
-        /* Menu Overlay */
         .menu-overlay {
             position: absolute;
             inset: 0;
@@ -181,7 +289,6 @@
             transform: scale(0.98);
         }
 
-        /* Mobile Controls */
         #mobile-controls {
             position: absolute;
             bottom: 20px;
@@ -223,9 +330,36 @@
                 <div class="stat-label">Score</div>
                 <div class="stat-value" id="score-display">0</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Radial Speed</div>
-                <div class="stat-value" id="speed-display">1.0x</div>
+
+            <div class="audio-hud-container interactive">
+                <button class="icon-btn" id="mute-btn" title="Toggle Mute" aria-label="Toggle Mute">🔊</button>
+                <button class="icon-btn" id="audio-settings-btn" title="Audio Settings" aria-label="Audio Settings">⚙️</button>
+
+                <div class="audio-dropdown" id="audio-dropdown">
+                    <div class="audio-row">
+                        <div class="audio-row-header">
+                            <span>Master</span>
+                            <span id="master-vol-num">80%</span>
+                        </div>
+                        <input type="range" class="audio-slider" id="master-vol-slider" min="0" max="1" step="0.05" value="0.8">
+                    </div>
+
+                    <div class="audio-row">
+                        <div class="audio-row-header">
+                            <span>Music</span>
+                            <button class="audio-toggle-btn" id="music-toggle-btn">ON</button>
+                        </div>
+                        <input type="range" class="audio-slider" id="music-vol-slider" min="0" max="1" step="0.05" value="0.7">
+                    </div>
+
+                    <div class="audio-row">
+                        <div class="audio-row-header">
+                            <span>Effects</span>
+                            <button class="audio-toggle-btn" id="sfx-toggle-btn">ON</button>
+                        </div>
+                        <input type="range" class="audio-slider" id="sfx-vol-slider" min="0" max="1" step="0.05" value="0.85">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -247,7 +381,6 @@
         </div>
     </div>
 
-    <!-- Start Overlay -->
     <div class="menu-overlay" id="start-overlay">
         <div class="game-title">CAT SPINNERS</div>
         <div class="game-subtitle">CHAOS MODE</div>
@@ -258,7 +391,6 @@
         <button class="btn-chaos interactive" id="start-btn">START CHAOS</button>
     </div>
 
-    <!-- Game Over Overlay -->
     <div class="menu-overlay" id="game-over-overlay" style="display: none;">
         <div class="game-title" style="background: linear-gradient(135deg, #ef4444, #f97316); -webkit-background-clip: text;">RING COLLAPSED</div>
         <div class="game-subtitle" id="final-score-display" style="color: #f87171; margin-bottom: 28px;">SCORE: 0</div>
@@ -266,28 +398,458 @@
     </div>
 
     <script>
-        // Polyfill safeguard if running in an environment without CapsuleGeometry
+        // Polyfill safeguard for CapsuleGeometry
         if (typeof THREE !== 'undefined' && !THREE.CapsuleGeometry) {
             THREE.CapsuleGeometry = function(radius, length, capSegments, radialSegments) {
                 return new THREE.CylinderGeometry(radius || 0.5, radius || 0.5, length || 1, radialSegments || 16);
             };
         }
 
-        // --- Core Game Variables ---
+        // ==========================================
+        // --- WEB AUDIO API PROCEDURAL AUDIO ENGINE ---
+        // ==========================================
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.isMuted = false;
+                this.musicEnabled = true;
+                this.sfxEnabled = true;
+
+                this.masterVol = 0.8;
+                this.musicVol = 0.7;
+                this.sfxVol = 0.85;
+
+                this.musicTimer = null;
+                this.musicStep = 0;
+                this.isPlayingMusic = false;
+
+                this.bassline = [110, 110, 110, 130.81, 110, 110, 146.83, 123.47, 98, 98, 98, 123.47, 87.31, 87.31, 110, 123.47];
+                this.leadArp = [440, 523.25, 659.25, 880, 523.25, 659.25, 880, 987.77, 392, 493.88, 587.33, 783.99, 349.23, 440, 523.25, 659.25];
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContextClass();
+
+                    this.limiter = this.ctx.createDynamicsCompressor();
+                    this.limiter.threshold.setValueAtTime(-3, this.ctx.currentTime);
+                    this.limiter.knee.setValueAtTime(4, this.ctx.currentTime);
+                    this.limiter.ratio.setValueAtTime(12, this.ctx.currentTime);
+                    this.limiter.attack.setValueAtTime(0.003, this.ctx.currentTime);
+                    this.limiter.release.setValueAtTime(0.15, this.ctx.currentTime);
+                    this.limiter.connect(this.ctx.destination);
+
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.setValueAtTime(this.masterVol, this.ctx.currentTime);
+                    this.masterGain.connect(this.limiter);
+
+                    this.musicGain = this.ctx.createGain();
+                    this.musicGain.gain.setValueAtTime(this.musicVol, this.ctx.currentTime);
+                    this.musicGain.connect(this.masterGain);
+
+                    this.sfxGain = this.ctx.createGain();
+                    this.sfxGain.gain.setValueAtTime(this.sfxVol, this.ctx.currentTime);
+                    this.sfxGain.connect(this.masterGain);
+                }
+
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            setMasterVolume(val) {
+                this.masterVol = Math.max(0, Math.min(1, val));
+                if (this.masterGain && !this.isMuted) {
+                    this.masterGain.gain.setTargetAtTime(this.masterVol, this.ctx.currentTime, 0.05);
+                }
+            }
+
+            setMusicVolume(val) {
+                this.musicVol = Math.max(0, Math.min(1, val));
+                if (this.musicGain && this.musicEnabled) {
+                    this.musicGain.gain.setTargetAtTime(this.musicVol, this.ctx.currentTime, 0.05);
+                }
+            }
+
+            setSfxVolume(val) {
+                this.sfxVol = Math.max(0, Math.min(1, val));
+                if (this.sfxGain && this.sfxEnabled) {
+                    this.sfxGain.gain.setTargetAtTime(this.sfxVol, this.ctx.currentTime, 0.05);
+                }
+            }
+
+            toggleMute() {
+                this.init();
+                this.isMuted = !this.isMuted;
+                if (this.masterGain) {
+                    const target = this.isMuted ? 0 : this.masterVol;
+                    this.masterGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.02);
+                }
+                return this.isMuted;
+            }
+
+            toggleMusic() {
+                this.musicEnabled = !this.musicEnabled;
+                if (this.musicGain) {
+                    const target = this.musicEnabled ? this.musicVol : 0;
+                    this.musicGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.05);
+                }
+                return this.musicEnabled;
+            }
+
+            toggleSfx() {
+                this.sfxEnabled = !this.sfxEnabled;
+                if (this.sfxGain) {
+                    const target = this.sfxEnabled ? this.sfxVol : 0;
+                    this.sfxGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.05);
+                }
+                return this.sfxEnabled;
+            }
+
+            startMusic() {
+                this.init();
+                if (this.isPlayingMusic) return;
+                this.isPlayingMusic = true;
+
+                const stepTime = 60 / 135 / 4;
+                this.musicStep = 0;
+
+                const scheduleNextStep = () => {
+                    if (!this.isPlayingMusic) return;
+                    if (this.ctx && this.ctx.state === 'running') {
+                        const now = this.ctx.currentTime;
+                        const step = this.musicStep % 16;
+
+                        // Bassline Synth
+                        const bassOsc = this.ctx.createOscillator();
+                        const bassGain = this.ctx.createGain();
+                        const bassFilter = this.ctx.createBiquadFilter();
+
+                        bassOsc.type = 'sawtooth';
+                        bassOsc.frequency.setValueAtTime(this.bassline[step] * 0.5, now);
+                        bassFilter.type = 'lowpass';
+                        bassFilter.frequency.setValueAtTime(450, now);
+
+                        bassGain.gain.setValueAtTime(0.18, now);
+                        bassGain.gain.exponentialRampToValueAtTime(0.001, now + stepTime * 0.95);
+
+                        bassOsc.connect(bassFilter);
+                        bassFilter.connect(bassGain);
+                        bassGain.connect(this.musicGain);
+
+                        bassOsc.start(now);
+                        bassOsc.stop(now + stepTime);
+
+                        // Arpeggiator
+                        if (step % 2 === 0) {
+                            const arpOsc = this.ctx.createOscillator();
+                            const arpGain = this.ctx.createGain();
+                            arpOsc.type = 'square';
+                            arpOsc.frequency.setValueAtTime(this.leadArp[step], now);
+
+                            arpGain.gain.setValueAtTime(0.04, now);
+                            arpGain.gain.exponentialRampToValueAtTime(0.0005, now + stepTime * 1.5);
+
+                            arpOsc.connect(arpGain);
+                            arpGain.connect(this.musicGain);
+                            arpOsc.start(now);
+                            arpOsc.stop(now + stepTime * 1.6);
+                        }
+
+                        // Hi-hat
+                        if (step % 2 === 1) {
+                            this.playHiHat(now);
+                        }
+
+                        // Kick
+                        if (step % 4 === 0) {
+                            this.playKick(now);
+                        }
+
+                        this.musicStep++;
+                    }
+                    this.musicTimer = setTimeout(scheduleNextStep, stepTime * 1000);
+                };
+
+                scheduleNextStep();
+            }
+
+            stopMusic() {
+                this.isPlayingMusic = false;
+                if (this.musicTimer) {
+                    clearTimeout(this.musicTimer);
+                    this.musicTimer = null;
+                }
+            }
+
+            playKick(time) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(140, time);
+                osc.frequency.exponentialRampToValueAtTime(38, time + 0.08);
+
+                gain.gain.setValueAtTime(0.35, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+
+                osc.connect(gain);
+                gain.connect(this.musicGain);
+                osc.start(time);
+                osc.stop(time + 0.1);
+            }
+
+            playHiHat(time) {
+                const bufferSize = Math.floor(this.ctx.sampleRate * 0.035);
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.setValueAtTime(7500, time);
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.06, time);
+                gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.03);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.musicGain);
+                noise.start(time);
+                noise.stop(time + 0.035);
+            }
+
+            duckMusic(factor = 0.25) {
+                if (this.musicGain && this.musicEnabled) {
+                    this.musicGain.gain.setTargetAtTime(this.musicVol * factor, this.ctx.currentTime, 0.1);
+                }
+            }
+
+            restoreMusic() {
+                if (this.musicGain && this.musicEnabled) {
+                    this.musicGain.gain.setTargetAtTime(this.musicVol, this.ctx.currentTime, 0.15);
+                }
+            }
+
+            playStartSound() {
+                this.init();
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+
+                    gain.gain.setValueAtTime(0, now + idx * 0.06);
+                    gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.06 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now + idx * 0.06);
+                    osc.stop(now + idx * 0.06 + 0.32);
+                });
+            }
+
+            playOrbChime() {
+                this.init();
+                const now = this.ctx.currentTime;
+                [880, 1318.51].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.04);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.3, now + i * 0.04 + 0.12);
+
+                    gain.gain.setValueAtTime(0.28, now + i * 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.22);
+
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now + i * 0.04);
+                    osc.stop(now + i * 0.04 + 0.24);
+                });
+            }
+
+            playHazardHit() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+                osc.connect(gain);
+                gain.connect(this.sfxGain);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            playBurstLaser() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const filter = this.ctx.createBiquadFilter();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(850, now);
+                osc.frequency.exponentialRampToValueAtTime(140, now + 0.25);
+
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(1800, now);
+                filter.frequency.exponentialRampToValueAtTime(400, now + 0.25);
+                filter.Q.setValueAtTime(4, now);
+
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.sfxGain);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playHazardDestroy() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const oscGain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+                oscGain.gain.setValueAtTime(0.38, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                osc.connect(oscGain);
+                oscGain.connect(this.sfxGain);
+                osc.start(now);
+                osc.stop(now + 0.23);
+
+                const bSize = Math.floor(this.ctx.sampleRate * 0.18);
+                const b = this.ctx.createBuffer(1, bSize, this.ctx.sampleRate);
+                const d = b.getChannelData(0);
+                for (let i = 0; i < bSize; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bSize * 0.25));
+
+                const n = this.ctx.createBufferSource();
+                n.buffer = b;
+                const nFilter = this.ctx.createBiquadFilter();
+                nFilter.type = 'lowpass';
+                nFilter.frequency.setValueAtTime(800, now);
+
+                const nGain = this.ctx.createGain();
+                nGain.gain.setValueAtTime(0.3, now);
+                nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+                n.connect(nFilter);
+                nFilter.connect(nGain);
+                nGain.connect(this.sfxGain);
+                n.start(now);
+                n.stop(now + 0.185);
+            }
+
+            playGameOverSound() {
+                this.init();
+                const now = this.ctx.currentTime;
+                [370, 311.13, 246.94, 185].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 0.6, now + idx * 0.1 + 0.45);
+
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.0005, now + idx * 0.1 + 0.5);
+
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + idx * 0.1 + 0.52);
+                });
+            }
+
+            playRestartSound() {
+                this.init();
+                const now = this.ctx.currentTime;
+                [659.25, 987.77].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.05);
+
+                    gain.gain.setValueAtTime(0.25, now + i * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.12);
+
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now + i * 0.05);
+                    osc.stop(now + i * 0.05 + 0.13);
+                });
+            }
+
+            playButtonClick() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.035);
+
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+
+                osc.connect(gain);
+                gain.connect(this.sfxGain);
+                osc.start(now);
+                osc.stop(now + 0.045);
+            }
+        }
+
+        const audio = new SoundEngine();
+
+        // --- Core Simulation State ---
         let scene, camera, renderer;
-        let catGroup, orbs = [], hazards = [], particles = [];
+        let catGroup;
+        let orbs = [], hazards = [], particles = [];
         let score = 0, gameActive = false;
         let catAngle = 0;
         let spinVelocity = 0;
         let burstEnergy = 100;
         let isBursting = false;
+        let burstSoundCooldown = false;
         const ringRadius = 7.5;
+        const TWO_PI = Math.PI * 2;
 
         const keys = { left: false, right: false, space: false };
 
+        // Pre-cached geometries & materials to avoid per-spawn allocations
+        const orbGeometry = new THREE.SphereGeometry(0.35, 16, 16);
+        const orbMaterial = new THREE.MeshStandardMaterial({
+            color: 0x38bdf8,
+            emissive: 0x0284c7,
+            emissiveIntensity: 0.9
+        });
+
+        const hazardGeometry = new THREE.DodecahedronGeometry(0.5, 0);
+        const hazardMaterial = new THREE.MeshStandardMaterial({
+            color: 0xef4444,
+            emissive: 0xb91c1c,
+            emissiveIntensity: 0.8,
+            roughness: 0.2
+        });
+
+        // DOM Element Cache
         const canvas = document.getElementById('game-canvas');
         const scoreDisplay = document.getElementById('score-display');
-        const speedDisplay = document.getElementById('speed-display');
         const cooldownBar = document.getElementById('cooldown-bar');
         const startOverlay = document.getElementById('start-overlay');
         const gameOverOverlay = document.getElementById('game-over-overlay');
@@ -295,7 +857,16 @@
         const startBtn = document.getElementById('start-btn');
         const restartBtn = document.getElementById('restart-btn');
 
-        // Check mobile touch support
+        const muteBtn = document.getElementById('mute-btn');
+        const audioSettingsBtn = document.getElementById('audio-settings-btn');
+        const audioDropdown = document.getElementById('audio-dropdown');
+        const masterVolSlider = document.getElementById('master-vol-slider');
+        const masterVolNum = document.getElementById('master-vol-num');
+        const musicToggleBtn = document.getElementById('music-toggle-btn');
+        const musicVolSlider = document.getElementById('music-vol-slider');
+        const sfxToggleBtn = document.getElementById('sfx-toggle-btn');
+        const sfxVolSlider = document.getElementById('sfx-vol-slider');
+
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             document.getElementById('mobile-controls').style.display = 'flex';
         }
@@ -307,35 +878,30 @@
             camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, 0, 15);
 
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
             scene.add(ambientLight);
 
-            const directLight = new THREE.DirectionalLight(0xfff, 1.2);
+            const directLight = new THREE.DirectionalLight(0xffffff, 1.2);
             directLight.position.set(5, 10, 8);
             scene.add(directLight);
 
-            // Orbit Ring Visual Guide
             const ringGeo = new THREE.RingGeometry(ringRadius - 0.05, ringRadius + 0.05, 64);
             const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.25 });
             const orbitGuide = new THREE.Mesh(ringGeo, ringMat);
             scene.add(orbitGuide);
 
-            // Background Starfield particles
-            const starGeo = new THREE.BufferGeometry();
-            const starCoords = [];
-            for (let i = 0; i < 600; i++) {
-                starCoords.push(
-                    (Math.random() - 0.5) * 60,
-                    (Math.random() - 0.5) * 60,
-                    (Math.random() - 0.5) * 40 - 10
-                );
+            const starCoords = new Float32Array(1800);
+            for (let i = 0; i < 1800; i += 3) {
+                starCoords[i] = (Math.random() - 0.5) * 60;
+                starCoords[i + 1] = (Math.random() - 0.5) * 60;
+                starCoords[i + 2] = (Math.random() - 0.5) * 40 - 10;
             }
-            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+            const starGeo = new THREE.BufferGeometry();
+            starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
             const starMat = new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.15, transparent: true, opacity: 0.8 });
             const starField = new THREE.Points(starGeo, starMat);
             scene.add(starField);
@@ -343,7 +909,6 @@
             create3DCat();
         }
 
-        // Cat Mesh Builder
         function create3DCat() {
             catGroup = new THREE.Group();
 
@@ -351,19 +916,14 @@
             const earMat = new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.3 });
             const eyeMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
 
-            // Body
-            const bodyGeo = new THREE.CapsuleGeometry(0.5, 0.7, 8, 16);
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.5, 0.7, 8, 16), bodyMat);
             body.rotation.z = Math.PI / 2;
             catGroup.add(body);
 
-            // Head
-            const headGeo = new THREE.SphereGeometry(0.5, 16, 16);
-            const head = new THREE.Mesh(headGeo, bodyMat);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), bodyMat);
             head.position.set(0.65, 0.15, 0);
             catGroup.add(head);
 
-            // Ears
             const earGeo = new THREE.ConeGeometry(0.2, 0.4, 4);
             const leftEar = new THREE.Mesh(earGeo, earMat);
             leftEar.position.set(0.65, 0.65, 0.22);
@@ -375,7 +935,6 @@
             rightEar.rotation.x = -0.2;
             catGroup.add(rightEar);
 
-            // Eyes
             const eyeGeo = new THREE.SphereGeometry(0.08, 8, 8);
             const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
             leftEye.position.set(0.95, 0.22, 0.18);
@@ -385,14 +944,12 @@
             rightEye.position.set(0.95, 0.22, -0.18);
             catGroup.add(rightEye);
 
-            // Tail
-            const tailGeo = new THREE.CylinderGeometry(0.1, 0.14, 0.9, 8);
-            const tail = new THREE.Mesh(tailGeo, bodyMat);
+            const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.14, 0.9, 8), bodyMat);
             tail.position.set(-0.8, 0.4, 0);
             tail.rotation.z = -Math.PI / 3;
             catGroup.add(tail);
 
-            catGroup.scale.set(0.9, 0.9, 0.9);
+            catGroup.scale.setScalar(0.9);
             scene.add(catGroup);
             updateCatPosition();
         }
@@ -403,33 +960,19 @@
             catGroup.rotation.z = catAngle + Math.PI / 2;
         }
 
-        // Spawn Mechanics
         function spawnOrb() {
-            const angle = Math.random() * Math.PI * 2;
-            const geo = new THREE.SphereGeometry(0.35, 16, 16);
-            const mat = new THREE.MeshStandardMaterial({
-                color: 0x38bdf8,
-                emissive: 0x0284c7,
-                emissiveIntensity: 0.9
-            });
-            const orb = new THREE.Mesh(geo, mat);
-            orb.userData = { angle: angle, zPos: -35, speed: 0.18 + Math.random() * 0.08 };
+            const angle = Math.random() * TWO_PI;
+            const orb = new THREE.Mesh(orbGeometry, orbMaterial);
+            orb.userData = { angle, zPos: -35, speed: 0.18 + Math.random() * 0.08 };
             scene.add(orb);
             orbs.push(orb);
         }
 
         function spawnHazard() {
-            const angle = Math.random() * Math.PI * 2;
-            const geo = new THREE.DodecahedronGeometry(0.5, 0);
-            const mat = new THREE.MeshStandardMaterial({
-                color: 0xef4444,
-                emissive: 0xb91c1c,
-                emissiveIntensity: 0.8,
-                roughness: 0.2
-            });
-            const hazard = new THREE.Mesh(geo, mat);
+            const angle = Math.random() * TWO_PI;
+            const hazard = new THREE.Mesh(hazardGeometry, hazardMaterial);
             hazard.userData = {
-                angle: angle,
+                angle,
                 zPos: -40,
                 speed: 0.22 + Math.random() * 0.12,
                 rotSpeedX: Math.random() * 0.05,
@@ -439,45 +982,65 @@
             hazards.push(hazard);
         }
 
-        // Particle Burst on Collect
         function triggerCollectEffect(pos, colorHex) {
             const pCount = 12;
-            const geo = new THREE.BufferGeometry();
-            const positions = [];
-            const velocities = [];
+            const positions = new Float32Array(pCount * 3);
+            const velocities = new Float32Array(pCount * 3);
 
             for (let i = 0; i < pCount; i++) {
-                positions.push(pos.x, pos.y, pos.z);
-                velocities.push(
-                    (Math.random() - 0.5) * 0.3,
-                    (Math.random() - 0.5) * 0.3,
-                    (Math.random() - 0.5) * 0.3
-                );
+                const idx = i * 3;
+                positions[idx] = pos.x;
+                positions[idx + 1] = pos.y;
+                positions[idx + 2] = pos.z;
+
+                velocities[idx] = (Math.random() - 0.5) * 0.3;
+                velocities[idx + 1] = (Math.random() - 0.5) * 0.3;
+                velocities[idx + 2] = (Math.random() - 0.5) * 0.3;
             }
 
-            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             const mat = new THREE.PointsMaterial({ color: colorHex, size: 0.2, transparent: true, opacity: 1 });
             const pMesh = new THREE.Points(geo, mat);
-            pMesh.userData = { velocities: velocities, life: 1.0 };
+            pMesh.userData = { velocities, life: 1.0 };
             scene.add(pMesh);
             particles.push(pMesh);
         }
 
-        function startGame() {
+        // Complete WebGL resource disposal to eliminate VRAM leaks
+        function cleanActiveEntities() {
+            orbs.forEach(o => scene.remove(o));
+            hazards.forEach(h => scene.remove(h));
+            particles.forEach(p => {
+                scene.remove(p);
+                p.geometry.dispose();
+                p.material.dispose();
+            });
+
+            orbs.length = 0;
+            hazards.length = 0;
+            particles.length = 0;
+        }
+
+        function startGame(isRestart = false) {
+            audio.init();
+
+            if (isRestart) {
+                audio.playRestartSound();
+            } else {
+                audio.playStartSound();
+            }
+
+            audio.restoreMusic();
+            audio.startMusic();
+
             score = 0;
             catAngle = 0;
             spinVelocity = 0;
             burstEnergy = 100;
             scoreDisplay.textContent = '0';
-            speedDisplay.textContent = '1.0x';
 
-            // Clean previous objects
-            orbs.forEach(o => scene.remove(o));
-            hazards.forEach(h => scene.remove(h));
-            particles.forEach(p => scene.remove(p));
-            orbs = [];
-            hazards = [];
-            particles = [];
+            cleanActiveEntities();
 
             startOverlay.style.display = 'none';
             gameOverOverlay.style.display = 'none';
@@ -486,15 +1049,30 @@
 
         function gameOver() {
             gameActive = false;
+            audio.playHazardHit();
+            audio.playGameOverSound();
+            audio.duckMusic(0.18);
+
             finalScoreDisplay.textContent = `SCORE: ${score}`;
             gameOverOverlay.style.display = 'flex';
         }
 
-        // Event Listeners
+        // True shortest arc angle difference on radial boundary
+        function getRadialDistance(a1, a2) {
+            const diff = Math.abs((a1 - a2) % TWO_PI);
+            return diff > Math.PI ? TWO_PI - diff : diff;
+        }
+
+        // Input Bindings
         window.addEventListener('keydown', (e) => {
             if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
             if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
-            if (e.code === 'Space') keys.space = true;
+            if (e.code === 'Space') {
+                if (!keys.space && burstEnergy > 10 && gameActive) {
+                    audio.playBurstLaser();
+                }
+                keys.space = true;
+            }
         });
 
         window.addEventListener('keyup', (e) => {
@@ -503,21 +1081,85 @@
             if (e.code === 'Space') keys.space = false;
         });
 
-        // Touch button controls
         const btnLeft = document.getElementById('btn-left');
         const btnRight = document.getElementById('btn-right');
         const btnBurst = document.getElementById('btn-burst');
 
         const bindTouch = (elem, keyName) => {
-            elem.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
-            elem.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
+            elem.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                audio.playButtonClick();
+                if (keyName === 'space' && !keys.space && burstEnergy > 10 && gameActive) {
+                    audio.playBurstLaser();
+                }
+                keys[keyName] = true;
+            }, { passive: false });
+
+            elem.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[keyName] = false;
+            }, { passive: false });
         };
+
         bindTouch(btnLeft, 'left');
         bindTouch(btnRight, 'right');
         bindTouch(btnBurst, 'space');
 
-        startBtn.addEventListener('click', startGame);
-        restartBtn.addEventListener('click', startGame);
+        startBtn.addEventListener('click', () => {
+            audio.playButtonClick();
+            startGame(false);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            audio.playButtonClick();
+            startGame(true);
+        });
+
+        muteBtn.addEventListener('click', () => {
+            const muted = audio.toggleMute();
+            muteBtn.textContent = muted ? '🔇' : '🔊';
+            muteBtn.classList.toggle('muted', muted);
+            audio.playButtonClick();
+        });
+
+        audioSettingsBtn.addEventListener('click', () => {
+            audioDropdown.classList.toggle('visible');
+            audio.playButtonClick();
+        });
+
+        masterVolSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            audio.setMasterVolume(val);
+            masterVolNum.textContent = `${Math.round(val * 100)}%`;
+        });
+
+        musicToggleBtn.addEventListener('click', () => {
+            const enabled = audio.toggleMusic();
+            musicToggleBtn.textContent = enabled ? 'ON' : 'OFF';
+            musicToggleBtn.classList.toggle('off', !enabled);
+            audio.playButtonClick();
+        });
+
+        musicVolSlider.addEventListener('input', (e) => {
+            audio.setMusicVolume(parseFloat(e.target.value));
+        });
+
+        sfxToggleBtn.addEventListener('click', () => {
+            const enabled = audio.toggleSfx();
+            sfxToggleBtn.textContent = enabled ? 'ON' : 'OFF';
+            sfxToggleBtn.classList.toggle('off', !enabled);
+            audio.playButtonClick();
+        });
+
+        sfxVolSlider.addEventListener('input', (e) => {
+            audio.setSfxVolume(parseFloat(e.target.value));
+        });
+
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.audio-hud-container')) {
+                audioDropdown.classList.remove('visible');
+            }
+        });
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -525,7 +1167,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // --- Main Game Loop ---
+        // --- Main Animation Frame Loop ---
         let lastSpawnOrb = 0;
         let lastSpawnHazard = 0;
 
@@ -533,30 +1175,31 @@
             requestAnimationFrame(animate);
 
             if (gameActive) {
-                // Controls handling
-                const accel = 0.0035;
-                if (keys.left) spinVelocity += accel;
-                if (keys.right) spinVelocity -= accel;
+                if (keys.left) spinVelocity += 0.0035;
+                if (keys.right) spinVelocity -= 0.0035;
 
-                // Friction
                 spinVelocity *= 0.93;
-                catAngle += spinVelocity;
+                catAngle = (catAngle + spinVelocity) % TWO_PI;
+                if (catAngle < 0) catAngle += TWO_PI;
 
-                // Chaos Burst logic
                 if (keys.space && burstEnergy > 0) {
+                    if (!isBursting && !burstSoundCooldown) {
+                        audio.playBurstLaser();
+                        burstSoundCooldown = true;
+                    }
                     isBursting = true;
                     burstEnergy = Math.max(0, burstEnergy - 1.2);
-                    catGroup.scale.set(1.2, 1.2, 1.2);
+                    catGroup.scale.setScalar(1.2);
                 } else {
                     isBursting = false;
+                    burstSoundCooldown = false;
                     burstEnergy = Math.min(100, burstEnergy + 0.25);
-                    catGroup.scale.set(0.9, 0.9, 0.9);
+                    catGroup.scale.setScalar(0.9);
                 }
                 cooldownBar.style.width = `${burstEnergy}%`;
 
                 updateCatPosition();
 
-                // Spawning items
                 if (timestamp - lastSpawnOrb > 900) {
                     spawnOrb();
                     lastSpawnOrb = timestamp;
@@ -574,14 +1217,11 @@
                     orb.position.y = Math.sin(orb.userData.angle) * ringRadius;
                     orb.position.z = orb.userData.zPos;
 
-                    // Proximity check on ring plane (z around 0)
                     if (Math.abs(orb.position.z) < 0.6) {
-                        const dist = Math.abs(catAngle - orb.userData.angle) % (Math.PI * 2);
-                        const angleDiff = Math.min(dist, Math.PI * 2 - dist);
-
-                        if (angleDiff < 0.28) {
+                        if (getRadialDistance(catAngle, orb.userData.angle) < 0.28) {
                             score += 10;
                             scoreDisplay.textContent = score;
+                            audio.playOrbChime();
                             triggerCollectEffect(orb.position, 0x38bdf8);
                             scene.remove(orb);
                             orbs.splice(i, 1);
@@ -606,14 +1246,11 @@
                     h.rotation.y += h.userData.rotSpeedY;
 
                     if (Math.abs(h.position.z) < 0.6) {
-                        const dist = Math.abs(catAngle - h.userData.angle) % (Math.PI * 2);
-                        const angleDiff = Math.min(dist, Math.PI * 2 - dist);
-
-                        if (angleDiff < 0.25) {
+                        if (getRadialDistance(catAngle, h.userData.angle) < 0.25) {
                             if (isBursting) {
-                                // Destroy hazard safely during Chaos burst
                                 score += 25;
                                 scoreDisplay.textContent = score;
+                                audio.playHazardDestroy();
                                 triggerCollectEffect(h.position, 0xf59e0b);
                                 scene.remove(h);
                                 hazards.splice(i, 1);
@@ -637,17 +1274,20 @@
                     const p = particles[i];
                     p.userData.life -= 0.035;
                     p.material.opacity = p.userData.life;
+
                     const pos = p.geometry.attributes.position.array;
                     const vels = p.userData.velocities;
-                    for (let j = 0; j < vels.length / 3; j++) {
-                        pos[j * 3] += vels[j * 3];
-                        pos[j * 3 + 1] += vels[j * 3 + 1];
-                        pos[j * 3 + 2] += vels[j * 3 + 2];
+                    for (let j = 0; j < vels.length; j += 3) {
+                        pos[j] += vels[j];
+                        pos[j + 1] += vels[j + 1];
+                        pos[j + 2] += vels[j + 2];
                     }
                     p.geometry.attributes.position.needsUpdate = true;
 
                     if (p.userData.life <= 0) {
                         scene.remove(p);
+                        p.geometry.dispose();
+                        p.material.dispose();
                         particles.splice(i, 1);
                     }
                 }
@@ -656,7 +1296,6 @@
             renderer.render(scene, camera);
         }
 
-        // Initialize and start animation
         initScene();
         requestAnimationFrame(animate);
     </script>

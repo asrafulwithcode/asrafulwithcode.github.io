@@ -732,7 +732,7 @@
                     const target = this.sfxEnabled ? this.sfxVol : 0;
                     this.sfxGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.05);
                 }
-                return this.sfxEnabled;
+                return this.musicEnabled;
             }
 
             startMusic() {
@@ -1505,7 +1505,7 @@
             }
         });
 
-        // Controls
+        // Controls (PC Keyboard)
         window.addEventListener('keydown', (e) => {
             if (e.code === 'KeyP' || e.code === 'Escape') {
                 togglePause();
@@ -1533,6 +1533,7 @@
         const btnRight = document.getElementById('btn-right');
         const btnBurst = document.getElementById('btn-burst');
 
+        // Touch Control Binding with Direction Swap Fix
         const bindTouch = (elem, keyName) => {
             elem.addEventListener('touchstart', (e) => {
                 e.preventDefault();
@@ -1558,6 +1559,7 @@
             }, { passive: false });
         };
 
+        // FIXED: Left and Right touch buttons are mapped properly
         bindTouch(btnLeft, 'left');
         bindTouch(btnRight, 'right');
         bindTouch(btnBurst, 'space');
@@ -1665,8 +1667,11 @@
                     triggerLevelUp();
                 }
 
-                if (keys.left) spinVelocity += 0.0035;
-                if (keys.right) spinVelocity -= 0.0035;
+                // FIXED MOVEMENT DIRECTION:
+                // Left press moves cat counter-clockwise / leftward
+                // Right press moves cat clockwise / rightward
+                if (keys.left) spinVelocity -= 0.0035;
+                if (keys.right) spinVelocity += 0.0035;
 
                 spinVelocity *= 0.93;
                 catAngle = (catAngle + spinVelocity) % TWO_PI;

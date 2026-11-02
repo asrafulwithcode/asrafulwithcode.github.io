@@ -110,8 +110,8 @@
             text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
         }
 
-        /* Audio HUD */
-        .audio-hud-container {
+        /* Controls Right */
+        .hud-controls-right {
             position: relative;
             display: flex;
             align-items: center;
@@ -130,6 +130,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(30, 30, 45, 0.85);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #fff;
         }
 
         .icon-btn.muted {
@@ -250,7 +257,7 @@
             margin-top: 4px;
         }
 
-        /* Bottom Controls & Meter */
+        /* Bottom Controls */
         .bottom-container {
             width: 100%;
             display: flex;
@@ -331,7 +338,7 @@
             background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.25));
         }
 
-        /* Menus */
+        /* Overlay Menus */
         .menu-overlay {
             position: absolute;
             inset: 0;
@@ -414,6 +421,14 @@
             margin-bottom: 24px;
         }
 
+        .btn-group-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 240px;
+        }
+
         .btn-chaos {
             background: linear-gradient(135deg, #3b82f6, #6366f1);
             color: #fff;
@@ -427,6 +442,41 @@
             border-radius: 9999px;
             cursor: pointer;
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-chaos:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e2e8f0;
+            outline: none;
+            padding: 11px 34px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .btn-danger:active {
+            background: rgba(239, 68, 68, 0.3);
         }
     </style>
 </head>
@@ -454,7 +504,8 @@
                 </div>
             </div>
 
-            <div class="audio-hud-container interactive">
+            <div class="hud-controls-right interactive">
+                <button class="icon-btn" id="pause-btn" title="Pause Game (P)" aria-label="Pause Game">⏸</button>
                 <button class="icon-btn" id="mute-btn" title="Toggle Mute" aria-label="Toggle Mute">🔊</button>
                 <button class="icon-btn" id="audio-settings-btn" title="Audio Settings" aria-label="Audio Settings">⚙️</button>
 
@@ -531,6 +582,18 @@
             Rotate the cosmic radial cat ring to collect bright energy orbs and dodge oncoming void anomalies.
         </p>
         <button class="btn-chaos interactive" id="start-btn">START CHAOS</button>
+    </div>
+
+    <!-- Pause Overlay -->
+    <div class="menu-overlay" id="pause-overlay" style="display: none;">
+        <div class="game-title" style="background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text;">GAME PAUSED</div>
+        <div class="game-subtitle" id="pause-stats-display" style="color: #94a3b8; margin-bottom: 22px;">LEVEL 1 | SCORE: 0</div>
+        
+        <div class="btn-group-vertical interactive">
+            <button class="btn-chaos" id="resume-btn">RESUME</button>
+            <button class="btn-secondary" id="pause-restart-btn">RESTART</button>
+            <button class="btn-secondary btn-danger" id="pause-quit-btn">QUIT TO MENU</button>
+        </div>
     </div>
 
     <!-- Game Over Overlay -->
@@ -1001,7 +1064,7 @@
         let scene, camera, renderer, orbitGuide;
         let catGroup;
         let orbs = [], hazards = [], particles = [];
-        let score = 0, gameActive = false;
+        let score = 0, gameActive = false, isPaused = false;
         let isTabHidden = false;
         let catAngle = 0;
         let spinVelocity = 0;
@@ -1073,6 +1136,13 @@
         const startBestScore = document.getElementById('start-best-score');
         const startBestTime = document.getElementById('start-best-time');
 
+        const pauseOverlay = document.getElementById('pause-overlay');
+        const pauseStatsDisplay = document.getElementById('pause-stats-display');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resumeBtn = document.getElementById('resume-btn');
+        const pauseRestartBtn = document.getElementById('pause-restart-btn');
+        const pauseQuitBtn = document.getElementById('pause-quit-btn');
+
         const gameOverOverlay = document.getElementById('game-over-overlay');
         const finalStatsDisplay = document.getElementById('final-stats-display');
         const gameoverBestScore = document.getElementById('gameover-best-score');
@@ -1108,12 +1178,10 @@
         }
         refreshStoredRecordsUI();
 
-        // Responsive Camera Auto-Fitter (Mobile Portrait & Landscape Fit)
         function updateCameraFov() {
             const aspect = window.innerWidth / window.innerHeight;
             camera.aspect = aspect;
 
-            // Agar aspect < 1 (Mobile portrait mode hai) toh camera door karo taaki ring na kate
             if (aspect < 0.6) {
                 camera.position.z = 24.5;
             } else if (aspect < 0.8) {
@@ -1121,7 +1189,7 @@
             } else if (aspect < 1.0) {
                 camera.position.z = 18.0;
             } else {
-                camera.position.z = 15.0; // Desktop mode
+                camera.position.z = 15.0;
             }
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1337,6 +1405,7 @@
             catAngle = 0;
             spinVelocity = 0;
             burstEnergy = 100;
+            isPaused = false;
 
             currentLevel = 1;
             survivalTime = 0;
@@ -1349,6 +1418,8 @@
             scoreDisplay.textContent = '0';
             levelDisplay.textContent = '1';
             timerDisplay.textContent = '00:00';
+            pauseBtn.textContent = '⏸';
+            pauseOverlay.style.display = 'none';
             refreshStoredRecordsUI();
 
             cleanActiveEntities();
@@ -1356,10 +1427,39 @@
             startOverlay.style.display = 'none';
             gameOverOverlay.style.display = 'none';
             gameActive = true;
+            lastFrameTimestamp = performance.now();
+        }
+
+        function togglePause() {
+            if (!gameActive) return;
+
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseBtn.textContent = '▶';
+                audio.duckMusic(0.2);
+                pauseStatsDisplay.textContent = `LEVEL ${currentLevel} | SCORE: ${score} | SURVIVED: ${formatTime(survivalTime)}`;
+                pauseOverlay.style.display = 'flex';
+            } else {
+                pauseBtn.textContent = '⏸';
+                pauseOverlay.style.display = 'none';
+                audio.restoreMusic();
+                lastFrameTimestamp = performance.now();
+            }
+        }
+
+        function quitToMenu() {
+            isPaused = false;
+            gameActive = false;
+            pauseOverlay.style.display = 'none';
+            audio.stopMusic();
+            cleanActiveEntities();
+            refreshStoredRecordsUI();
+            startOverlay.style.display = 'flex';
         }
 
         function gameOver() {
             gameActive = false;
+            isPaused = false;
             audio.playHazardHit();
             audio.playGameOverSound();
             audio.duckMusic(0.18);
@@ -1379,25 +1479,20 @@
             return diff > Math.PI ? TWO_PI - diff : diff;
         }
 
-        // ==========================================
-        // --- SCREEN LOCK / TAB VISIBILITY FIX ---
-        // ==========================================
+        // Tab Visibility & Background Audio Handlers
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 isTabHidden = true;
-                // Phone lock ya minimize hone par audio turant silent karein
                 audio.suspendAudio();
             } else {
                 isTabHidden = false;
-                // Phone open hone par sound wapas resume karein agar game active ho
                 lastFrameTimestamp = performance.now();
-                if (gameActive) {
+                if (gameActive && !isPaused) {
                     audio.resumeAudio();
                 }
             }
         });
 
-        // Window Blur/Focus fallback for older mobile browsers
         window.addEventListener('blur', () => {
             isTabHidden = true;
             audio.suspendAudio();
@@ -1405,13 +1500,19 @@
         window.addEventListener('focus', () => {
             isTabHidden = false;
             lastFrameTimestamp = performance.now();
-            if (gameActive) {
+            if (gameActive && !isPaused) {
                 audio.resumeAudio();
             }
         });
 
         // Controls
         window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyP' || e.code === 'Escape') {
+                togglePause();
+                return;
+            }
+            if (isPaused) return;
+
             if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
             if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
             if (e.code === 'Space') {
@@ -1436,6 +1537,8 @@
             elem.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (isPaused) return;
+
                 audio.playButtonClick();
                 if (keyName === 'space' && !keys.space && burstEnergy > 10 && gameActive) {
                     audio.playBurstLaser();
@@ -1467,6 +1570,26 @@
         restartBtn.addEventListener('click', () => {
             audio.playButtonClick();
             startGame(true);
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            audio.playButtonClick();
+            togglePause();
+        });
+
+        resumeBtn.addEventListener('click', () => {
+            audio.playButtonClick();
+            togglePause();
+        });
+
+        pauseRestartBtn.addEventListener('click', () => {
+            audio.playButtonClick();
+            startGame(true);
+        });
+
+        pauseQuitBtn.addEventListener('click', () => {
+            audio.playButtonClick();
+            quitToMenu();
         });
 
         muteBtn.addEventListener('click', () => {
@@ -1510,7 +1633,7 @@
         });
 
         window.addEventListener('click', (e) => {
-            if (!e.target.closest('.audio-hud-container')) {
+            if (!e.target.closest('.hud-controls-right')) {
                 audioDropdown.classList.remove('visible');
             }
         });
@@ -1527,8 +1650,7 @@
         function animate(timestamp) {
             requestAnimationFrame(animate);
 
-            // Tab hidden ya phone locked hone par rendering aur physics pause rahegi
-            if (isTabHidden) return;
+            if (isTabHidden || isPaused) return;
 
             const delta = Math.min((timestamp - lastFrameTimestamp) / 1000, 0.1);
             lastFrameTimestamp = timestamp;

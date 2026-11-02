@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CAT SPINNERS: CHAOS MODE</title>
 
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
@@ -15,6 +15,7 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none;
         }
 
         html, body {
@@ -43,97 +44,92 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px;
+            padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
         }
 
         .interactive {
             pointer-events: auto;
         }
 
+        /* Top HUD */
         .hud-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             width: 100%;
-            gap: 12px;
+            gap: 8px;
         }
 
         .hud-left {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(70px, auto));
+            gap: 6px;
         }
 
         .stat-card {
-            background: rgba(15, 15, 20, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 8px 16px;
+            background: rgba(15, 15, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 6px 10px;
             backdrop-filter: blur(8px);
-            min-width: 85px;
+            min-width: 68px;
         }
 
         .stat-card.level-card {
-            border-color: rgba(56, 189, 248, 0.4);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
         }
 
         .stat-card.best-card {
-            border-color: rgba(251, 191, 36, 0.4);
-            box-shadow: 0 0 12px rgba(251, 191, 36, 0.12);
+            border-color: rgba(251, 191, 36, 0.45);
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.12);
         }
 
         .stat-label {
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             color: #8a8d9b;
             margin-bottom: 2px;
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 800;
             color: #fff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         }
 
         .stat-value.level-val {
             color: #38bdf8;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
         }
 
         .stat-value.best-val {
             color: #fbbf24;
-            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
         }
 
+        /* Audio HUD */
         .audio-hud-container {
             position: relative;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .icon-btn {
-            background: rgba(15, 15, 20, 0.75);
+            background: rgba(15, 15, 20, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            border-radius: 10px;
             color: #cbd5e1;
-            padding: 10px 14px;
+            padding: 8px 11px;
             cursor: pointer;
             backdrop-filter: blur(8px);
-            font-size: 16px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
-        }
-
-        .icon-btn:hover {
-            background: rgba(30, 30, 45, 0.85);
-            border-color: rgba(56, 189, 248, 0.4);
-            color: #fff;
         }
 
         .icon-btn.muted {
@@ -144,17 +140,17 @@
         .audio-dropdown {
             display: none;
             position: absolute;
-            top: 50px;
+            top: 45px;
             right: 0;
-            background: rgba(15, 15, 22, 0.94);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            padding: 16px;
-            min-width: 220px;
+            background: rgba(15, 15, 22, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 12px;
+            padding: 14px;
+            min-width: 200px;
             backdrop-filter: blur(14px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             z-index: 50;
         }
 
@@ -172,7 +168,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 1px;
             text-transform: uppercase;
             color: #94a3b8;
@@ -201,7 +197,6 @@
             border-radius: 3px;
             background: rgba(255, 255, 255, 0.15);
             outline: none;
-            cursor: pointer;
         }
 
         .audio-slider::-webkit-slider-thumb {
@@ -212,21 +207,12 @@
             border-radius: 50%;
             background: #38bdf8;
             cursor: pointer;
-            box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
         }
 
-        .audio-slider::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #38bdf8;
-            cursor: pointer;
-            border: none;
-        }
-
+        /* Level Banner */
         #level-up-banner {
             position: absolute;
-            top: 18%;
+            top: 22%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.6);
             opacity: 0;
@@ -245,43 +231,49 @@
         }
 
         .level-up-title {
-            font-size: 34px;
+            font-size: 28px;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
         }
 
         .level-up-sub {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             color: #f1f5f9;
             text-transform: uppercase;
             margin-top: 4px;
         }
 
+        /* Bottom Controls & Meter */
+        .bottom-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 4px;
+        }
+
         #special-card {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
             background: rgba(15, 15, 20, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            padding: 10px 24px;
+            border-radius: 20px;
+            padding: 6px 16px;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
             backdrop-filter: blur(8px);
         }
 
         .cooldown-bar-bg {
-            width: 140px;
-            height: 8px;
+            width: 120px;
+            height: 7px;
             background: rgba(255, 255, 255, 0.12);
             border-radius: 4px;
             overflow: hidden;
@@ -294,128 +286,13 @@
             transition: width 0.05s linear;
         }
 
-        .menu-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(5, 5, 8, 0.85);
-            backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 24px;
-            z-index: 20;
-        }
-
-        .game-title {
-            font-size: 38px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            background: linear-gradient(135deg, #ffedd5, #f43f5e, #fb7185);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .game-subtitle {
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 4px;
-            color: #38bdf8;
-            margin-bottom: 18px;
-        }
-
-        .best-records-box {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(251, 191, 36, 0.25);
-            border-radius: 12px;
-            padding: 10px 20px;
-            display: flex;
-            gap: 24px;
-            margin-bottom: 22px;
-        }
-
-        .best-record-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .best-record-label {
-            font-size: 10px;
-            letter-spacing: 1.5px;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-
-        .best-record-val {
-            font-size: 16px;
-            font-weight: 800;
-            color: #fbbf24;
-        }
-
-        .new-record-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            margin-top: 6px;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-            animation: pulse 1.2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .game-desc {
-            max-width: 380px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #94a3b8;
-            margin-bottom: 30px;
-        }
-
-        .btn-chaos {
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
-            color: #fff;
-            border: none;
-            outline: none;
-            padding: 14px 42px;
-            font-size: 15px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-radius: 9999px;
-            cursor: pointer;
-            box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .btn-chaos:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 35px rgba(99, 102, 241, 0.8);
-        }
-
-        .btn-chaos:active {
-            transform: scale(0.98);
-        }
-
         #mobile-controls {
-            position: absolute;
-            bottom: 20px;
-            width: calc(100% - 40px);
-            display: none;
+            width: 100%;
+            display: flex;
             justify-content: space-between;
-            z-index: 12;
+            align-items: center;
             pointer-events: none;
+            padding: 0 4px;
         }
 
         .control-group {
@@ -428,8 +305,8 @@
             width: 58px;
             height: 58px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(6px);
             display: flex;
             justify-content: center;
@@ -437,6 +314,119 @@
             color: #fff;
             font-weight: bold;
             font-size: 20px;
+            touch-action: manipulation;
+        }
+
+        .touch-btn:active {
+            background: rgba(56, 189, 248, 0.3);
+            border-color: #38bdf8;
+        }
+
+        #btn-burst {
+            width: 76px;
+            border-radius: 18px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            font-weight: 800;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.25));
+        }
+
+        /* Menus */
+        .menu-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 5, 8, 0.88);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 20;
+        }
+
+        .game-title {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #ffedd5, #f43f5e, #fb7185);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .game-subtitle {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #38bdf8;
+            margin-bottom: 16px;
+        }
+
+        .best-records-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(251, 191, 36, 0.28);
+            border-radius: 12px;
+            padding: 10px 16px;
+            display: flex;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .best-record-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .best-record-label {
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .best-record-val {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fbbf24;
+        }
+
+        .new-record-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        .game-desc {
+            max-width: 320px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+
+        .btn-chaos {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
+            border: none;
+            outline: none;
+            padding: 12px 34px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 9999px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
         }
     </style>
 </head>
@@ -501,20 +491,22 @@
             <div class="level-up-sub" id="level-up-sub-text">LEVEL 2 REACHED</div>
         </div>
 
-        <div id="special-card">
-            <span style="font-size: 11px; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">BURST [SPACE]</span>
-            <div class="cooldown-bar-bg">
-                <div id="cooldown-bar"></div>
+        <div class="bottom-container">
+            <div id="special-card">
+                <span style="font-size: 10px; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">BURST</span>
+                <div class="cooldown-bar-bg">
+                    <div id="cooldown-bar"></div>
+                </div>
             </div>
-        </div>
 
-        <div id="mobile-controls">
-            <div class="control-group">
-                <button class="touch-btn" id="btn-left">&larr;</button>
-                <button class="touch-btn" id="btn-right">&rarr;</button>
-            </div>
-            <div class="control-group">
-                <button class="touch-btn" id="btn-burst" style="width: 70px; border-radius: 16px; font-size: 12px;">BURST</button>
+            <div id="mobile-controls">
+                <div class="control-group">
+                    <button class="touch-btn" id="btn-left">&larr;</button>
+                    <button class="touch-btn" id="btn-right">&rarr;</button>
+                </div>
+                <div class="control-group">
+                    <button class="touch-btn" id="btn-burst">BURST</button>
+                </div>
             </div>
         </div>
     </div>
@@ -526,18 +518,17 @@
 
         <div class="best-records-box">
             <div class="best-record-item">
-                <span class="best-record-label">All-Time High Score</span>
+                <span class="best-record-label">High Score</span>
                 <span class="best-record-val" id="start-best-score">0</span>
             </div>
             <div class="best-record-item">
-                <span class="best-record-label">Longest Survival</span>
+                <span class="best-record-label">Best Time</span>
                 <span class="best-record-val" id="start-best-time">00:00</span>
             </div>
         </div>
 
         <p class="game-desc">
             Rotate the cosmic radial cat ring to collect bright energy orbs and dodge oncoming void anomalies.
-            Survive longer to level up and beat your personal best records!
         </p>
         <button class="btn-chaos interactive" id="start-btn">START CHAOS</button>
     </div>
@@ -545,9 +536,9 @@
     <!-- Game Over Overlay -->
     <div class="menu-overlay" id="game-over-overlay" style="display: none;">
         <div class="game-title" style="background: linear-gradient(135deg, #ef4444, #f97316); -webkit-background-clip: text;">RING COLLAPSED</div>
-        <div class="game-subtitle" id="final-stats-display" style="color: #f87171; margin-bottom: 14px;">SCORE: 0 | SURVIVED: 0s</div>
+        <div class="game-subtitle" id="final-stats-display" style="color: #f87171; margin-bottom: 12px;">SCORE: 0 | SURVIVED: 0s</div>
         
-        <div class="best-records-box" style="margin-bottom: 24px;">
+        <div class="best-records-box" style="margin-bottom: 20px;">
             <div class="best-record-item">
                 <span class="best-record-label">Best Score</span>
                 <span class="best-record-val" id="gameover-best-score">0</span>
@@ -616,6 +607,18 @@
                 }
 
                 if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            suspendAudio() {
+                if (this.ctx && this.ctx.state === 'running') {
+                    this.ctx.suspend();
+                }
+            }
+
+            resumeAudio() {
+                if (this.ctx && this.ctx.state === 'suspended') {
                     this.ctx.resume();
                 }
             }
@@ -999,6 +1002,7 @@
         let catGroup;
         let orbs = [], hazards = [], particles = [];
         let score = 0, gameActive = false;
+        let isTabHidden = false;
         let catAngle = 0;
         let spinVelocity = 0;
         let burstEnergy = 100;
@@ -1089,10 +1093,6 @@
         const sfxToggleBtn = document.getElementById('sfx-toggle-btn');
         const sfxVolSlider = document.getElementById('sfx-vol-slider');
 
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            document.getElementById('mobile-controls').style.display = 'flex';
-        }
-
         function formatTime(totalSeconds) {
             const mins = Math.floor(totalSeconds / 60);
             const secs = Math.floor(totalSeconds % 60);
@@ -1108,16 +1108,34 @@
         }
         refreshStoredRecordsUI();
 
+        // Responsive Camera Auto-Fitter (Mobile Portrait & Landscape Fit)
+        function updateCameraFov() {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = aspect;
+
+            // Agar aspect < 1 (Mobile portrait mode hai) toh camera door karo taaki ring na kate
+            if (aspect < 0.6) {
+                camera.position.z = 24.5;
+            } else if (aspect < 0.8) {
+                camera.position.z = 21.0;
+            } else if (aspect < 1.0) {
+                camera.position.z = 18.0;
+            } else {
+                camera.position.z = 15.0; // Desktop mode
+            }
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
         function initScene() {
             scene = new THREE.Scene();
             scene.fog = new THREE.FogExp2(0x050508, 0.035);
 
             camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 0, 15);
-
+            
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
-            renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            updateCameraFov();
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
             scene.add(ambientLight);
@@ -1361,6 +1379,38 @@
             return diff > Math.PI ? TWO_PI - diff : diff;
         }
 
+        // ==========================================
+        // --- SCREEN LOCK / TAB VISIBILITY FIX ---
+        // ==========================================
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                isTabHidden = true;
+                // Phone lock ya minimize hone par audio turant silent karein
+                audio.suspendAudio();
+            } else {
+                isTabHidden = false;
+                // Phone open hone par sound wapas resume karein agar game active ho
+                lastFrameTimestamp = performance.now();
+                if (gameActive) {
+                    audio.resumeAudio();
+                }
+            }
+        });
+
+        // Window Blur/Focus fallback for older mobile browsers
+        window.addEventListener('blur', () => {
+            isTabHidden = true;
+            audio.suspendAudio();
+        });
+        window.addEventListener('focus', () => {
+            isTabHidden = false;
+            lastFrameTimestamp = performance.now();
+            if (gameActive) {
+                audio.resumeAudio();
+            }
+        });
+
+        // Controls
         window.addEventListener('keydown', (e) => {
             if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
             if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
@@ -1385,6 +1435,7 @@
         const bindTouch = (elem, keyName) => {
             elem.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 audio.playButtonClick();
                 if (keyName === 'space' && !keys.space && burstEnergy > 10 && gameActive) {
                     audio.playBurstLaser();
@@ -1393,6 +1444,12 @@
             }, { passive: false });
 
             elem.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                keys[keyName] = false;
+            }, { passive: false });
+
+            elem.addEventListener('touchcancel', (e) => {
                 e.preventDefault();
                 keys[keyName] = false;
             }, { passive: false });
@@ -1458,10 +1515,9 @@
             }
         });
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        window.addEventListener('resize', updateCameraFov);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateCameraFov, 150);
         });
 
         let lastSpawnOrb = 0;
@@ -1470,6 +1526,9 @@
 
         function animate(timestamp) {
             requestAnimationFrame(animate);
+
+            // Tab hidden ya phone locked hone par rendering aur physics pause rahegi
+            if (isTabHidden) return;
 
             const delta = Math.min((timestamp - lastFrameTimestamp) / 1000, 0.1);
             lastFrameTimestamp = timestamp;

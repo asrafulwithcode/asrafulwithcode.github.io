@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>CAT SPINNERS: CHAOS MODE</title>
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
+
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <style>
         *, *::before, *::after {
@@ -52,18 +55,36 @@
             justify-content: space-between;
             align-items: flex-start;
             width: 100%;
+            gap: 12px;
+        }
+
+        .hud-left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .stat-card {
             background: rgba(15, 15, 20, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            padding: 10px 18px;
+            padding: 8px 16px;
             backdrop-filter: blur(8px);
+            min-width: 85px;
+        }
+
+        .stat-card.level-card {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+        }
+
+        .stat-card.best-card {
+            border-color: rgba(251, 191, 36, 0.4);
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.12);
         }
 
         .stat-label {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: #8a8d9b;
@@ -71,10 +92,20 @@
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 800;
             color: #fff;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-value.level-val {
+            color: #38bdf8;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        .stat-value.best-val {
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
         }
 
         .audio-hud-container {
@@ -193,6 +224,46 @@
             border: none;
         }
 
+        #level-up-banner {
+            position: absolute;
+            top: 18%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.6);
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease;
+        }
+
+        #level-up-banner.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .level-up-title {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+        }
+
+        .level-up-sub {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #f1f5f9;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
         #special-card {
             position: absolute;
             bottom: 24px;
@@ -253,15 +324,63 @@
             font-weight: 700;
             letter-spacing: 4px;
             color: #38bdf8;
-            margin-bottom: 24px;
+            margin-bottom: 18px;
+        }
+
+        .best-records-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 12px;
+            padding: 10px 20px;
+            display: flex;
+            gap: 24px;
+            margin-bottom: 22px;
+        }
+
+        .best-record-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .best-record-label {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .best-record-val {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fbbf24;
+        }
+
+        .new-record-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-top: 6px;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .game-desc {
-            max-width: 360px;
+            max-width: 380px;
             font-size: 14px;
             line-height: 1.6;
             color: #94a3b8;
-            margin-bottom: 32px;
+            margin-bottom: 30px;
         }
 
         .btn-chaos {
@@ -326,9 +445,23 @@
 
     <div id="ui-layer">
         <div class="hud-top">
-            <div class="stat-card">
-                <div class="stat-label">Score</div>
-                <div class="stat-value" id="score-display">0</div>
+            <div class="hud-left">
+                <div class="stat-card level-card">
+                    <div class="stat-label">Level</div>
+                    <div class="stat-value level-val" id="level-display">1</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score-display">0</div>
+                </div>
+                <div class="stat-card best-card">
+                    <div class="stat-label">Best</div>
+                    <div class="stat-value best-val" id="hud-best-score">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Time</div>
+                    <div class="stat-value" id="timer-display">00:00</div>
+                </div>
             </div>
 
             <div class="audio-hud-container interactive">
@@ -363,6 +496,11 @@
             </div>
         </div>
 
+        <div id="level-up-banner">
+            <div class="level-up-title">LEVEL UP!</div>
+            <div class="level-up-sub" id="level-up-sub-text">LEVEL 2 REACHED</div>
+        </div>
+
         <div id="special-card">
             <span style="font-size: 11px; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">BURST [SPACE]</span>
             <div class="cooldown-bar-bg">
@@ -381,33 +519,57 @@
         </div>
     </div>
 
+    <!-- Start Overlay -->
     <div class="menu-overlay" id="start-overlay">
         <div class="game-title">CAT SPINNERS</div>
         <div class="game-subtitle">CHAOS MODE</div>
+
+        <div class="best-records-box">
+            <div class="best-record-item">
+                <span class="best-record-label">All-Time High Score</span>
+                <span class="best-record-val" id="start-best-score">0</span>
+            </div>
+            <div class="best-record-item">
+                <span class="best-record-label">Longest Survival</span>
+                <span class="best-record-val" id="start-best-time">00:00</span>
+            </div>
+        </div>
+
         <p class="game-desc">
             Rotate the cosmic radial cat ring to collect bright energy orbs and dodge oncoming void anomalies.
-            Use <b>[A / D]</b> or <b>[Arrow Keys]</b> to spin, and <b>[SPACE]</b> for Chaos Burst.
+            Survive longer to level up and beat your personal best records!
         </p>
         <button class="btn-chaos interactive" id="start-btn">START CHAOS</button>
     </div>
 
+    <!-- Game Over Overlay -->
     <div class="menu-overlay" id="game-over-overlay" style="display: none;">
         <div class="game-title" style="background: linear-gradient(135deg, #ef4444, #f97316); -webkit-background-clip: text;">RING COLLAPSED</div>
-        <div class="game-subtitle" id="final-score-display" style="color: #f87171; margin-bottom: 28px;">SCORE: 0</div>
+        <div class="game-subtitle" id="final-stats-display" style="color: #f87171; margin-bottom: 14px;">SCORE: 0 | SURVIVED: 0s</div>
+        
+        <div class="best-records-box" style="margin-bottom: 24px;">
+            <div class="best-record-item">
+                <span class="best-record-label">Best Score</span>
+                <span class="best-record-val" id="gameover-best-score">0</span>
+                <div id="new-score-badge" class="new-record-badge" style="display: none;">NEW BEST!</div>
+            </div>
+            <div class="best-record-item">
+                <span class="best-record-label">Best Survival</span>
+                <span class="best-record-val" id="gameover-best-time">00:00</span>
+                <div id="new-time-badge" class="new-record-badge" style="display: none;">RECORD TIME!</div>
+            </div>
+        </div>
+
         <button class="btn-chaos interactive" id="restart-btn">SPIN AGAIN</button>
     </div>
 
     <script>
-        // Polyfill safeguard for CapsuleGeometry
         if (typeof THREE !== 'undefined' && !THREE.CapsuleGeometry) {
             THREE.CapsuleGeometry = function(radius, length, capSegments, radialSegments) {
                 return new THREE.CylinderGeometry(radius || 0.5, radius || 0.5, length || 1, radialSegments || 16);
             };
         }
 
-        // ==========================================
-        // --- WEB AUDIO API PROCEDURAL AUDIO ENGINE ---
-        // ==========================================
         class SoundEngine {
             constructor() {
                 this.ctx = null;
@@ -521,7 +683,6 @@
                         const now = this.ctx.currentTime;
                         const step = this.musicStep % 16;
 
-                        // Bassline Synth
                         const bassOsc = this.ctx.createOscillator();
                         const bassGain = this.ctx.createGain();
                         const bassFilter = this.ctx.createBiquadFilter();
@@ -541,7 +702,6 @@
                         bassOsc.start(now);
                         bassOsc.stop(now + stepTime);
 
-                        // Arpeggiator
                         if (step % 2 === 0) {
                             const arpOsc = this.ctx.createOscillator();
                             const arpGain = this.ctx.createGain();
@@ -557,12 +717,10 @@
                             arpOsc.stop(now + stepTime * 1.6);
                         }
 
-                        // Hi-hat
                         if (step % 2 === 1) {
                             this.playHiHat(now);
                         }
 
-                        // Kick
                         if (step % 4 === 0) {
                             this.playKick(now);
                         }
@@ -651,6 +809,27 @@
                     gain.connect(this.sfxGain);
                     osc.start(now + idx * 0.06);
                     osc.stop(now + idx * 0.06 + 0.32);
+                });
+            }
+
+            playLevelUpSound() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const fanfare = [587.33, 739.99, 880.00, 1174.66];
+                fanfare.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+
+                    gain.gain.setValueAtTime(0, now + idx * 0.07);
+                    gain.gain.linearRampToValueAtTime(0.28, now + idx * 0.07 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.38);
+
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now + idx * 0.07);
+                    osc.stop(now + idx * 0.07 + 0.4);
                 });
             }
 
@@ -816,8 +995,7 @@
 
         const audio = new SoundEngine();
 
-        // --- Core Simulation State ---
-        let scene, camera, renderer;
+        let scene, camera, renderer, orbitGuide;
         let catGroup;
         let orbs = [], hazards = [], particles = [];
         let score = 0, gameActive = false;
@@ -829,9 +1007,40 @@
         const ringRadius = 7.5;
         const TWO_PI = Math.PI * 2;
 
+        let currentLevel = 1;
+        let survivalTime = 0;
+        let timeInCurrentLevel = 0;
+        let speedMultiplier = 1.0;
+        const MAX_SPEED_MULTIPLIER = 2.2;
+        let bannerTimeout = null;
+
+        const STORAGE_KEY_SCORE = 'cat_spinners_best_score';
+        const STORAGE_KEY_TIME = 'cat_spinners_best_time';
+
+        let bestScore = parseInt(localStorage.getItem(STORAGE_KEY_SCORE), 10) || 0;
+        let bestTime = parseFloat(localStorage.getItem(STORAGE_KEY_TIME)) || 0;
+
+        function savePersonalBests(finalScore, finalSurvivalTime) {
+            let isNewScore = false;
+            let isNewTime = false;
+
+            if (finalScore > bestScore) {
+                bestScore = finalScore;
+                localStorage.setItem(STORAGE_KEY_SCORE, bestScore);
+                isNewScore = true;
+            }
+
+            if (finalSurvivalTime > bestTime) {
+                bestTime = finalSurvivalTime;
+                localStorage.setItem(STORAGE_KEY_TIME, bestTime);
+                isNewTime = true;
+            }
+
+            return { isNewScore, isNewTime };
+        }
+
         const keys = { left: false, right: false, space: false };
 
-        // Pre-cached geometries & materials to avoid per-spawn allocations
         const orbGeometry = new THREE.SphereGeometry(0.35, 16, 16);
         const orbMaterial = new THREE.MeshStandardMaterial({
             color: 0x38bdf8,
@@ -847,13 +1056,26 @@
             roughness: 0.2
         });
 
-        // DOM Element Cache
         const canvas = document.getElementById('game-canvas');
         const scoreDisplay = document.getElementById('score-display');
+        const levelDisplay = document.getElementById('level-display');
+        const timerDisplay = document.getElementById('timer-display');
+        const hudBestScore = document.getElementById('hud-best-score');
+        const levelUpBanner = document.getElementById('level-up-banner');
+        const levelUpSubText = document.getElementById('level-up-sub-text');
         const cooldownBar = document.getElementById('cooldown-bar');
+
         const startOverlay = document.getElementById('start-overlay');
+        const startBestScore = document.getElementById('start-best-score');
+        const startBestTime = document.getElementById('start-best-time');
+
         const gameOverOverlay = document.getElementById('game-over-overlay');
-        const finalScoreDisplay = document.getElementById('final-score-display');
+        const finalStatsDisplay = document.getElementById('final-stats-display');
+        const gameoverBestScore = document.getElementById('gameover-best-score');
+        const gameoverBestTime = document.getElementById('gameover-best-time');
+        const newScoreBadge = document.getElementById('new-score-badge');
+        const newTimeBadge = document.getElementById('new-time-badge');
+
         const startBtn = document.getElementById('start-btn');
         const restartBtn = document.getElementById('restart-btn');
 
@@ -870,6 +1092,21 @@
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             document.getElementById('mobile-controls').style.display = 'flex';
         }
+
+        function formatTime(totalSeconds) {
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = Math.floor(totalSeconds % 60);
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function refreshStoredRecordsUI() {
+            hudBestScore.textContent = String(bestScore);
+            startBestScore.textContent = String(bestScore);
+            startBestTime.textContent = formatTime(bestTime);
+            gameoverBestScore.textContent = String(bestScore);
+            gameoverBestTime.textContent = formatTime(bestTime);
+        }
+        refreshStoredRecordsUI();
 
         function initScene() {
             scene = new THREE.Scene();
@@ -891,7 +1128,7 @@
 
             const ringGeo = new THREE.RingGeometry(ringRadius - 0.05, ringRadius + 0.05, 64);
             const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.25 });
-            const orbitGuide = new THREE.Mesh(ringGeo, ringMat);
+            orbitGuide = new THREE.Mesh(ringGeo, ringMat);
             scene.add(orbitGuide);
 
             const starCoords = new Float32Array(1800);
@@ -960,21 +1197,66 @@
             catGroup.rotation.z = catAngle + Math.PI / 2;
         }
 
+        function getRequiredLevelTime(lvl) {
+            if (lvl === 1 || lvl === 2) return 15;
+            return Math.max(8, 15 - (lvl - 2));
+        }
+
+        function triggerLevelUp() {
+            currentLevel++;
+            timeInCurrentLevel = 0;
+
+            const oldMultiplier = speedMultiplier;
+            speedMultiplier = Math.min(MAX_SPEED_MULTIPLIER, 1.0 + (currentLevel - 1) * 0.11);
+            const ratio = speedMultiplier / oldMultiplier;
+
+            orbs.forEach(o => { o.userData.speed *= ratio; });
+            hazards.forEach(h => { h.userData.speed *= ratio; });
+
+            levelDisplay.textContent = String(currentLevel);
+            levelUpSubText.textContent = `LEVEL ${currentLevel} REACHED`;
+
+            levelUpBanner.classList.add('show');
+            if (bannerTimeout) clearTimeout(bannerTimeout);
+            bannerTimeout = setTimeout(() => {
+                levelUpBanner.classList.remove('show');
+            }, 1800);
+
+            if (orbitGuide) {
+                orbitGuide.material.opacity = 0.85;
+                orbitGuide.material.color.setHex(0xa855f7);
+                setTimeout(() => {
+                    orbitGuide.material.opacity = 0.25;
+                    orbitGuide.material.color.setHex(0x38bdf8);
+                }, 600);
+            }
+
+            audio.playLevelUpSound();
+        }
+
         function spawnOrb() {
             const angle = Math.random() * TWO_PI;
+            const baseSpeed = 0.18 + Math.random() * 0.08;
             const orb = new THREE.Mesh(orbGeometry, orbMaterial);
-            orb.userData = { angle, zPos: -35, speed: 0.18 + Math.random() * 0.08 };
+            orb.userData = {
+                angle,
+                zPos: -35,
+                baseSpeed,
+                speed: baseSpeed * speedMultiplier
+            };
             scene.add(orb);
             orbs.push(orb);
         }
 
         function spawnHazard() {
             const angle = Math.random() * TWO_PI;
+            const baseSpeed = 0.22 + Math.random() * 0.12;
             const hazard = new THREE.Mesh(hazardGeometry, hazardMaterial);
             hazard.userData = {
                 angle,
                 zPos: -40,
-                speed: 0.22 + Math.random() * 0.12,
+                baseSpeed,
+                speed: baseSpeed * speedMultiplier,
                 rotSpeedX: Math.random() * 0.05,
                 rotSpeedY: Math.random() * 0.05
             };
@@ -1007,7 +1289,6 @@
             particles.push(pMesh);
         }
 
-        // Complete WebGL resource disposal to eliminate VRAM leaks
         function cleanActiveEntities() {
             orbs.forEach(o => scene.remove(o));
             hazards.forEach(h => scene.remove(h));
@@ -1038,7 +1319,19 @@
             catAngle = 0;
             spinVelocity = 0;
             burstEnergy = 100;
+
+            currentLevel = 1;
+            survivalTime = 0;
+            timeInCurrentLevel = 0;
+            speedMultiplier = 1.0;
+
+            if (bannerTimeout) clearTimeout(bannerTimeout);
+            levelUpBanner.classList.remove('show');
+
             scoreDisplay.textContent = '0';
+            levelDisplay.textContent = '1';
+            timerDisplay.textContent = '00:00';
+            refreshStoredRecordsUI();
 
             cleanActiveEntities();
 
@@ -1053,17 +1346,21 @@
             audio.playGameOverSound();
             audio.duckMusic(0.18);
 
-            finalScoreDisplay.textContent = `SCORE: ${score}`;
+            const { isNewScore, isNewTime } = savePersonalBests(score, survivalTime);
+            refreshStoredRecordsUI();
+
+            newScoreBadge.style.display = isNewScore ? 'inline-block' : 'none';
+            newTimeBadge.style.display = isNewTime ? 'inline-block' : 'none';
+
+            finalStatsDisplay.textContent = `SCORE: ${score} | SURVIVED: ${Math.floor(survivalTime)}s (LVL ${currentLevel})`;
             gameOverOverlay.style.display = 'flex';
         }
 
-        // True shortest arc angle difference on radial boundary
         function getRadialDistance(a1, a2) {
             const diff = Math.abs((a1 - a2) % TWO_PI);
             return diff > Math.PI ? TWO_PI - diff : diff;
         }
 
-        // Input Bindings
         window.addEventListener('keydown', (e) => {
             if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
             if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
@@ -1167,14 +1464,26 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // --- Main Animation Frame Loop ---
         let lastSpawnOrb = 0;
         let lastSpawnHazard = 0;
+        let lastFrameTimestamp = performance.now();
 
         function animate(timestamp) {
             requestAnimationFrame(animate);
 
+            const delta = Math.min((timestamp - lastFrameTimestamp) / 1000, 0.1);
+            lastFrameTimestamp = timestamp;
+
             if (gameActive) {
+                survivalTime += delta;
+                timeInCurrentLevel += delta;
+                timerDisplay.textContent = formatTime(survivalTime);
+
+                const reqTime = getRequiredLevelTime(currentLevel);
+                if (timeInCurrentLevel >= reqTime) {
+                    triggerLevelUp();
+                }
+
                 if (keys.left) spinVelocity += 0.0035;
                 if (keys.right) spinVelocity -= 0.0035;
 
@@ -1200,16 +1509,18 @@
 
                 updateCatPosition();
 
-                if (timestamp - lastSpawnOrb > 900) {
+                const orbSpawnInterval = Math.max(600, 900 - (currentLevel - 1) * 35);
+                const hazardSpawnInterval = Math.max(800, 1400 - (currentLevel - 1) * 75);
+
+                if (timestamp - lastSpawnOrb > orbSpawnInterval) {
                     spawnOrb();
                     lastSpawnOrb = timestamp;
                 }
-                if (timestamp - lastSpawnHazard > 1400) {
+                if (timestamp - lastSpawnHazard > hazardSpawnInterval) {
                     spawnHazard();
                     lastSpawnHazard = timestamp;
                 }
 
-                // Update Energy Orbs
                 for (let i = orbs.length - 1; i >= 0; i--) {
                     const orb = orbs[i];
                     orb.userData.zPos += orb.userData.speed;
@@ -1220,7 +1531,10 @@
                     if (Math.abs(orb.position.z) < 0.6) {
                         if (getRadialDistance(catAngle, orb.userData.angle) < 0.28) {
                             score += 10;
-                            scoreDisplay.textContent = score;
+                            scoreDisplay.textContent = String(score);
+                            if (score > bestScore) {
+                                hudBestScore.textContent = String(score);
+                            }
                             audio.playOrbChime();
                             triggerCollectEffect(orb.position, 0x38bdf8);
                             scene.remove(orb);
@@ -1235,7 +1549,6 @@
                     }
                 }
 
-                // Update Hazards
                 for (let i = hazards.length - 1; i >= 0; i--) {
                     const h = hazards[i];
                     h.userData.zPos += h.userData.speed;
@@ -1249,7 +1562,10 @@
                         if (getRadialDistance(catAngle, h.userData.angle) < 0.25) {
                             if (isBursting) {
                                 score += 25;
-                                scoreDisplay.textContent = score;
+                                scoreDisplay.textContent = String(score);
+                                if (score > bestScore) {
+                                    hudBestScore.textContent = String(score);
+                                }
                                 audio.playHazardDestroy();
                                 triggerCollectEffect(h.position, 0xf59e0b);
                                 scene.remove(h);
@@ -1269,7 +1585,6 @@
                     }
                 }
 
-                // Update Particles
                 for (let i = particles.length - 1; i >= 0; i--) {
                     const p = particles[i];
                     p.userData.life -= 0.035;

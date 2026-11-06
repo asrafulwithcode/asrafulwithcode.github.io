@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>CAT SPINNERS: CHAOS MODE</title>
+  <title>CAT SPINNERS: REALISTIC SURVIVAL</title>
   <style>
     * {
       box-sizing: border-box;
@@ -17,7 +17,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #060814;
+      background: #050711;
       font-family: system-ui, -apple-system, sans-serif;
       touch-action: none;
     }
@@ -34,27 +34,81 @@
       pointer-events: none;
       z-index: 10;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      align-items: flex-start;
       padding: 16px;
     }
-    .hud-box {
+    .hud-top {
       display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
       gap: 10px;
     }
+    .hud-left {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stats-row {
+      display: flex;
+      gap: 8px;
+    }
     .badge {
-      background: rgba(13, 17, 38, 0.7);
+      background: rgba(13, 17, 38, 0.75);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 12px;
-      padding: 8px 14px;
+      padding: 6px 12px;
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
     }
+    .badge.timer {
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    .badge.timer span {
+      color: #ef4444;
+    }
     .badge span {
       color: #4ade80;
+    }
+    .mission-card {
+      background: rgba(13, 17, 38, 0.85);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      border-radius: 14px;
+      padding: 10px 14px;
+      color: #fff;
+      max-width: 280px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .mission-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #93c5fd;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .mission-desc {
+      font-size: 12px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      transition: width 0.25s ease;
     }
     .btn {
       pointer-events: auto;
@@ -72,8 +126,8 @@
     }
     #touch-reticle {
       position: absolute;
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border: 2px solid rgba(147, 197, 253, 0.8);
       border-radius: 50%;
       pointer-events: none;
@@ -100,11 +154,34 @@
       25% { opacity: 1; transform: translate(-50%, -8px) scale(1.1); }
       100% { opacity: 0; transform: translate(-50%, -40px) scale(0.9); }
     }
-    #pause-menu {
+    .mission-popup {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: linear-gradient(135deg, #1e3a8a, #065f46);
+      border: 2px solid #facc15;
+      padding: 16px 24px;
+      border-radius: 16px;
+      color: #fff;
+      text-align: center;
+      font-weight: 900;
+      font-size: 18px;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+      transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+      z-index: 30;
+    }
+    .mission-popup.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .modal-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(4, 6, 18, 0.85);
-      backdrop-filter: blur(10px);
+      background: rgba(4, 6, 18, 0.88);
+      backdrop-filter: blur(12px);
       z-index: 50;
       display: none;
       flex-direction: column;
@@ -113,16 +190,16 @@
       gap: 12px;
       color: #fff;
     }
-    #pause-menu.open {
+    .modal-overlay.open {
       display: flex;
     }
     .menu-card {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 22px;
+      padding: 24px;
       border-radius: 18px;
       text-align: center;
-      width: 260px;
+      width: 280px;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -132,18 +209,44 @@
   <div id="touch-reticle"></div>
 
   <div id="ui-layer">
-    <div class="hud-box">
-      <div class="badge">Size: <span id="scale-val">1.0x</span></div>
-      <div class="badge">Score: <span id="score-val">0</span></div>
+    <div class="hud-top">
+      <div class="hud-left">
+        <div class="stats-row">
+          <div class="badge">Size: <span id="scale-val">1.0x</span></div>
+          <div class="badge">Score: <span id="score-val">0</span></div>
+          <div class="badge timer">Time: <span id="time-val">60s</span></div>
+        </div>
+        <div class="mission-card">
+          <div class="mission-title" id="m-rank">MISSION 1</div>
+          <div class="mission-desc" id="m-text">Eat 5 Small Fish</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="m-bar"></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="pause-btn">PAUSE</button>
     </div>
-    <button class="btn" id="pause-btn">PAUSE</button>
   </div>
 
-  <div id="pause-menu">
+  <div class="mission-popup" id="mission-alert">
+    🎉 MISSION COMPLETE!<br />
+    <span style="font-size: 13px; color: #fef08a; font-weight: 600;" id="mission-reward-text">+BONUS TIME & GROWTH!</span>
+  </div>
+
+  <div class="modal-overlay" id="gameover-menu">
+    <div class="menu-card" style="border-color: rgba(239, 68, 68, 0.5);">
+      <h2 style="color: #ef4444; margin-bottom: 6px;">GAME OVER</h2>
+      <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 16px;" id="gameover-reason">Time expired!</p>
+      <div style="font-size: 14px; margin-bottom: 18px;">Final Score: <strong id="go-score" style="color: #4ade80;">0</strong></div>
+      <button class="btn" id="retry-btn" style="width: 100%; padding: 12px; background: #dc2626;">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="pause-menu">
     <div class="menu-card">
       <h3 style="margin-bottom: 16px;">PAUSED</h3>
       <button class="btn" id="resume-btn" style="width: 100%; padding: 10px; margin-bottom: 8px; background: #2563eb;">RESUME</button>
-      <button class="btn" id="reset-btn" style="width: 100%; padding: 10px;">RESET</button>
+      <button class="btn" id="reset-btn" style="width: 100%; padding: 10px;">RESTART</button>
     </div>
   </div>
 
@@ -165,10 +268,44 @@
       osc.stop(now + 0.13);
     }
 
+    function playMissionSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(554.37, now + 0.08);
+      osc.frequency.setValueAtTime(659.25, now + 0.16);
+      osc.frequency.setValueAtTime(880, now + 0.24);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.46);
+    }
+
+    function playGameOverSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.5);
+      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.52);
+    }
+
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060814);
-    scene.fog = new THREE.FogExp2(0x060814, 0.025);
+    scene.background = new THREE.Color(0x050711);
+    scene.fog = new THREE.FogExp2(0x050711, 0.018);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -177,131 +314,191 @@
     renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.8);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(15, 30, 20);
+    const dirLight = new THREE.DirectionalLight(0xfff5e6, 1.1);
+    dirLight.position.set(20, 35, 25);
     dirLight.castShadow = true;
     scene.add(dirLight);
 
+    const floorSize = 400;
     const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(120, 120),
-      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 })
+      new THREE.PlaneGeometry(floorSize, floorSize),
+      new THREE.MeshStandardMaterial({ color: 0x090d1f, roughness: 0.6 })
     );
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     scene.add(floor);
 
-    const grid = new THREE.GridHelper(120, 40, 0x3b82f6, 0x1e293b);
+    const grid = new THREE.GridHelper(floorSize, 120, 0x3b82f6, 0x172554);
     grid.position.y = 0.02;
     scene.add(grid);
 
     const catGroup = new THREE.Group();
     scene.add(catGroup);
 
-    const furMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
+    const furMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.45, metalness: 0.05 });
+    const darkStripeMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.5 });
     const whiteFurMat = new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.6 });
-    const innerEarMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4 });
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x020617 });
+    const earInnerMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4 });
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x050505 });
+    const noseMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.3 });
+    const whiskerMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-    const bodyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.95, 2.0, 16), furMat);
-    bodyMesh.rotation.x = Math.PI / 2;
-    bodyMesh.position.set(0, 1.0, 0);
-    bodyMesh.castShadow = true;
-    catGroup.add(bodyMesh);
+    const bodyGroup = new THREE.Group();
+    catGroup.add(bodyGroup);
 
-    const bellyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.85, 1.4, 16, 1, false, 0, Math.PI), whiteFurMat);
-    bellyMesh.rotation.x = Math.PI / 2;
-    bellyMesh.rotation.y = Math.PI / 2;
-    bellyMesh.position.set(0, 0.95, 0);
-    catGroup.add(bellyMesh);
+    const chestMesh = new THREE.Mesh(new THREE.SphereGeometry(0.72, 16, 16), furMat);
+    chestMesh.scale.set(0.9, 1.05, 1.15);
+    chestMesh.position.set(0, 1.1, 0.45);
+    chestMesh.castShadow = true;
+    bodyGroup.add(chestMesh);
+
+    const abdomenMesh = new THREE.Mesh(new THREE.SphereGeometry(0.62, 16, 16), furMat);
+    abdomenMesh.scale.set(0.8, 0.95, 1.1);
+    abdomenMesh.position.set(0, 1.05, -0.2);
+    abdomenMesh.castShadow = true;
+    bodyGroup.add(abdomenMesh);
+
+    const pelvisMesh = new THREE.Mesh(new THREE.SphereGeometry(0.68, 16, 16), furMat);
+    pelvisMesh.scale.set(0.85, 1.0, 1.05);
+    pelvisMesh.position.set(0, 1.15, -0.8);
+    pelvisMesh.castShadow = true;
+    bodyGroup.add(pelvisMesh);
+
+    const bellyBib = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 14), whiteFurMat);
+    bellyBib.scale.set(0.75, 0.9, 1.4);
+    bellyBib.position.set(0, 0.9, 0.1);
+    bodyGroup.add(bellyBib);
+
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.5, 0.6, 12), furMat);
+    neck.position.set(0, 1.45, 0.85);
+    neck.rotation.x = -0.4;
+    bodyGroup.add(neck);
 
     const headGroup = new THREE.Group();
-    headGroup.position.set(0, 1.4, 1.25);
+    headGroup.position.set(0, 1.7, 1.15);
     catGroup.add(headGroup);
 
-    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), furMat);
-    headMesh.castShadow = true;
-    headGroup.add(headMesh);
+    const headBase = new THREE.Mesh(new THREE.SphereGeometry(0.58, 16, 16), furMat);
+    headBase.scale.set(1.05, 0.9, 0.95);
+    headBase.castShadow = true;
+    headGroup.add(headBase);
 
-    const muzzleMesh = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), whiteFurMat);
-    muzzleMesh.scale.set(1.1, 0.7, 0.9);
-    muzzleMesh.position.set(0, -0.15, 0.65);
-    headGroup.add(muzzleMesh);
+    const snout = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), whiteFurMat);
+    snout.scale.set(1.2, 0.75, 1.0);
+    snout.position.set(0, -0.12, 0.5);
+    headGroup.add(snout);
 
-    function createEye(x) {
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.06, 4), noseMat);
+    nose.rotation.x = Math.PI;
+    nose.position.set(0, -0.06, 0.72);
+    headGroup.add(nose);
+
+    function createRealisticEye(x) {
       const g = new THREE.Group();
-      g.position.set(x, 0.12, 0.62);
-      const c = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), eyeMat);
-      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8), pupilMat);
-      p.position.z = 0.09;
-      g.add(c, p);
+      g.position.set(x, 0.1, 0.46);
+      const eyeBall = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 12), eyeMat);
+      const slit = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.16, 0.05), pupilMat);
+      slit.position.z = 0.09;
+      g.add(eyeBall, slit);
       return g;
     }
-    headGroup.add(createEye(-0.3), createEye(0.3));
+    headGroup.add(createRealisticEye(-0.25), createRealisticEye(0.25));
 
-    function createEar(x, rotZ) {
+    function createRealisticEar(x, rotZ) {
       const g = new THREE.Group();
-      g.position.set(x, 0.72, 0.1);
+      g.position.set(x, 0.48, 0.08);
       g.rotation.z = rotZ;
-      g.rotation.x = -0.15;
-      const o = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.5, 5), furMat);
-      const i = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.42, 5), innerEarMat);
-      i.position.z = 0.05;
+      g.rotation.x = -0.2;
+      const o = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.45, 4), furMat);
+      const i = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.38, 4), earInnerMat);
+      i.position.z = 0.04;
       g.add(o, i);
       return g;
     }
-    headGroup.add(createEar(-0.4, 0.35), createEar(0.4, -0.35));
+    headGroup.add(createRealisticEar(-0.35, 0.35), createRealisticEar(0.35, -0.35));
+
+    function createWhiskers() {
+      const g = new THREE.Group();
+      [-1, 1].forEach(side => {
+        [-0.04, 0.0, 0.04].forEach((yOff, i) => {
+          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.35, 4), whiskerMat);
+          w.rotation.z = Math.PI / 2 + (side * 0.15 * i);
+          w.rotation.y = side * 0.3;
+          w.position.set(side * 0.28, -0.1 + yOff, 0.55);
+          g.add(w);
+        });
+      });
+      return g;
+    }
+    headGroup.add(createWhiskers());
 
     const tailGroup = new THREE.Group();
-    tailGroup.position.set(0, 1.2, -1.0);
+    tailGroup.position.set(0, 1.25, -1.25);
     catGroup.add(tailGroup);
 
     const tailJoints = [];
     let pNode = tailGroup;
-    for (let i = 0; i < 4; i++) {
-      const s = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.45, 8), i % 2 === 0 ? furMat : whiteFurMat);
-      s.position.y = 0.2;
+    for (let i = 0; i < 5; i++) {
+      const s = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 8), i === 4 ? darkStripeMat : furMat);
+      s.position.y = 0.18;
       const j = new THREE.Group();
-      j.position.y = 0.35;
+      j.position.y = 0.32;
       j.add(s);
       pNode.add(j);
       tailJoints.push(j);
       pNode = j;
     }
 
-    const legs = [];
-    const legGeo = new THREE.CylinderGeometry(0.2, 0.16, 0.9, 10);
-    [
-      { x: -0.55, z: 0.65 },
-      { x: 0.55, z: 0.65 },
-      { x: -0.55, z: -0.65 },
-      { x: 0.55, z: -0.65 }
-    ].forEach((pos) => {
-      const g = new THREE.Group();
-      g.position.set(pos.x, 0.75, pos.z);
-      const m = new THREE.Mesh(legGeo, furMat);
-      m.position.y = -0.3;
-      m.castShadow = true;
-      g.add(m);
-      catGroup.add(g);
-      legs.push(g);
-    });
+    const frontLegs = [];
+    const backLegs = [];
+    function createFelineLeg(isFront, x, z) {
+      const legRoot = new THREE.Group();
+      legRoot.position.set(x, isFront ? 0.95 : 1.05, z);
+
+      const upper = new THREE.Mesh(new THREE.CylinderGeometry(isFront ? 0.16 : 0.22, 0.13, 0.55, 10), furMat);
+      upper.position.y = -0.22;
+      legRoot.add(upper);
+
+      const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.5, 10), furMat);
+      lower.position.set(0, -0.65, isFront ? 0.02 : -0.05);
+      legRoot.add(lower);
+
+      const paw = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 10), whiteFurMat);
+      paw.scale.set(1.0, 0.6, 1.3);
+      paw.position.set(0, -0.9, isFront ? 0.08 : 0.06);
+      legRoot.add(paw);
+
+      catGroup.add(legRoot);
+      if (isFront) frontLegs.push(legRoot);
+      else backLegs.push(legRoot);
+    }
+    createFelineLeg(true, -0.38, 0.55);
+    createFelineLeg(true, 0.38, 0.55);
+    createFelineLeg(false, -0.42, -0.75);
+    createFelineLeg(false, 0.42, -0.75);
 
     let catCurrentScale = 1.0;
     let catTargetScale = 1.0;
     let eatingAnimTimer = 0;
     let score = 0;
+    let isGameOver = false;
+    let isPaused = false;
+    let timeLeft = 60;
 
     const foods = [];
-    const MAX_FOODS = 18;
+    const MAX_FOODS = 30;
+    const hazards = [];
+    const MAX_HAZARDS = 8;
+    const SPAWN_RADIUS = 75;
 
     const FOOD_TYPES = [
-      { type: 'small', color: 0x38bdf8, scale: 0.7, growthVal: 0.06, text: '+Size' },
-      { type: 'medium', color: 0xfacc15, scale: 1.0, growthVal: 0.12, text: '+Grow' },
-      { type: 'large', color: 0xf43f5e, scale: 1.5, growthVal: 0.25, text: 'MEGA' }
+      { type: 'small', color: 0x38bdf8, scale: 0.7, growthVal: 0.06, text: '+Fish', timeBonus: 2 },
+      { type: 'medium', color: 0xfacc15, scale: 1.0, growthVal: 0.12, text: '+Golden', timeBonus: 4 },
+      { type: 'large', color: 0xf43f5e, scale: 1.5, growthVal: 0.25, text: 'MEGA', timeBonus: 7 }
     ];
 
     function createFoodMesh(def) {
@@ -325,33 +522,165 @@
       return g;
     }
 
-    function spawnFood() {
+    function createHazardMesh() {
+      const g = new THREE.Group();
+      const core = new THREE.Mesh(
+        new THREE.SphereGeometry(0.5, 12, 12),
+        new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3, emissive: 0x7f1d1d })
+      );
+      g.add(core);
+
+      for (let i = 0; i < 6; i++) {
+        const spike = new THREE.Mesh(
+          new THREE.ConeGeometry(0.15, 0.6, 6),
+          new THREE.MeshStandardMaterial({ color: 0x111827 })
+        );
+        spike.position.y = 0.45;
+        const sG = new THREE.Group();
+        sG.rotation.x = (i % 2 === 0 ? 1 : -1) * (i * 0.5);
+        sG.rotation.y = i * 1.04;
+        sG.add(spike);
+        g.add(sG);
+      }
+      g.userData = { baseY: 0.7 };
+      return g;
+    }
+
+    function spawnFoodNear(centerX, centerZ) {
       const r = Math.random();
       let def = FOOD_TYPES[0];
-      if (r > 0.88) def = FOOD_TYPES[2];
+      if (r > 0.85) def = FOOD_TYPES[2];
       else if (r > 0.60) def = FOOD_TYPES[1];
 
       const f = createFoodMesh(def);
       const a = Math.random() * Math.PI * 2;
-      const d = 5 + Math.random() * 38;
-      f.position.set(Math.cos(a) * d, f.userData.baseY, Math.sin(a) * d);
+      const d = 12 + Math.random() * (SPAWN_RADIUS - 12);
+      f.position.set(centerX + Math.cos(a) * d, f.userData.baseY, centerZ + Math.sin(a) * d);
       scene.add(f);
       foods.push(f);
     }
 
-    for (let i = 0; i < MAX_FOODS; i++) spawnFood();
+    function spawnHazardNear(centerX, centerZ) {
+      const h = createHazardMesh();
+      const a = Math.random() * Math.PI * 2;
+      const d = 18 + Math.random() * (SPAWN_RADIUS - 18);
+      h.position.set(centerX + Math.cos(a) * d, h.userData.baseY, centerZ + Math.sin(a) * d);
+      scene.add(h);
+      hazards.push(h);
+    }
+
+    for (let i = 0; i < MAX_FOODS; i++) spawnFoodNear(0, 0);
+    for (let i = 0; i < MAX_HAZARDS; i++) spawnHazardNear(0, 0);
+
+    const MISSIONS = [
+      { id: 1, text: "Eat 5 Small Fish", reqType: "small", target: 5, reward: 0.25, timeBonus: 20 },
+      { id: 2, text: "Eat 3 Golden Fish", reqType: "medium", target: 3, reward: 0.35, timeBonus: 25 },
+      { id: 3, text: "Eat 2 Mega Salmon", reqType: "large", target: 2, reward: 0.50, timeBonus: 30 },
+      { id: 4, text: "Reach Size 2.0x", reqType: "scale", target: 2.0, reward: 0.40, timeBonus: 35 },
+      { id: 5, text: "Eat Any 12 Fish", reqType: "any", target: 12, reward: 0.60, timeBonus: 40 },
+      { id: 6, text: "Reach Size 4.0x (Beast)", reqType: "scale", target: 4.0, reward: 1.00, timeBonus: 50 }
+    ];
+
+    let currentMissionIdx = 0;
+    let missionProgress = 0;
+
+    const mRankEl = document.getElementById('m-rank');
+    const mTextEl = document.getElementById('m-text');
+    const mBarEl = document.getElementById('m-bar');
+    const mAlertEl = document.getElementById('mission-alert');
+    const mRewardTextEl = document.getElementById('mission-reward-text');
+    const timeValEl = document.getElementById('time-val');
+    const gameoverMenu = document.getElementById('gameover-menu');
+    const gameoverReason = document.getElementById('gameover-reason');
+    const goScoreEl = document.getElementById('go-score');
+
+    function updateMissionHUD() {
+      if (currentMissionIdx >= MISSIONS.length) {
+        mRankEl.textContent = 'CHAMPION';
+        mTextEl.textContent = 'All Missions Done! Roam Free.';
+        mBarEl.style.width = '100%';
+        return;
+      }
+      const m = MISSIONS[currentMissionIdx];
+      mRankEl.textContent = `MISSION ${m.id}`;
+      mTextEl.textContent = m.text;
+      const pct = m.reqType === 'scale' 
+        ? Math.min(100, Math.max(0, ((catCurrentScale - 1) / (m.target - 1)) * 100))
+        : Math.min(100, (missionProgress / m.target) * 100);
+      mBarEl.style.width = pct + '%';
+    }
+
+    function checkMissionAdvance(eatenType) {
+      if (currentMissionIdx >= MISSIONS.length) return;
+      const m = MISSIONS[currentMissionIdx];
+      let advance = false;
+
+      if (m.reqType === 'any') {
+        missionProgress++;
+        if (missionProgress >= m.target) advance = true;
+      } else if (m.reqType === eatenType) {
+        missionProgress++;
+        if (missionProgress >= m.target) advance = true;
+      } else if (m.reqType === 'scale') {
+        if (catCurrentScale >= m.target) advance = true;
+      }
+
+      if (advance) {
+        catTargetScale += m.reward;
+        timeLeft += m.timeBonus;
+        playMissionSound();
+        mRewardTextEl.textContent = `+${m.timeBonus}s & +${Math.round(m.reward * 100)}% SIZE BOOST!`;
+        mAlertEl.classList.add('show');
+        setTimeout(() => mAlertEl.classList.remove('show'), 2500);
+
+        currentMissionIdx++;
+        missionProgress = 0;
+      }
+      updateMissionHUD();
+    }
+
+    function triggerGameOver(reason) {
+      if (isGameOver) return;
+      isGameOver = true;
+      playGameOverSound();
+      gameoverReason.textContent = reason;
+      goScoreEl.textContent = score;
+      gameoverMenu.classList.add('open');
+    }
+
+    function resetGameState() {
+      catTargetScale = 1.0;
+      catCurrentScale = 1.0;
+      catGroup.scale.set(1, 1, 1);
+      catGroup.position.set(0, 0, 0);
+      score = 0;
+      currentMissionIdx = 0;
+      missionProgress = 0;
+      timeLeft = 60;
+      isGameOver = false;
+      isPaused = false;
+      updateMissionHUD();
+      scoreValEl.textContent = '0';
+      scaleValEl.textContent = '1.0x';
+      timeValEl.textContent = '60s';
+      gameoverMenu.classList.remove('open');
+      pauseMenu.classList.remove('open');
+    }
+
+    updateMissionHUD();
 
     const uiLayer = document.getElementById('ui-layer');
     const scaleValEl = document.getElementById('scale-val');
     const scoreValEl = document.getElementById('score-val');
 
-    function triggerFloatingText(text, x, y, isSpecial) {
+    function triggerFloatingText(text, x, y, isSpecial, isWarning) {
       const el = document.createElement('div');
       el.className = 'float-text';
       el.textContent = text;
       el.style.left = x + 'px';
       el.style.top = y + 'px';
-      if (isSpecial) el.style.color = '#facc15';
+      if (isWarning) el.style.color = '#ef4444';
+      else if (isSpecial) el.style.color = '#facc15';
       uiLayer.appendChild(el);
       setTimeout(() => el.remove(), 800);
     }
@@ -363,7 +692,6 @@
     let isTouching = false;
     let targetWorldPos = new THREE.Vector3();
     const catVelocity = new THREE.Vector3();
-    let isPaused = false;
 
     function getTouchPointOnPlane(clientX, clientY) {
       const ndc = new THREE.Vector2(
@@ -377,7 +705,7 @@
     }
 
     window.addEventListener('touchstart', (e) => {
-      if (isPaused || e.target.closest('button') || e.target.closest('#pause-menu')) return;
+      if (isPaused || isGameOver || e.target.closest('button') || e.target.closest('.modal-overlay')) return;
       e.preventDefault();
       isTouching = true;
       const t = e.touches[0];
@@ -389,7 +717,7 @@
     }, { passive: false });
 
     window.addEventListener('touchmove', (e) => {
-      if (!isTouching || isPaused) return;
+      if (!isTouching || isPaused || isGameOver) return;
       e.preventDefault();
       const t = e.touches[0];
       touchReticle.style.left = t.clientX + 'px';
@@ -407,7 +735,7 @@
 
     let isMouseDown = false;
     window.addEventListener('mousedown', (e) => {
-      if (isPaused || e.target.closest('button') || e.target.closest('#pause-menu')) return;
+      if (isPaused || isGameOver || e.target.closest('button') || e.target.closest('.modal-overlay')) return;
       isMouseDown = true;
       touchReticle.style.left = e.clientX + 'px';
       touchReticle.style.top = e.clientY + 'px';
@@ -417,7 +745,7 @@
     });
 
     window.addEventListener('mousemove', (e) => {
-      if (!isMouseDown || isPaused) return;
+      if (!isMouseDown || isPaused || isGameOver) return;
       touchReticle.style.left = e.clientX + 'px';
       touchReticle.style.top = e.clientY + 'px';
       const hit = getTouchPointOnPlane(e.clientX, e.clientY);
@@ -447,6 +775,7 @@
 
     const pauseMenu = document.getElementById('pause-menu');
     document.getElementById('pause-btn').addEventListener('click', () => {
+      if (isGameOver) return;
       isPaused = true;
       pauseMenu.classList.add('open');
     });
@@ -454,16 +783,8 @@
       isPaused = false;
       pauseMenu.classList.remove('open');
     });
-    document.getElementById('reset-btn').addEventListener('click', () => {
-      catTargetScale = 1.0;
-      catCurrentScale = 1.0;
-      catGroup.scale.set(1, 1, 1);
-      score = 0;
-      scoreValEl.textContent = '0';
-      scaleValEl.textContent = '1.0x';
-      isPaused = false;
-      pauseMenu.classList.remove('open');
-    });
+    document.getElementById('reset-btn').addEventListener('click', resetGameState);
+    document.getElementById('retry-btn').addEventListener('click', resetGameState);
 
     const clock = new THREE.Clock();
     let walkCycle = 0;
@@ -471,7 +792,14 @@
     function animate() {
       requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), 0.1);
-      if (isPaused) return;
+      if (isPaused || isGameOver) return;
+
+      timeLeft -= delta;
+      timeValEl.textContent = Math.max(0, Math.ceil(timeLeft)) + 's';
+      if (timeLeft <= 0) {
+        triggerGameOver("Time ran out before completing the mission!");
+        return;
+      }
 
       let moveDir = new THREE.Vector3();
       if (isTouching || isMouseDown) {
@@ -492,7 +820,8 @@
 
       const isMoving = moveDir.lengthSq() > 0.05;
       if (isMoving) {
-        catVelocity.lerp(moveDir.multiplyScalar(12.0), 0.18);
+        const dynamicSpeed = 12.0 + Math.sqrt(catCurrentScale) * 1.5;
+        catVelocity.lerp(moveDir.multiplyScalar(dynamicSpeed), 0.18);
         catGroup.position.addScaledVector(catVelocity, delta);
 
         const targetAngle = Math.atan2(catVelocity.x, catVelocity.z);
@@ -501,24 +830,38 @@
         while (diff > Math.PI) diff -= Math.PI * 2;
         catGroup.rotation.y += diff * 0.22;
 
-        walkCycle += delta * (12 + catCurrentScale);
+        walkCycle += delta * (13 + catCurrentScale);
       } else {
         catVelocity.lerp(new THREE.Vector3(0, 0, 0), 0.2);
         walkCycle += delta * 2;
       }
 
-      const curDist = Math.hypot(catGroup.position.x, catGroup.position.z);
-      if (curDist > 44) catGroup.position.setLength(43.9);
+      floor.position.x = catGroup.position.x;
+      floor.position.z = catGroup.position.z;
+      const gridSize = floorSize / 120;
+      grid.position.x = Math.floor(catGroup.position.x / gridSize) * gridSize;
+      grid.position.z = Math.floor(catGroup.position.z / gridSize) * gridSize;
 
-      legs.forEach((leg, idx) => {
-        const offset = idx % 2 === 0 ? 0 : Math.PI;
-        leg.rotation.x = isMoving ? Math.sin(walkCycle + offset) * 0.6 : 0;
+      dirLight.position.set(catGroup.position.x + 20, 35, catGroup.position.z + 25);
+      dirLight.target = catGroup;
+
+      frontLegs.forEach((leg, idx) => {
+        const off = idx === 0 ? 0 : Math.PI;
+        leg.rotation.x = isMoving ? Math.sin(walkCycle + off) * 0.55 : 0;
+      });
+      backLegs.forEach((leg, idx) => {
+        const off = idx === 0 ? Math.PI : 0;
+        leg.rotation.x = isMoving ? Math.sin(walkCycle + off) * 0.65 : 0;
       });
 
-      const wagAngle = Math.sin(walkCycle * 1.5) * 0.25;
-      tailJoints.forEach((j) => {
-        j.rotation.y = wagAngle;
+      const wagAngle = Math.sin(walkCycle * 1.6) * 0.3;
+      tailJoints.forEach((j, i) => {
+        j.rotation.y = wagAngle * (1 + i * 0.2);
+        j.rotation.x = Math.sin(walkCycle * 0.8) * 0.08;
       });
+
+      bodyGroup.position.y = isMoving ? Math.abs(Math.sin(walkCycle * 2)) * 0.08 : 0;
+      bodyGroup.rotation.z = isMoving ? Math.sin(walkCycle) * 0.04 : 0;
 
       if (eatingAnimTimer > 0) {
         eatingAnimTimer -= delta * 5.0;
@@ -533,7 +876,25 @@
       scaleValEl.textContent = catCurrentScale.toFixed(1) + 'x';
 
       const catPos = catGroup.position;
-      const hitRadius = 1.15 * catCurrentScale;
+      const hitRadius = 1.25 * catCurrentScale;
+
+      for (let i = hazards.length - 1; i >= 0; i--) {
+        const h = hazards[i];
+        h.rotation.y += delta * 2;
+        h.rotation.x += delta * 1.5;
+        const d = Math.hypot(h.position.x - catPos.x, h.position.z - catPos.z);
+        if (d < hitRadius + 0.5) {
+          triggerGameOver("The cat hit a poisonous spike bomb!");
+          return;
+        } else if (d > SPAWN_RADIUS + 30) {
+          scene.remove(h);
+          hazards.splice(i, 1);
+          spawnHazardNear(catPos.x, catPos.z);
+        }
+      }
+      while (hazards.length < MAX_HAZARDS) {
+        spawnHazardNear(catPos.x, catPos.z);
+      }
 
       for (let i = foods.length - 1; i >= 0; i--) {
         const f = foods[i];
@@ -546,6 +907,7 @@
           playChompSound(item.type === 'large');
 
           catTargetScale += item.growthVal / (1 + (catTargetScale - 1) * 0.25);
+          timeLeft += item.timeBonus;
           eatingAnimTimer = 1.0;
 
           score += item.type === 'large' ? 5 : (item.type === 'medium' ? 2 : 1);
@@ -554,12 +916,26 @@
           const screenPos = f.position.clone().project(camera);
           const sx = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
           const sy = (-(screenPos.y * 0.5) + 0.5) * window.innerHeight;
-          triggerFloatingText(item.text, sx, sy, item.type === 'large');
+          triggerFloatingText(`${item.text} (+${item.timeBonus}s)`, sx, sy, item.type === 'large', false);
+
+          checkMissionAdvance(item.type);
 
           scene.remove(f);
           foods.splice(i, 1);
-          setTimeout(spawnFood, 1200 + Math.random() * 1500);
+          spawnFoodNear(catPos.x, catPos.z);
+        } else if (d > SPAWN_RADIUS + 25) {
+          scene.remove(f);
+          foods.splice(i, 1);
+          spawnFoodNear(catPos.x, catPos.z);
         }
+      }
+
+      while (foods.length < MAX_FOODS) {
+        spawnFoodNear(catPos.x, catPos.z);
+      }
+
+      if (MISSIONS[currentMissionIdx] && MISSIONS[currentMissionIdx].reqType === 'scale') {
+        checkMissionAdvance('scale');
       }
 
       const desiredCamPos = new THREE.Vector3(

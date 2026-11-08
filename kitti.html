@@ -201,23 +201,6 @@
       text-align: center;
       width: 280px;
     }
-    #loading-indicator {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(13, 17, 38, 0.9);
-      border: 1px solid #3b82f6;
-      border-radius: 12px;
-      padding: 14px 22px;
-      color: #93c5fd;
-      font-size: 14px;
-      font-weight: 700;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -225,10 +208,6 @@
 <body>
   <div id="canvas-container"></div>
   <div id="touch-reticle"></div>
-
-  <div id="loading-indicator">
-    <span>Loading Realistic Cat 3D Asset...</span>
-  </div>
 
   <div id="ui-layer">
     <div class="hud-top">
@@ -325,7 +304,6 @@
     }
 
     const container = document.getElementById('canvas-container');
-    const loadingIndicator = document.getElementById('loading-indicator');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050711);
     scene.fog = new THREE.FogExp2(0x050711, 0.018);
@@ -341,7 +319,7 @@
     const ambientLight = new THREE.AmbientLight(0xdbeafe, 1.0);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.4);
+    const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
     dirLight.position.set(20, 35, 25);
     dirLight.castShadow = true;
     scene.add(dirLight);
@@ -368,26 +346,20 @@
     let catNeckBone = null;
 
     const gltfLoader = new THREE.GLTFLoader();
-    
-    // Primary URL: Verified rigged Domestic Tabby Cat model (CC-BY 4.0 / Public Web Delivery)
-    // Fallback: Local ./cat.glb if hosted directly inside your repository
-    const PRIMARY_CAT_URL = 'https://cdn.jsdelivr.net/gh/sketchfab-assets/realistic-domestic-cat@main/cat.glb';
-    const LOCAL_CAT_URL = './cat.glb';
+    const MODEL_SOURCES = [
+      './cat.glb',
+      'https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/models/gltf/Cat.glb',
+      'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Fox/glTF-Binary/Fox.glb'
+    ];
 
-    function initCatModel(gltf) {
+    function applyModelSetup(gltf) {
       const model = gltf.scene;
-      
-      // Compute bounding box to set exact natural domestic cat scale
       const box = new THREE.Box3().setFromObject(model);
       const size = new THREE.Vector3();
       box.getSize(size);
-      const maxAxis = Math.max(size.x, size.y, size.z);
-      const targetLength = 2.4; 
-      const normScale = maxAxis > 0 ? (targetLength / maxAxis) : 1.0;
-      model.scale.set(normScale, normScale, normScale);
-
-      // Domestic cat models in glTF are oriented towards +Z by default
-      model.rotation.y = 0; 
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scaleFactor = maxDim > 0 ? (2.2 / maxDim) : 1.0;
+      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
       model.position.set(0, 0, 0);
 
       model.traverse((node) => {
@@ -395,7 +367,7 @@
           node.castShadow = true;
           node.receiveShadow = true;
           if (node.material) {
-            node.material.roughness = 0.65;
+            node.material.roughness = 0.6;
             node.material.metalness = 0.05;
           }
         }
@@ -412,20 +384,14 @@
         gltf.animations.forEach((clip) => {
           const name = clip.name.toLowerCase();
           const action = catMixer.clipAction(clip);
-          if (name.includes('run') || name.includes('sprint') || name.includes('fast')) {
-            animActions['run'] = action;
-          } else if (name.includes('walk') || name.includes('trot')) {
-            animActions['walk'] = action;
-          } else if (name.includes('idle') || name.includes('sit') || name.includes('stand') || name.includes('rest')) {
-            animActions['idle'] = action;
-          }
+          if (name.includes('run') || name.includes('fast')) animActions['run'] = action;
+          else if (name.includes('walk') || name.includes('trot')) animActions['walk'] = action;
+          else if (name.includes('idle') || name.includes('sit') || name.includes('stand')) animActions['idle'] = action;
         });
 
-        // Safe Fallback for clips if single baked track exists
         if (!animActions['idle']) animActions['idle'] = catMixer.clipAction(gltf.animations[0]);
         if (!animActions['walk']) animActions['walk'] = animActions['idle'];
         if (!animActions['run']) animActions['run'] = animActions['walk'];
-
         animActions['idle'].play();
       }
 
@@ -434,36 +400,23 @@
       }
       catGroup.add(model);
       isGltfLoaded = true;
-      if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 
-    function loadCatAsset() {
-      // Attempt 1: Check local ./cat.glb inside your GitHub repo
+    function tryLoadChain(urls, index) {
+      if (index >= urls.length) return;
       gltfLoader.load(
-        LOCAL_CAT_URL,
+        urls[index],
         (gltf) => {
-          initCatModel(gltf);
+          applyModelSetup(gltf);
         },
         undefined,
         () => {
-          // Attempt 2: Load verified domestic cat CDN asset
-          gltfLoader.load(
-            PRIMARY_CAT_URL,
-            (gltf) => {
-              initCatModel(gltf);
-            },
-            undefined,
-            (err) => {
-              if (loadingIndicator) {
-                loadingIndicator.innerHTML = '<span style="color:#ef4444;">Failed to load cat.glb. Place cat.glb in repo root.</span>';
-              }
-            }
-          );
+          tryLoadChain(urls, index + 1);
         }
       );
     }
 
-    loadCatAsset();
+    tryLoadChain(MODEL_SOURCES, 0);
 
     let catCurrentScale = 1.0;
     let catTargetScale = 1.0;
@@ -819,7 +772,6 @@
         catVelocity.lerp(moveDir.multiplyScalar(dynamicSpeed), 0.18);
         catGroup.position.addScaledVector(catVelocity, delta);
 
-        // Accurate forward rotation: facing movement vector directly
         const targetAngle = Math.atan2(catVelocity.x, catVelocity.z);
         let diff = targetAngle - catGroup.rotation.y;
         while (diff < -Math.PI) diff += Math.PI * 2;

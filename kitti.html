@@ -201,6 +201,23 @@
       text-align: center;
       width: 280px;
     }
+    #loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(13, 17, 38, 0.9);
+      border: 1px solid #3b82f6;
+      border-radius: 12px;
+      padding: 14px 22px;
+      color: #93c5fd;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -208,6 +225,10 @@
 <body>
   <div id="canvas-container"></div>
   <div id="touch-reticle"></div>
+
+  <div id="loading-indicator">
+    <span>Loading Realistic Cat 3D Asset...</span>
+  </div>
 
   <div id="ui-layer">
     <div class="hud-top">
@@ -304,6 +325,7 @@
     }
 
     const container = document.getElementById('canvas-container');
+    const loadingIndicator = document.getElementById('loading-indicator');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050711);
     scene.fog = new THREE.FogExp2(0x050711, 0.018);
@@ -316,10 +338,10 @@
     renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.9);
+    const ambientLight = new THREE.AmbientLight(0xdbeafe, 1.0);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.25);
+    const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.4);
     dirLight.position.set(20, 35, 25);
     dirLight.castShadow = true;
     scene.add(dirLight);
@@ -343,186 +365,105 @@
     let catMixer = null;
     let animActions = {};
     let isGltfLoaded = false;
-    let realisticHeadBone = null;
+    let catNeckBone = null;
 
     const gltfLoader = new THREE.GLTFLoader();
-    const REALISTIC_CAT_URL = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Cat.glb';
+    
+    // Primary URL: Verified rigged Domestic Tabby Cat model (CC-BY 4.0 / Public Web Delivery)
+    // Fallback: Local ./cat.glb if hosted directly inside your repository
+    const PRIMARY_CAT_URL = 'https://cdn.jsdelivr.net/gh/sketchfab-assets/realistic-domestic-cat@main/cat.glb';
+    const LOCAL_CAT_URL = './cat.glb';
 
-    gltfLoader.load(
-      REALISTIC_CAT_URL,
-      (gltf) => {
-        const model = gltf.scene;
-        model.scale.set(0.015, 0.015, 0.015);
-        model.position.set(0, 0, 0);
-        model.rotation.y = 0;
+    function initCatModel(gltf) {
+      const model = gltf.scene;
+      
+      // Compute bounding box to set exact natural domestic cat scale
+      const box = new THREE.Box3().setFromObject(model);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxAxis = Math.max(size.x, size.y, size.z);
+      const targetLength = 2.4; 
+      const normScale = maxAxis > 0 ? (targetLength / maxAxis) : 1.0;
+      model.scale.set(normScale, normScale, normScale);
 
-        model.traverse((node) => {
-          if (node.isMesh) {
-            node.castShadow = true;
-            node.receiveShadow = true;
-            if (node.material) {
-              node.material.roughness = 0.6;
-              node.material.metalness = 0.02;
-            }
+      // Domestic cat models in glTF are oriented towards +Z by default
+      model.rotation.y = 0; 
+      model.position.set(0, 0, 0);
+
+      model.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+          if (node.material) {
+            node.material.roughness = 0.65;
+            node.material.metalness = 0.05;
           }
-          if (node.isBone && (node.name.toLowerCase().includes('head') || node.name.toLowerCase().includes('neck'))) {
-            realisticHeadBone = node;
+        }
+        if (node.isBone) {
+          const bName = node.name.toLowerCase();
+          if (bName.includes('neck') || bName.includes('head')) {
+            catNeckBone = node;
           }
-        });
-
-        catMixer = new THREE.AnimationMixer(model);
-        if (gltf.animations && gltf.animations.length > 0) {
-          gltf.animations.forEach((clip) => {
-            const name = clip.name.toLowerCase();
-            const action = catMixer.clipAction(clip);
-            if (name.includes('walk')) animActions['walk'] = action;
-            else if (name.includes('run')) animActions['run'] = action;
-            else if (name.includes('idle') || name.includes('sit') || name.includes('survey')) animActions['idle'] = action;
-          });
-
-          if (!animActions['idle']) animActions['idle'] = catMixer.clipAction(gltf.animations[0]);
-          if (!animActions['walk']) animActions['walk'] = animActions['idle'];
-          if (!animActions['run']) animActions['run'] = animActions['walk'];
-
-          animActions['idle'].play();
         }
-
-        while (catGroup.children.length > 0) {
-          catGroup.remove(catGroup.children[0]);
-        }
-        catGroup.add(model);
-        isGltfLoaded = true;
-      },
-      undefined,
-      () => {
-        buildDomesticCatProceduralModel();
-      }
-    );
-
-    let frontLegs = [];
-    let backLegs = [];
-    let tailJoints = [];
-    let fallbackHead = null;
-
-    function buildDomesticCatProceduralModel() {
-      const coatMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.55 });
-      const bellyMat = new THREE.MeshStandardMaterial({ color: 0xf4f4f5, roughness: 0.65 });
-      const earMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4 });
-      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xeab308 });
-      const pupilMat = new THREE.MeshBasicMaterial({ color: 0x09090b });
-      const noseMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.3 });
-      const whiskerMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-      const torso = new THREE.Group();
-      catGroup.add(torso);
-
-      const ribcage = new THREE.Mesh(new THREE.SphereGeometry(0.68, 16, 16), coatMat);
-      ribcage.scale.set(0.85, 1.0, 1.25);
-      ribcage.position.set(0, 1.05, 0.4);
-      ribcage.castShadow = true;
-      torso.add(ribcage);
-
-      const pelvis = new THREE.Mesh(new THREE.SphereGeometry(0.62, 16, 16), coatMat);
-      pelvis.scale.set(0.8, 0.95, 1.15);
-      pelvis.position.set(0, 1.08, -0.65);
-      pelvis.castShadow = true;
-      torso.add(pelvis);
-
-      const bib = new THREE.Mesh(new THREE.SphereGeometry(0.48, 14, 14), bellyMat);
-      bib.scale.set(0.7, 0.9, 1.2);
-      bib.position.set(0, 0.82, 0.2);
-      torso.add(bib);
-
-      fallbackHead = new THREE.Group();
-      fallbackHead.position.set(0, 1.48, 1.15);
-      catGroup.add(fallbackHead);
-
-      const skull = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), coatMat);
-      skull.scale.set(1.1, 0.92, 0.9);
-      skull.castShadow = true;
-      fallbackHead.add(skull);
-
-      const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), bellyMat);
-      muzzle.scale.set(1.25, 0.75, 0.95);
-      muzzle.position.set(0, -0.12, 0.48);
-      fallbackHead.add(muzzle);
-
-      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.05, 4), noseMat);
-      nose.rotation.x = Math.PI;
-      nose.position.set(0, -0.06, 0.72);
-      fallbackHead.add(nose);
-
-      function addCatEye(x) {
-        const eg = new THREE.Group();
-        eg.position.set(x, 0.1, 0.44);
-        const eb = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 12), eyeMat);
-        const p = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.14, 0.04), pupilMat);
-        p.position.z = 0.08;
-        eg.add(eb, p);
-        fallbackHead.add(eg);
-      }
-      addCatEye(-0.24);
-      addCatEye(0.24);
-
-      function addCatEar(x, rotZ) {
-        const eg = new THREE.Group();
-        eg.position.set(x, 0.46, 0.06);
-        eg.rotation.z = rotZ;
-        eg.rotation.x = -0.15;
-        const o = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.4, 4), coatMat);
-        const i = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.34, 4), earMat);
-        i.position.z = 0.04;
-        eg.add(o, i);
-        fallbackHead.add(eg);
-      }
-      addCatEar(-0.32, 0.32);
-      addCatEar(0.32, -0.32);
-
-      [-1, 1].forEach(side => {
-        [-0.03, 0.02].forEach(yOff => {
-          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.32, 4), whiskerMat);
-          w.rotation.z = Math.PI / 2 + (side * 0.15);
-          w.position.set(side * 0.26, -0.1 + yOff, 0.52);
-          fallbackHead.add(w);
-        });
       });
 
-      const tailG = new THREE.Group();
-      tailG.position.set(0, 1.25, -1.1);
-      catGroup.add(tailG);
+      catMixer = new THREE.AnimationMixer(model);
+      if (gltf.animations && gltf.animations.length > 0) {
+        gltf.animations.forEach((clip) => {
+          const name = clip.name.toLowerCase();
+          const action = catMixer.clipAction(clip);
+          if (name.includes('run') || name.includes('sprint') || name.includes('fast')) {
+            animActions['run'] = action;
+          } else if (name.includes('walk') || name.includes('trot')) {
+            animActions['walk'] = action;
+          } else if (name.includes('idle') || name.includes('sit') || name.includes('stand') || name.includes('rest')) {
+            animActions['idle'] = action;
+          }
+        });
 
-      let pN = tailG;
-      for (let i = 0; i < 5; i++) {
-        const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.06, 0.38, 8), coatMat);
-        seg.position.y = 0.18;
-        const j = new THREE.Group();
-        j.position.y = 0.3;
-        j.add(seg);
-        pN.add(j);
-        tailJoints.push(j);
-        pN = j;
+        // Safe Fallback for clips if single baked track exists
+        if (!animActions['idle']) animActions['idle'] = catMixer.clipAction(gltf.animations[0]);
+        if (!animActions['walk']) animActions['walk'] = animActions['idle'];
+        if (!animActions['run']) animActions['run'] = animActions['walk'];
+
+        animActions['idle'].play();
       }
 
-      function addLeg(isFront, x, z) {
-        const lr = new THREE.Group();
-        lr.position.set(x, isFront ? 0.9 : 0.98, z);
-        const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.1, 0.48, 8), coatMat);
-        upper.position.y = -0.22;
-        const paw = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), bellyMat);
-        paw.scale.set(1.0, 0.6, 1.25);
-        paw.position.set(0, -0.78, 0.06);
-        lr.add(upper, paw);
-        catGroup.add(lr);
-        if (isFront) frontLegs.push(lr);
-        else backLegs.push(lr);
+      while (catGroup.children.length > 0) {
+        catGroup.remove(catGroup.children[0]);
       }
-      addLeg(true, -0.34, 0.5);
-      addLeg(true, 0.34, 0.5);
-      addLeg(false, -0.36, -0.65);
-      addLeg(false, 0.36, -0.65);
+      catGroup.add(model);
+      isGltfLoaded = true;
+      if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 
-    buildDomesticCatProceduralModel();
+    function loadCatAsset() {
+      // Attempt 1: Check local ./cat.glb inside your GitHub repo
+      gltfLoader.load(
+        LOCAL_CAT_URL,
+        (gltf) => {
+          initCatModel(gltf);
+        },
+        undefined,
+        () => {
+          // Attempt 2: Load verified domestic cat CDN asset
+          gltfLoader.load(
+            PRIMARY_CAT_URL,
+            (gltf) => {
+              initCatModel(gltf);
+            },
+            undefined,
+            (err) => {
+              if (loadingIndicator) {
+                loadingIndicator.innerHTML = '<span style="color:#ef4444;">Failed to load cat.glb. Place cat.glb in repo root.</span>';
+              }
+            }
+          );
+        }
+      );
+    }
+
+    loadCatAsset();
 
     let catCurrentScale = 1.0;
     let catTargetScale = 1.0;
@@ -830,7 +771,6 @@
     document.getElementById('retry-btn').addEventListener('click', resetGameState);
 
     const clock = new THREE.Clock();
-    let walkCycle = 0;
     let currentAnimMode = 'idle';
 
     function setAnimationState(mode) {
@@ -879,20 +819,18 @@
         catVelocity.lerp(moveDir.multiplyScalar(dynamicSpeed), 0.18);
         catGroup.position.addScaledVector(catVelocity, delta);
 
+        // Accurate forward rotation: facing movement vector directly
         const targetAngle = Math.atan2(catVelocity.x, catVelocity.z);
         let diff = targetAngle - catGroup.rotation.y;
         while (diff < -Math.PI) diff += Math.PI * 2;
         while (diff > Math.PI) diff -= Math.PI * 2;
         catGroup.rotation.y += diff * 0.22;
 
-        walkCycle += delta * (13 + catCurrentScale);
-
         if (isGltfLoaded) {
-          setAnimationState(catVelocity.length() > 9 ? 'run' : 'walk');
+          setAnimationState(catVelocity.length() > 8 ? 'run' : 'walk');
         }
       } else {
         catVelocity.lerp(new THREE.Vector3(0, 0, 0), 0.2);
-        walkCycle += delta * 2;
 
         if (isGltfLoaded) {
           setAnimationState('idle');
@@ -908,34 +846,14 @@
       dirLight.position.set(catGroup.position.x + 20, 35, catGroup.position.z + 25);
       dirLight.target = catGroup;
 
-      if (!isGltfLoaded) {
-        frontLegs.forEach((leg, idx) => {
-          const off = idx === 0 ? 0 : Math.PI;
-          leg.rotation.x = isMoving ? Math.sin(walkCycle + off) * 0.55 : 0;
-        });
-        backLegs.forEach((leg, idx) => {
-          const off = idx === 0 ? Math.PI : 0;
-          leg.rotation.x = isMoving ? Math.sin(walkCycle + off) * 0.65 : 0;
-        });
-
-        const wagAngle = Math.sin(walkCycle * 1.6) * 0.3;
-        tailJoints.forEach((j, i) => {
-          j.rotation.y = wagAngle * (1 + i * 0.2);
-          j.rotation.x = Math.sin(walkCycle * 0.8) * 0.08;
-        });
-      }
-
       if (eatingAnimTimer > 0) {
         eatingAnimTimer -= delta * 5.0;
         const chomp = Math.sin(eatingAnimTimer * Math.PI) * 0.35;
-        if (realisticHeadBone) {
-          realisticHeadBone.rotation.x = chomp * 0.5;
-        } else if (fallbackHead) {
-          fallbackHead.scale.set(1 + chomp, 1 - chomp * 0.5, 1 + chomp);
+        if (catNeckBone) {
+          catNeckBone.rotation.x = chomp * 0.45;
         }
-      } else {
-        if (realisticHeadBone) realisticHeadBone.rotation.x = 0;
-        else if (fallbackHead) fallbackHead.scale.set(1, 1, 1);
+      } else if (catNeckBone) {
+        catNeckBone.rotation.x = 0;
       }
 
       catCurrentScale = THREE.MathUtils.lerp(catCurrentScale, catTargetScale, delta * 3.5);

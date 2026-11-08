@@ -1,920 +1,603 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>CAT SPINNERS: CHUBBY CAT SURVIVAL</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #050711;
-      font-family: system-ui, -apple-system, sans-serif;
-      touch-action: none;
-    }
-    #canvas-container {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-    #ui-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px;
-    }
-    .hud-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    .hud-left {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .stats-row {
-      display: flex;
-      gap: 8px;
-    }
-    .badge {
-      background: rgba(13, 17, 38, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      padding: 6px 12px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    .badge.timer {
-      border-color: rgba(239, 68, 68, 0.5);
-    }
-    .badge.timer span {
-      color: #ef4444;
-    }
-    .badge span {
-      color: #4ade80;
-    }
-    .mission-card {
-      background: rgba(13, 17, 38, 0.85);
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      border-radius: 14px;
-      padding: 10px 14px;
-      color: #fff;
-      max-width: 280px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    }
-    .mission-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: #93c5fd;
-      font-weight: 800;
-      margin-bottom: 2px;
-    }
-    .mission-desc {
-      font-size: 12px;
-      font-weight: 600;
-      color: #f1f5f9;
-      margin-bottom: 6px;
-    }
-    .progress-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #3b82f6, #10b981);
-      transition: width 0.25s ease;
-    }
-    .btn {
-      pointer-events: auto;
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .btn:active {
-      transform: scale(0.95);
-    }
-    #touch-reticle {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border: 2px solid rgba(147, 197, 253, 0.8);
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%) scale(0.6);
-      opacity: 0;
-      transition: opacity 0.15s, transform 0.15s ease-out;
-      z-index: 5;
-    }
-    #touch-reticle.active {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    .float-text {
-      position: absolute;
-      color: #4ade80;
-      font-weight: 900;
-      font-size: 15px;
-      pointer-events: none;
-      animation: floatUp 0.8s ease-out forwards;
-      z-index: 20;
-    }
-    @keyframes floatUp {
-      0% { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
-      25% { opacity: 1; transform: translate(-50%, -8px) scale(1.1); }
-      100% { opacity: 0; transform: translate(-50%, -40px) scale(0.9); }
-    }
-    .mission-popup {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.8);
-      background: linear-gradient(135deg, #1e3a8a, #065f46);
-      border: 2px solid #facc15;
-      padding: 16px 24px;
-      border-radius: 16px;
-      color: #fff;
-      text-align: center;
-      font-weight: 900;
-      font-size: 18px;
-      opacity: 0;
-      pointer-events: none;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-      transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-      z-index: 30;
-    }
-    .mission-popup.show {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    .modal-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(4, 6, 18, 0.88);
-      backdrop-filter: blur(12px);
-      z-index: 50;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      color: #fff;
-    }
-    .modal-overlay.open {
-      display: flex;
-    }
-    .menu-card {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 24px;
-      border-radius: 18px;
-      text-align: center;
-      width: 280px;
-    }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>CHUBBY ANIMAL SURVIVAL</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#050711;font-family:system-ui,-apple-system,sans-serif;touch-action:none}
+#canvas-container{position:absolute;inset:0;z-index:1}
+#ui-layer{position:absolute;inset:0;pointer-events:none;z-index:10;display:flex;flex-direction:column;justify-content:space-between;padding:16px}
+.hud-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hud-left{display:flex;flex-direction:column;gap:8px}
+.stats-row{display:flex;gap:8px;flex-wrap:wrap}
+.badge{background:rgba(13,17,38,.75);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:6px 12px;color:#fff;font-size:13px;font-weight:700;backdrop-filter:blur(6px)}
+.badge.timer{border-color:rgba(239,68,68,.5)}
+.badge.timer span{color:#ef4444}
+.badge span{color:#4ade80}
+.mission-card{background:rgba(13,17,38,.85);border:1px solid rgba(59,130,246,.4);border-radius:14px;padding:10px 14px;color:#fff;max-width:280px;backdrop-filter:blur(8px)}
+.mission-title{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#93c5fd;font-weight:800;margin-bottom:2px}
+.mission-desc{font-size:12px;font-weight:600;color:#f1f5f9;margin-bottom:6px}
+.progress-bar-bg{width:100%;height:6px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#10b981);transition:width .25s ease}
+.btn{pointer-events:auto;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+.btn:active{transform:scale(.95)}
+#touch-reticle{position:absolute;width:40px;height:40px;border:2px solid rgba(147,197,253,.8);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%) scale(.6);opacity:0;transition:opacity .15s,transform .15s ease-out;z-index:5}
+#touch-reticle.active{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.float-text{position:absolute;color:#4ade80;font-weight:900;font-size:15px;pointer-events:none;animation:floatUp .8s ease-out forwards;z-index:20}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,0) scale(.6)}25%{opacity:1;transform:translate(-50%,-8px) scale(1.1)}100%{opacity:0;transform:translate(-50%,-40px) scale(.9)}}
+.mission-popup{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) scale(.8);background:linear-gradient(135deg,#1e3a8a,#065f46);border:2px solid #facc15;padding:16px 24px;border-radius:16px;color:#fff;text-align:center;font-weight:900;font-size:18px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.1,.9,.2,1);z-index:30}
+.mission-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.modal-overlay{position:absolute;inset:0;background:rgba(4,6,18,.88);backdrop-filter:blur(12px);z-index:50;display:none;flex-direction:column;justify-content:center;align-items:center;gap:12px;color:#fff}
+.modal-overlay.open{display:flex}
+.menu-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);padding:24px;border-radius:18px;text-align:center;width:290px}
+.pick{width:100%;padding:12px;margin-bottom:8px;font-size:15px;pointer-events:auto}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-  <div id="canvas-container"></div>
-  <div id="touch-reticle"></div>
+<div id="canvas-container"></div>
+<div id="touch-reticle"></div>
 
-  <div id="ui-layer">
-    <div class="hud-top">
-      <div class="hud-left">
-        <div class="stats-row">
-          <div class="badge">Size: <span id="scale-val">1.0x</span></div>
-          <div class="badge">Score: <span id="score-val">0</span></div>
-          <div class="badge timer">Time: <span id="time-val">60s</span></div>
-        </div>
-        <div class="mission-card">
-          <div class="mission-title" id="m-rank">MISSION 1</div>
-          <div class="mission-desc" id="m-text">Eat 5 Small Fish</div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="m-bar"></div>
-          </div>
-        </div>
-      </div>
-      <button class="btn" id="pause-btn">PAUSE</button>
-    </div>
-  </div>
+<div id="ui-layer">
+<div class="hud-top">
+<div class="hud-left">
+<div class="stats-row">
+<div class="badge">Size: <span id="scale-val">1.0x</span></div>
+<div class="badge">Score: <span id="score-val">0</span></div>
+<div class="badge timer">Time: <span id="time-val">60s</span></div>
+</div>
+<div class="mission-card">
+<div class="mission-title" id="m-rank">MISSION 1</div>
+<div class="mission-desc" id="m-text"></div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" id="m-bar"></div></div>
+</div>
+</div>
+<button class="btn" id="pause-btn">PAUSE</button>
+</div>
+</div>
 
-  <div class="mission-popup" id="mission-alert">
-    🎉 MISSION COMPLETE!<br />
-    <span style="font-size: 13px; color: #fef08a; font-weight: 600;" id="mission-reward-text">+BONUS TIME & GROWTH!</span>
-  </div>
+<div class="mission-popup" id="mission-alert">🎉 MISSION COMPLETE!<br /><span style="font-size:13px;color:#fef08a;font-weight:600" id="mission-reward-text"></span></div>
 
-  <div class="modal-overlay" id="gameover-menu">
-    <div class="menu-card" style="border-color: rgba(239, 68, 68, 0.5);">
-      <h2 style="color: #ef4444; margin-bottom: 6px;">GAME OVER</h2>
-      <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 16px;" id="gameover-reason">Time expired!</p>
-      <div style="font-size: 14px; margin-bottom: 18px;">Final Score: <strong id="go-score" style="color: #4ade80;">0</strong></div>
-      <button class="btn" id="retry-btn" style="width: 100%; padding: 12px; background: #dc2626;">PLAY AGAIN</button>
-    </div>
-  </div>
+<div class="modal-overlay open" id="select-menu">
+<div class="menu-card">
+<h2 style="margin-bottom:6px">CHOOSE YOUR ANIMAL</h2>
+<p style="font-size:12px;color:#cbd5e1;margin-bottom:16px">Khao, bado, spike se bacho!</p>
+<button class="btn pick" data-a="cat" style="background:#ea580c">🐱 Cat (Fish)</button>
+<button class="btn pick" data-a="dog" style="background:#92400e">🐶 Dog (Bone)</button>
+<button class="btn pick" data-a="panda" style="background:#15803d">🐼 Panda (Bamboo)</button>
+</div>
+</div>
 
-  <div class="modal-overlay" id="pause-menu">
-    <div class="menu-card">
-      <h3 style="margin-bottom: 16px;">PAUSED</h3>
-      <button class="btn" id="resume-btn" style="width: 100%; padding: 10px; margin-bottom: 8px; background: #2563eb;">RESUME</button>
-      <button class="btn" id="reset-btn" style="width: 100%; padding: 10px;">RESTART</button>
-    </div>
-  </div>
+<div class="modal-overlay" id="gameover-menu">
+<div class="menu-card" style="border-color:rgba(239,68,68,.5)">
+<h2 style="color:#ef4444;margin-bottom:6px">GAME OVER</h2>
+<p style="font-size:13px;color:#cbd5e1;margin-bottom:16px" id="gameover-reason"></p>
+<div style="font-size:14px;margin-bottom:18px">Final Score: <strong id="go-score" style="color:#4ade80">0</strong></div>
+<button class="btn" id="retry-btn" style="width:100%;padding:12px;background:#dc2626;margin-bottom:8px">PLAY AGAIN</button>
+<button class="btn" id="change-btn2" style="width:100%;padding:10px">CHANGE ANIMAL</button>
+</div>
+</div>
 
-  <script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playChompSound(isSpecial) {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = isSpecial ? 'triangle' : 'sine';
-      osc.frequency.setValueAtTime(isSpecial ? 650 : 480, now);
-      osc.frequency.exponentialRampToValueAtTime(isSpecial ? 240 : 180, now + 0.12);
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.13);
+<div class="modal-overlay" id="pause-menu">
+<div class="menu-card">
+<h3 style="margin-bottom:16px">PAUSED</h3>
+<button class="btn" id="resume-btn" style="width:100%;padding:10px;margin-bottom:8px;background:#2563eb">RESUME</button>
+<button class="btn" id="reset-btn" style="width:100%;padding:10px;margin-bottom:8px">RESTART</button>
+<button class="btn" id="change-btn" style="width:100%;padding:10px">CHANGE ANIMAL</button>
+</div>
+</div>
+
+<script>
+// ---------- Audio ----------
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function beep(type, f0, f1, vol, dur) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.01, t + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t); o.stop(t + dur + 0.01);
+}
+const playChompSound = (s) => s ? beep('triangle', 650, 240, 0.25, 0.12) : beep('sine', 480, 180, 0.25, 0.12);
+const playMissionSound = () => beep('triangle', 440, 880, 0.3, 0.45);
+const playGameOverSound = () => beep('sawtooth', 260, 60, 0.4, 0.5);
+
+// ---------- All DOM refs (declared up front) ----------
+const $ = (id) => document.getElementById(id);
+const uiLayer = $('ui-layer'), scaleValEl = $('scale-val'), scoreValEl = $('score-val'), timeValEl = $('time-val');
+const mRankEl = $('m-rank'), mTextEl = $('m-text'), mBarEl = $('m-bar');
+const mAlertEl = $('mission-alert'), mRewardTextEl = $('mission-reward-text');
+const gameoverMenu = $('gameover-menu'), gameoverReason = $('gameover-reason'), goScoreEl = $('go-score');
+const pauseMenu = $('pause-menu'), selectMenu = $('select-menu'), touchReticle = $('touch-reticle');
+
+// ---------- Scene ----------
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050711);
+scene.fog = new THREE.FogExp2(0x050711, 0.018);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+$('canvas-container').appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0xdbeafe, 0.85));
+const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.2);
+dirLight.position.set(20, 35, 25);
+scene.add(dirLight);
+
+const floorSize = 400;
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(floorSize, floorSize), new THREE.MeshStandardMaterial({ color: 0x090d1f, roughness: 0.6 }));
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+const grid = new THREE.GridHelper(floorSize, 120, 0x3b82f6, 0x172554);
+grid.position.y = 0.02;
+scene.add(grid);
+
+// ---------- Animals ----------
+const ANIMALS = {
+  cat:   { fur: 0xf97316, belly: 0xffedd5, acc: 0xf97316, nose: 0xf43f5e, eye: 0x10b981, ear: 'point', snout: 0.9, tail: 4, tailUp: 0,   patch: false,
+           food: 'fish',   names: ['Fish', 'Golden Fish', 'Mega Salmon'], colors: [0x38bdf8, 0xfacc15, 0xf43f5e] },
+  dog:   { fur: 0x92400e, belly: 0xfde68a, acc: 0x451a03, nose: 0x111111, eye: 0x1e293b, ear: 'floppy', snout: 1.5, tail: 3, tailUp: -0.7, patch: false,
+           food: 'bone',   names: ['Bone', 'Golden Bone', 'Mega Steak'],   colors: [0xf1f5f9, 0xfacc15, 0xef4444] },
+  panda: { fur: 0xf8fafc, belly: 0xffffff, acc: 0x111111, nose: 0x111111, eye: 0x111111, ear: 'round', snout: 0.8, tail: 1, tailUp: 0,   patch: true,
+           food: 'bamboo', names: ['Bamboo', 'Golden Bamboo', 'Mega Bamboo'], colors: [0x4ade80, 0xfacc15, 0x16a34a] }
+};
+let animalKey = 'cat';
+let A = ANIMALS.cat;
+
+const catGroup = new THREE.Group();
+scene.add(catGroup);
+let headGroup, tailGroup, tailJoints = [], legs = [];
+
+function buildAnimal(key) {
+  animalKey = key; A = ANIMALS[key];
+  while (catGroup.children.length) catGroup.remove(catGroup.children[0]);
+  tailJoints = []; legs = [];
+  const fur = new THREE.MeshStandardMaterial({ color: A.fur, roughness: 0.5 });
+  const belly = new THREE.MeshStandardMaterial({ color: A.belly, roughness: 0.6 });
+  const acc = new THREE.MeshStandardMaterial({ color: A.acc, roughness: 0.5 });
+  const noseMat = new THREE.MeshStandardMaterial({ color: A.nose, roughness: 0.4 });
+  const eyeMat = new THREE.MeshBasicMaterial({ color: A.eye });
+  const white = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.98, 2.0, 16), fur);
+  body.rotation.x = Math.PI / 2; body.position.set(0, 1.0, 0);
+  catGroup.add(body);
+  const bel = new THREE.Mesh(new THREE.CylinderGeometry(0.76, 0.88, 1.4, 16, 1, false, 0, Math.PI), belly);
+  bel.rotation.x = Math.PI / 2; bel.rotation.y = Math.PI / 2; bel.position.set(0, 0.95, 0);
+  catGroup.add(bel);
+
+  headGroup = new THREE.Group();
+  headGroup.position.set(0, 1.42, 1.25);
+  catGroup.add(headGroup);
+  headGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), fur));
+
+  const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), belly);
+  const mz = 0.55 + 0.12 * A.snout;
+  muzzle.scale.set(1.1, 0.7, A.snout);
+  muzzle.position.set(0, -0.15, mz);
+  headGroup.add(muzzle);
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), noseMat);
+  nose.position.set(0, -0.05, mz + 0.3 * A.snout);
+  headGroup.add(nose);
+
+  [-0.3, 0.3].forEach((x) => {
+    if (A.patch) {
+      const p = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), acc);
+      p.scale.set(1, 1.3, 0.5); p.position.set(x, 0.12, 0.62); p.rotation.z = x > 0 ? -0.4 : 0.4;
+      headGroup.add(p);
     }
+    const g = new THREE.Group();
+    g.position.set(x, 0.12, 0.66);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12, 12), A.patch ? white : eyeMat);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), new THREE.MeshBasicMaterial({ color: 0x020617 }));
+    pupil.position.z = 0.1;
+    g.add(eye, pupil);
+    headGroup.add(g);
+  });
 
-    function playMissionSound() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(440, now);
-      osc.frequency.setValueAtTime(554.37, now + 0.08);
-      osc.frequency.setValueAtTime(659.25, now + 0.16);
-      osc.frequency.setValueAtTime(880, now + 0.24);
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.46);
+  [-1, 1].forEach((s) => {
+    let ear;
+    if (A.ear === 'point') {
+      ear = new THREE.Group();
+      ear.add(new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.5, 5), fur));
+      const inner = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.42, 5), noseMat);
+      inner.position.z = 0.05; ear.add(inner);
+      ear.position.set(0.4 * s, 0.72, 0.1); ear.rotation.z = -0.35 * s;
+    } else if (A.ear === 'floppy') {
+      ear = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 10), acc);
+      ear.scale.set(0.45, 1.1, 0.7);
+      ear.position.set(0.72 * s, 0.1, 0.05); ear.rotation.z = 0.3 * s;
+    } else {
+      ear = new THREE.Mesh(new THREE.SphereGeometry(0.26, 10, 10), acc);
+      ear.position.set(0.5 * s, 0.62, 0);
     }
+    headGroup.add(ear);
+  });
 
-    function playGameOverSound() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(260, now);
-      osc.frequency.exponentialRampToValueAtTime(60, now + 0.5);
-      gain.gain.setValueAtTime(0.4, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.52);
+  tailGroup = new THREE.Group();
+  tailGroup.position.set(0, 1.2, -1.0);
+  tailGroup.rotation.x = A.tailUp;
+  catGroup.add(tailGroup);
+  let parent = tailGroup;
+  for (let i = 0; i < A.tail; i++) {
+    const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.45, 8), (i % 2 === 0 || key === 'panda') ? (key === 'panda' ? belly : fur) : belly);
+    seg.position.y = 0.2;
+    const j = new THREE.Group();
+    j.position.y = 0.35; j.add(seg);
+    parent.add(j); tailJoints.push(j); parent = j;
+  }
+
+  const legGeo = new THREE.CylinderGeometry(0.2, 0.16, 0.9, 10);
+  [[-0.55, 0.65], [0.55, 0.65], [-0.55, -0.65], [0.55, -0.65]].forEach(([x, z]) => {
+    const g = new THREE.Group();
+    g.position.set(x, 0.75, z);
+    const m = new THREE.Mesh(legGeo, key === 'panda' ? acc : fur);
+    m.position.y = -0.3;
+    g.add(m); catGroup.add(g); legs.push(g);
+  });
+}
+
+// ---------- Food & hazards ----------
+const foods = [], hazards = [];
+const MAX_FOODS = 30, MAX_HAZARDS = 8, SPAWN_RADIUS = 75;
+const FOOD_BASE = [
+  { type: 'small',  scale: 0.7, growthVal: 0.06, timeBonus: 2 },
+  { type: 'medium', scale: 1.0, growthVal: 0.12, timeBonus: 4 },
+  { type: 'large',  scale: 1.5, growthVal: 0.25, timeBonus: 7 }
+];
+
+function createFoodMesh(def) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color: def.color, emissive: def.color, emissiveIntensity: 0.25 });
+  const s = def.scale;
+  if (A.food === 'fish') {
+    const b = new THREE.Mesh(new THREE.ConeGeometry(0.35 * s, 0.9 * s, 7), mat);
+    b.rotation.z = Math.PI / 2; g.add(b);
+  } else if (A.food === 'bone') {
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12 * s, 0.12 * s, 0.8 * s, 8), mat);
+    shaft.rotation.z = Math.PI / 2; g.add(shaft);
+    [-0.4, 0.4].forEach((x) => [-0.1, 0.1].forEach((z) => {
+      const k = new THREE.Mesh(new THREE.SphereGeometry(0.17 * s, 8, 8), mat);
+      k.position.set(x * s, 0, z * s); g.add(k);
+    }));
+  } else {
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(0.16 * s, 0.16 * s, 1.0 * s, 8), mat);
+    g.add(b);
+    const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.2 * s, 0.4 * s, 5), new THREE.MeshStandardMaterial({ color: 0x22c55e }));
+    leaf.position.y = 0.65 * s; g.add(leaf);
+  }
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.55 * s, 0.65 * s, 16), new THREE.MeshBasicMaterial({ color: def.color, side: THREE.DoubleSide, transparent: true, opacity: 0.5 }));
+  ring.rotation.x = Math.PI / 2; ring.position.y = -0.2;
+  g.add(ring);
+  g.userData = { ...def, baseY: 0.8 * s };
+  return g;
+}
+
+function createHazardMesh() {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 12), new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3, emissive: 0x7f1d1d })));
+  for (let i = 0; i < 6; i++) {
+    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.6, 6), new THREE.MeshStandardMaterial({ color: 0x111827 }));
+    spike.position.y = 0.45;
+    const sg = new THREE.Group();
+    sg.rotation.x = (i % 2 === 0 ? 1 : -1) * (i * 0.5);
+    sg.rotation.y = i * 1.04;
+    sg.add(spike); g.add(sg);
+  }
+  g.userData = { baseY: 0.7 };
+  return g;
+}
+
+function spawnFoodNear(cx, cz) {
+  const r = Math.random();
+  const i = r > 0.85 ? 2 : r > 0.6 ? 1 : 0;
+  const def = { ...FOOD_BASE[i], color: A.colors[i], text: '+' + A.names[i] };
+  const f = createFoodMesh(def);
+  const a = Math.random() * Math.PI * 2, d = 12 + Math.random() * (SPAWN_RADIUS - 12);
+  f.position.set(cx + Math.cos(a) * d, f.userData.baseY, cz + Math.sin(a) * d);
+  scene.add(f); foods.push(f);
+}
+
+function spawnHazardNear(cx, cz) {
+  const h = createHazardMesh();
+  const a = Math.random() * Math.PI * 2;
+  const d = 18 + catCurrentScale * 4 + Math.random() * (SPAWN_RADIUS - 18);
+  h.position.set(cx + Math.cos(a) * d, h.userData.baseY, cz + Math.sin(a) * d);
+  scene.add(h); hazards.push(h);
+}
+
+// ---------- State & missions ----------
+let catCurrentScale = 1.0, catTargetScale = 1.0, eatingAnimTimer = 0;
+let score = 0, isGameOver = false, isPaused = true, timeLeft = 60;
+let MISSIONS = [], currentMissionIdx = 0, missionProgress = 0;
+
+function buildMissions() {
+  const n = A.names;
+  MISSIONS = [
+    { id: 1, text: `Eat 5 ${n[0]}`, reqType: 'small', target: 5, reward: 0.25, timeBonus: 20 },
+    { id: 2, text: `Eat 3 ${n[1]}`, reqType: 'medium', target: 3, reward: 0.35, timeBonus: 25 },
+    { id: 3, text: `Eat 2 ${n[2]}`, reqType: 'large', target: 2, reward: 0.50, timeBonus: 30 },
+    { id: 4, text: 'Reach Size 2.0x', reqType: 'scale', target: 2.0, reward: 0.40, timeBonus: 35 },
+    { id: 5, text: 'Eat Any 12 Items', reqType: 'any', target: 12, reward: 0.60, timeBonus: 40 },
+    { id: 6, text: 'Reach Size 4.0x (Beast)', reqType: 'scale', target: 4.0, reward: 1.00, timeBonus: 50 }
+  ];
+}
+
+function updateMissionHUD() {
+  if (currentMissionIdx >= MISSIONS.length) {
+    mRankEl.textContent = 'CHAMPION';
+    mTextEl.textContent = 'All Missions Done! Roam Free.';
+    mBarEl.style.width = '100%';
+    return;
+  }
+  const m = MISSIONS[currentMissionIdx];
+  mRankEl.textContent = `MISSION ${m.id}`;
+  mTextEl.textContent = m.text;
+  const pct = m.reqType === 'scale'
+    ? Math.min(100, Math.max(0, ((catCurrentScale - 1) / (m.target - 1)) * 100))
+    : Math.min(100, (missionProgress / m.target) * 100);
+  mBarEl.style.width = pct + '%';
+}
+
+function checkMissionAdvance(eatenType) {
+  if (currentMissionIdx >= MISSIONS.length) return;
+  const m = MISSIONS[currentMissionIdx];
+  let advance = false;
+  if (m.reqType === 'any' || m.reqType === eatenType) {
+    missionProgress++;
+    if (missionProgress >= m.target) advance = true;
+  } else if (m.reqType === 'scale' && catCurrentScale >= m.target) advance = true;
+
+  if (advance) {
+    catTargetScale += m.reward;
+    timeLeft += m.timeBonus;
+    playMissionSound();
+    mRewardTextEl.textContent = `+${m.timeBonus}s & +${Math.round(m.reward * 100)}% SIZE BOOST!`;
+    mAlertEl.classList.add('show');
+    setTimeout(() => mAlertEl.classList.remove('show'), 2500);
+    currentMissionIdx++;
+    missionProgress = 0;
+  }
+  updateMissionHUD();
+}
+
+function triggerGameOver(reason) {
+  if (isGameOver) return;
+  isGameOver = true;
+  playGameOverSound();
+  gameoverReason.textContent = reason;
+  goScoreEl.textContent = score;
+  gameoverMenu.classList.add('open');
+}
+
+function resetGameState() {
+  catTargetScale = 1.0; catCurrentScale = 1.0;
+  catGroup.scale.set(1, 1, 1);
+  catGroup.position.set(0, 0, 0);
+  catGroup.rotation.y = 0;
+  catVelocity.set(0, 0, 0);
+  score = 0; currentMissionIdx = 0; missionProgress = 0; timeLeft = 60;
+  isGameOver = false; isPaused = false;
+  buildMissions();
+  foods.forEach((f) => scene.remove(f)); foods.length = 0;
+  hazards.forEach((h) => scene.remove(h)); hazards.length = 0;
+  for (let i = 0; i < MAX_FOODS; i++) spawnFoodNear(0, 0);
+  for (let i = 0; i < MAX_HAZARDS; i++) spawnHazardNear(0, 0);
+  updateMissionHUD();
+  scoreValEl.textContent = '0';
+  scaleValEl.textContent = '1.0x';
+  timeValEl.textContent = '60s';
+  gameoverMenu.classList.remove('open');
+  pauseMenu.classList.remove('open');
+  selectMenu.classList.remove('open');
+}
+
+function showSelect() {
+  isPaused = true;
+  gameoverMenu.classList.remove('open');
+  pauseMenu.classList.remove('open');
+  selectMenu.classList.add('open');
+}
+
+function triggerFloatingText(text, x, y, special) {
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = text;
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  if (special) el.style.color = '#facc15';
+  uiLayer.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+// ---------- Input ----------
+const raycaster = new THREE.Raycaster();
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+let isTouching = false, isMouseDown = false;
+const targetWorldPos = new THREE.Vector3();
+const catVelocity = new THREE.Vector3();
+
+function pointOnPlane(cx, cy) {
+  raycaster.setFromCamera(new THREE.Vector2((cx / innerWidth) * 2 - 1, -(cy / innerHeight) * 2 + 1), camera);
+  const hit = new THREE.Vector3();
+  return raycaster.ray.intersectPlane(groundPlane, hit) ? hit : null;
+}
+function aim(cx, cy) {
+  touchReticle.style.left = cx + 'px'; touchReticle.style.top = cy + 'px';
+  const hit = pointOnPlane(cx, cy);
+  if (hit) targetWorldPos.copy(hit);
+}
+const blocked = (e) => isPaused || isGameOver || e.target.closest('button') || e.target.closest('.modal-overlay');
+
+addEventListener('touchstart', (e) => {
+  if (blocked(e)) return;
+  e.preventDefault(); isTouching = true;
+  touchReticle.classList.add('active');
+  aim(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+addEventListener('touchmove', (e) => {
+  if (!isTouching || isPaused || isGameOver) return;
+  e.preventDefault(); aim(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+addEventListener('touchend', (e) => {
+  if (e.touches.length === 0) { isTouching = false; touchReticle.classList.remove('active'); }
+});
+addEventListener('mousedown', (e) => {
+  if (blocked(e)) return;
+  isMouseDown = true; touchReticle.classList.add('active'); aim(e.clientX, e.clientY);
+});
+addEventListener('mousemove', (e) => { if (isMouseDown && !isPaused && !isGameOver) aim(e.clientX, e.clientY); });
+addEventListener('mouseup', () => { isMouseDown = false; touchReticle.classList.remove('active'); });
+
+const keys = { w: false, a: false, s: false, d: false };
+function setKey(e, v) {
+  const k = e.key.toLowerCase();
+  if (k === 'w' || k === 'arrowup') keys.w = v;
+  if (k === 's' || k === 'arrowdown') keys.s = v;
+  if (k === 'a' || k === 'arrowleft') keys.a = v;
+  if (k === 'd' || k === 'arrowright') keys.d = v;
+}
+addEventListener('keydown', (e) => setKey(e, true));
+addEventListener('keyup', (e) => setKey(e, false));
+
+// ---------- Buttons ----------
+document.querySelectorAll('.pick').forEach((b) => b.addEventListener('click', () => {
+  buildAnimal(b.dataset.a);
+  resetGameState();
+}));
+$('pause-btn').addEventListener('click', () => { if (!isGameOver && !isPaused) { isPaused = true; pauseMenu.classList.add('open'); } });
+$('resume-btn').addEventListener('click', () => { isPaused = false; pauseMenu.classList.remove('open'); });
+$('reset-btn').addEventListener('click', resetGameState);
+$('retry-btn').addEventListener('click', resetGameState);
+$('change-btn').addEventListener('click', showSelect);
+$('change-btn2').addEventListener('click', showSelect);
+
+// ---------- Loop ----------
+buildAnimal('cat');
+buildMissions();
+updateMissionHUD();
+
+const clock = new THREE.Clock();
+let walkCycle = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = Math.min(clock.getDelta(), 0.1);
+  if (isPaused || isGameOver) { renderer.render(scene, camera); return; }
+
+  timeLeft -= delta;
+  timeValEl.textContent = Math.max(0, Math.ceil(timeLeft)) + 's';
+  if (timeLeft <= 0) { triggerGameOver('Time ran out before completing the mission!'); return; }
+
+  const moveDir = new THREE.Vector3();
+  if (isTouching || isMouseDown) {
+    const to = new THREE.Vector3().subVectors(targetWorldPos, catGroup.position);
+    to.y = 0;
+    const d = to.length();
+    if (d > 0.4) moveDir.copy(to.normalize()).multiplyScalar(Math.min(d * 2.8, 1.0));
+  } else {
+    if (keys.w) moveDir.z -= 1;
+    if (keys.s) moveDir.z += 1;
+    if (keys.a) moveDir.x -= 1;
+    if (keys.d) moveDir.x += 1;
+    if (moveDir.lengthSq() > 0) moveDir.normalize();
+  }
+
+  const isMoving = moveDir.lengthSq() > 0.05;
+  if (isMoving) {
+    const speed = 12.0 + Math.sqrt(catCurrentScale) * 1.5;
+    catVelocity.lerp(moveDir.multiplyScalar(speed), 0.18);
+    catGroup.position.addScaledVector(catVelocity, delta);
+    const targetAngle = Math.atan2(catVelocity.x, catVelocity.z);
+    let diff = targetAngle - catGroup.rotation.y;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    catGroup.rotation.y += diff * 0.22;
+    walkCycle += delta * (13 + catCurrentScale);
+  } else {
+    catVelocity.lerp(new THREE.Vector3(), 0.2);
+    walkCycle += delta * 2;
+  }
+
+  floor.position.x = catGroup.position.x;
+  floor.position.z = catGroup.position.z;
+  const gs = floorSize / 120;
+  grid.position.x = Math.floor(catGroup.position.x / gs) * gs;
+  grid.position.z = Math.floor(catGroup.position.z / gs) * gs;
+  dirLight.position.set(catGroup.position.x + 20, 35, catGroup.position.z + 25);
+  dirLight.target = catGroup;
+
+  legs.forEach((leg, i) => { leg.rotation.x = isMoving ? Math.sin(walkCycle + (i % 2 === 0 ? 0 : Math.PI)) * 0.6 : 0; });
+  const wag = Math.sin(walkCycle * (animalKey === 'dog' ? 3 : 1.5)) * 0.25;
+  tailJoints.forEach((j) => { j.rotation.y = wag; });
+
+  if (eatingAnimTimer > 0) {
+    eatingAnimTimer -= delta * 5.0;
+    const c = Math.sin(eatingAnimTimer * Math.PI) * 0.35;
+    headGroup.scale.set(1 + c, 1 - c * 0.5, 1 + c);
+  } else headGroup.scale.set(1, 1, 1);
+
+  catCurrentScale = THREE.MathUtils.lerp(catCurrentScale, catTargetScale, delta * 3.5);
+  catGroup.scale.setScalar(catCurrentScale);
+  scaleValEl.textContent = catCurrentScale.toFixed(1) + 'x';
+
+  const catPos = catGroup.position;
+  const hitRadius = 1.25 * catCurrentScale;
+
+  for (let i = hazards.length - 1; i >= 0; i--) {
+    const h = hazards[i];
+    h.rotation.y += delta * 2; h.rotation.x += delta * 1.5;
+    const d = Math.hypot(h.position.x - catPos.x, h.position.z - catPos.z);
+    if (d < hitRadius + 0.5) { triggerGameOver('Spike bomb se takra gaye!'); return; }
+    if (d > SPAWN_RADIUS + 30) { scene.remove(h); hazards.splice(i, 1); spawnHazardNear(catPos.x, catPos.z); }
+  }
+  while (hazards.length < MAX_HAZARDS) spawnHazardNear(catPos.x, catPos.z);
+
+  const t = clock.getElapsedTime();
+  for (let i = foods.length - 1; i >= 0; i--) {
+    const f = foods[i];
+    f.rotation.y += delta * 3;
+    f.position.y = f.userData.baseY + Math.sin(t * 3 + i) * 0.2;
+    const d = Math.hypot(f.position.x - catPos.x, f.position.z - catPos.z);
+    if (d < hitRadius + 0.5 * f.userData.scale) {
+      const it = f.userData;
+      playChompSound(it.type === 'large');
+      catTargetScale += it.growthVal / (1 + (catTargetScale - 1) * 0.25);
+      timeLeft += it.timeBonus;
+      eatingAnimTimer = 1.0;
+      score += it.type === 'large' ? 5 : it.type === 'medium' ? 2 : 1;
+      scoreValEl.textContent = score;
+      const sp = f.position.clone().project(camera);
+      triggerFloatingText(`${it.text} (+${it.timeBonus}s)`, (sp.x * 0.5 + 0.5) * innerWidth, (-sp.y * 0.5 + 0.5) * innerHeight, it.type === 'large');
+      checkMissionAdvance(it.type);
+      scene.remove(f); foods.splice(i, 1);
+      spawnFoodNear(catPos.x, catPos.z);
+    } else if (d > SPAWN_RADIUS + 25) {
+      scene.remove(f); foods.splice(i, 1);
+      spawnFoodNear(catPos.x, catPos.z);
     }
-
-    const container = document.getElementById('canvas-container');
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050711);
-    scene.fog = new THREE.FogExp2(0x050711, 0.018);
-
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    container.appendChild(renderer.domElement);
-
-    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.85);
-    scene.add(ambientLight);
-
-    const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.2);
-    dirLight.position.set(20, 35, 25);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-
-    const floorSize = 400;
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(floorSize, floorSize),
-      new THREE.MeshStandardMaterial({ color: 0x090d1f, roughness: 0.6 })
-    );
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    const grid = new THREE.GridHelper(floorSize, 120, 0x3b82f6, 0x172554);
-    grid.position.y = 0.02;
-    scene.add(grid);
-
-    // ==================== CUTE CHUBBY MOTA CAT BUILD ====================
-    const catGroup = new THREE.Group();
-    scene.add(catGroup);
-
-    const furMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
-    const whiteFurMat = new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.6 });
-    const innerEarMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4 });
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x020617 });
-
-    // Round Chubby Body
-    const bodyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.98, 2.0, 16), furMat);
-    bodyMesh.rotation.x = Math.PI / 2;
-    bodyMesh.position.set(0, 1.0, 0);
-    bodyMesh.castShadow = true;
-    catGroup.add(bodyMesh);
-
-    // Cute Chubby White Belly
-    const bellyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.76, 0.88, 1.4, 16, 1, false, 0, Math.PI), whiteFurMat);
-    bellyMesh.rotation.x = Math.PI / 2;
-    bellyMesh.rotation.y = Math.PI / 2;
-    bellyMesh.position.set(0, 0.95, 0);
-    catGroup.add(bellyMesh);
-
-    // Head Container
-    const headGroup = new THREE.Group();
-    headGroup.position.set(0, 1.42, 1.25);
-    catGroup.add(headGroup);
-
-    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), furMat);
-    headMesh.castShadow = true;
-    headGroup.add(headMesh);
-
-    // Snout
-    const muzzleMesh = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), whiteFurMat);
-    muzzleMesh.scale.set(1.1, 0.7, 0.9);
-    muzzleMesh.position.set(0, -0.15, 0.65);
-    headGroup.add(muzzleMesh);
-
-    const noseMesh = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.08, 6), innerEarMat);
-    noseMesh.rotation.x = Math.PI;
-    noseMesh.position.set(0, -0.07, 0.92);
-    headGroup.add(noseMesh);
-
-    function createEye(x) {
-      const g = new THREE.Group();
-      g.position.set(x, 0.12, 0.62);
-      const cornea = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), eyeMat);
-      const pupil = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8), pupilMat);
-      pupil.position.z = 0.09;
-      g.add(cornea, pupil);
-      return g;
-    }
-    headGroup.add(createEye(-0.3), createEye(0.3));
-
-    function createEar(x, rotZ) {
-      const g = new THREE.Group();
-      g.position.set(x, 0.72, 0.1);
-      g.rotation.z = rotZ;
-      g.rotation.x = -0.15;
-      const outer = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.5, 5), furMat);
-      const inner = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.42, 5), innerEarMat);
-      inner.position.z = 0.05;
-      g.add(outer, inner);
-      return g;
-    }
-    headGroup.add(createEar(-0.4, 0.35), createEar(0.4, -0.35));
-
-    // Tail
-    const tailGroup = new THREE.Group();
-    tailGroup.position.set(0, 1.2, -1.0);
-    catGroup.add(tailGroup);
-
-    const tailJoints = [];
-    let parentJoint = tailGroup;
-    for (let i = 0; i < 4; i++) {
-      const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.45, 8), i % 2 === 0 ? furMat : whiteFurMat);
-      seg.position.y = 0.2;
-      const jNode = new THREE.Group();
-      jNode.position.y = 0.35;
-      jNode.add(seg);
-      parentJoint.add(jNode);
-      tailJoints.push(jNode);
-      parentJoint = jNode;
-    }
-
-    // Legs
-    const legs = [];
-    const legGeo = new THREE.CylinderGeometry(0.2, 0.16, 0.9, 10);
-    [
-      { x: -0.55, z: 0.65 },
-      { x: 0.55, z: 0.65 },
-      { x: -0.55, z: -0.65 },
-      { x: 0.55, z: -0.65 }
-    ].forEach((pos) => {
-      const legG = new THREE.Group();
-      legG.position.set(pos.x, 0.75, pos.z);
-      const legMesh = new THREE.Mesh(legGeo, furMat);
-      legMesh.position.y = -0.3;
-      legMesh.castShadow = true;
-      legG.add(legMesh);
-      catGroup.add(legG);
-      legs.push(legG);
-    });
-
-    let catCurrentScale = 1.0;
-    let catTargetScale = 1.0;
-    let eatingAnimTimer = 0;
-    let score = 0;
-    let isGameOver = false;
-    let isPaused = false;
-    let timeLeft = 60;
-
-    const foods = [];
-    const MAX_FOODS = 30;
-    const hazards = [];
-    const MAX_HAZARDS = 8;
-    const SPAWN_RADIUS = 75;
-
-    const FOOD_TYPES = [
-      { type: 'small', color: 0x38bdf8, scale: 0.7, growthVal: 0.06, text: '+Fish', timeBonus: 2 },
-      { type: 'medium', color: 0xfacc15, scale: 1.0, growthVal: 0.12, text: '+Golden', timeBonus: 4 },
-      { type: 'large', color: 0xf43f5e, scale: 1.5, growthVal: 0.25, text: 'MEGA', timeBonus: 7 }
-    ];
-
-    function createFoodMesh(def) {
-      const g = new THREE.Group();
-      const b = new THREE.Mesh(
-        new THREE.ConeGeometry(0.35 * def.scale, 0.9 * def.scale, 7),
-        new THREE.MeshStandardMaterial({ color: def.color, emissive: def.color, emissiveIntensity: 0.25 })
-      );
-      b.rotation.z = Math.PI / 2;
-      g.add(b);
-
-      const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.55 * def.scale, 0.65 * def.scale, 16),
-        new THREE.MeshBasicMaterial({ color: def.color, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
-      );
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = -0.2;
-      g.add(ring);
-
-      g.userData = { ...def, ringMesh: ring, baseY: 0.8 * def.scale };
-      return g;
-    }
-
-    function createHazardMesh() {
-      const g = new THREE.Group();
-      const core = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 12, 12),
-        new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3, emissive: 0x7f1d1d })
-      );
-      g.add(core);
-
-      for (let i = 0; i < 6; i++) {
-        const spike = new THREE.Mesh(
-          new THREE.ConeGeometry(0.15, 0.6, 6),
-          new THREE.MeshStandardMaterial({ color: 0x111827 })
-        );
-        spike.position.y = 0.45;
-        const sG = new THREE.Group();
-        sG.rotation.x = (i % 2 === 0 ? 1 : -1) * (i * 0.5);
-        sG.rotation.y = i * 1.04;
-        sG.add(spike);
-        g.add(sG);
-      }
-      g.userData = { baseY: 0.7 };
-      return g;
-    }
-
-    function spawnFoodNear(centerX, centerZ) {
-      const r = Math.random();
-      let def = FOOD_TYPES[0];
-      if (r > 0.85) def = FOOD_TYPES[2];
-      else if (r > 0.60) def = FOOD_TYPES[1];
-
-      const f = createFoodMesh(def);
-      const a = Math.random() * Math.PI * 2;
-      const d = 12 + Math.random() * (SPAWN_RADIUS - 12);
-      f.position.set(centerX + Math.cos(a) * d, f.userData.baseY, centerZ + Math.sin(a) * d);
-      scene.add(f);
-      foods.push(f);
-    }
-
-    function spawnHazardNear(centerX, centerZ) {
-      const h = createHazardMesh();
-      const a = Math.random() * Math.PI * 2;
-      const d = 18 + Math.random() * (SPAWN_RADIUS - 18);
-      h.position.set(centerX + Math.cos(a) * d, h.userData.baseY, centerZ + Math.sin(a) * d);
-      scene.add(h);
-      hazards.push(h);
-    }
-
-    for (let i = 0; i < MAX_FOODS; i++) spawnFoodNear(0, 0);
-    for (let i = 0; i < MAX_HAZARDS; i++) spawnHazardNear(0, 0);
-
-    const MISSIONS = [
-      { id: 1, text: "Eat 5 Small Fish", reqType: "small", target: 5, reward: 0.25, timeBonus: 20 },
-      { id: 2, text: "Eat 3 Golden Fish", reqType: "medium", target: 3, reward: 0.35, timeBonus: 25 },
-      { id: 3, text: "Eat 2 Mega Salmon", reqType: "large", target: 2, reward: 0.50, timeBonus: 30 },
-      { id: 4, text: "Reach Size 2.0x", reqType: "scale", target: 2.0, reward: 0.40, timeBonus: 35 },
-      { id: 5, text: "Eat Any 12 Fish", reqType: "any", target: 12, reward: 0.60, timeBonus: 40 },
-      { id: 6, text: "Reach Size 4.0x (Beast)", reqType: "scale", target: 4.0, reward: 1.00, timeBonus: 50 }
-    ];
-
-    let currentMissionIdx = 0;
-    let missionProgress = 0;
-
-    const mRankEl = document.getElementById('m-rank');
-    const mTextEl = document.getElementById('m-text');
-    const mBarEl = document.getElementById('m-bar');
-    const mAlertEl = document.getElementById('mission-alert');
-    const mRewardTextEl = document.getElementById('mission-reward-text');
-    const timeValEl = document.getElementById('time-val');
-    const gameoverMenu = document.getElementById('gameover-menu');
-    const gameoverReason = document.getElementById('gameover-reason');
-    const goScoreEl = document.getElementById('go-score');
-
-    function updateMissionHUD() {
-      if (currentMissionIdx >= MISSIONS.length) {
-        mRankEl.textContent = 'CHAMPION';
-        mTextEl.textContent = 'All Missions Done! Roam Free.';
-        mBarEl.style.width = '100%';
-        return;
-      }
-      const m = MISSIONS[currentMissionIdx];
-      mRankEl.textContent = `MISSION ${m.id}`;
-      mTextEl.textContent = m.text;
-      const pct = m.reqType === 'scale' 
-        ? Math.min(100, Math.max(0, ((catCurrentScale - 1) / (m.target - 1)) * 100))
-        : Math.min(100, (missionProgress / m.target) * 100);
-      mBarEl.style.width = pct + '%';
-    }
-
-    function checkMissionAdvance(eatenType) {
-      if (currentMissionIdx >= MISSIONS.length) return;
-      const m = MISSIONS[currentMissionIdx];
-      let advance = false;
-
-      if (m.reqType === 'any') {
-        missionProgress++;
-        if (missionProgress >= m.target) advance = true;
-      } else if (m.reqType === eatenType) {
-        missionProgress++;
-        if (missionProgress >= m.target) advance = true;
-      } else if (m.reqType === 'scale') {
-        if (catCurrentScale >= m.target) advance = true;
-      }
-
-      if (advance) {
-        catTargetScale += m.reward;
-        timeLeft += m.timeBonus;
-        playMissionSound();
-        mRewardTextEl.textContent = `+${m.timeBonus}s & +${Math.round(m.reward * 100)}% SIZE BOOST!`;
-        mAlertEl.classList.add('show');
-        setTimeout(() => mAlertEl.classList.remove('show'), 2500);
-
-        currentMissionIdx++;
-        missionProgress = 0;
-      }
-      updateMissionHUD();
-    }
-
-    function triggerGameOver(reason) {
-      if (isGameOver) return;
-      isGameOver = true;
-      playGameOverSound();
-      gameoverReason.textContent = reason;
-      goScoreEl.textContent = score;
-      gameoverMenu.classList.add('open');
-    }
-
-    function resetGameState() {
-      catTargetScale = 1.0;
-      catCurrentScale = 1.0;
-      catGroup.scale.set(1, 1, 1);
-      catGroup.position.set(0, 0, 0);
-      score = 0;
-      currentMissionIdx = 0;
-      missionProgress = 0;
-      timeLeft = 60;
-      isGameOver = false;
-      isPaused = false;
-      updateMissionHUD();
-      scoreValEl.textContent = '0';
-      scaleValEl.textContent = '1.0x';
-      timeValEl.textContent = '60s';
-      gameoverMenu.classList.remove('open');
-      pauseMenu.classList.remove('open');
-    }
-
-    updateMissionHUD();
-
-    const uiLayer = document.getElementById('ui-layer');
-    const scaleValEl = document.getElementById('scale-val');
-    const scoreValEl = document.getElementById('score-val');
-
-    function triggerFloatingText(text, x, y, isSpecial, isWarning) {
-      const el = document.createElement('div');
-      el.className = 'float-text';
-      el.textContent = text;
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-      if (isWarning) el.style.color = '#ef4444';
-      else if (isSpecial) el.style.color = '#facc15';
-      uiLayer.appendChild(el);
-      setTimeout(() => el.remove(), 800);
-    }
-
-    const touchReticle = document.getElementById('touch-reticle');
-    const raycaster = new THREE.Raycaster();
-    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-
-    let isTouching = false;
-    let targetWorldPos = new THREE.Vector3();
-    const catVelocity = new THREE.Vector3();
-
-    function getTouchPointOnPlane(clientX, clientY) {
-      const ndc = new THREE.Vector2(
-        (clientX / window.innerWidth) * 2 - 1,
-        -(clientY / window.innerHeight) * 2 + 1
-      );
-      raycaster.setFromCamera(ndc, camera);
-      const hit = new THREE.Vector3();
-      raycaster.ray.intersectPlane(groundPlane, hit);
-      return hit;
-    }
-
-    window.addEventListener('touchstart', (e) => {
-      if (isPaused || isGameOver || e.target.closest('button') || e.target.closest('.modal-overlay')) return;
-      e.preventDefault();
-      isTouching = true;
-      const t = e.touches[0];
-      touchReticle.style.left = t.clientX + 'px';
-      touchReticle.style.top = t.clientY + 'px';
-      touchReticle.classList.add('active');
-      const hit = getTouchPointOnPlane(t.clientX, t.clientY);
-      if (hit) targetWorldPos.copy(hit);
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!isTouching || isPaused || isGameOver) return;
-      e.preventDefault();
-      const t = e.touches[0];
-      touchReticle.style.left = t.clientX + 'px';
-      touchReticle.style.top = t.clientY + 'px';
-      const hit = getTouchPointOnPlane(t.clientX, t.clientY);
-      if (hit) targetWorldPos.copy(hit);
-    }, { passive: false });
-
-    window.addEventListener('touchend', (e) => {
-      if (e.touches.length === 0) {
-        isTouching = false;
-        touchReticle.classList.remove('active');
-      }
-    });
-
-    let isMouseDown = false;
-    window.addEventListener('mousedown', (e) => {
-      if (isPaused || isGameOver || e.target.closest('button') || e.target.closest('.modal-overlay')) return;
-      isMouseDown = true;
-      touchReticle.style.left = e.clientX + 'px';
-      touchReticle.style.top = e.clientY + 'px';
-      touchReticle.classList.add('active');
-      const hit = getTouchPointOnPlane(e.clientX, e.clientY);
-      if (hit) targetWorldPos.copy(hit);
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isMouseDown || isPaused || isGameOver) return;
-      touchReticle.style.left = e.clientX + 'px';
-      touchReticle.style.top = e.clientY + 'px';
-      const hit = getTouchPointOnPlane(e.clientX, e.clientY);
-      if (hit) targetWorldPos.copy(hit);
-    });
-
-    window.addEventListener('mouseup', () => {
-      isMouseDown = false;
-      touchReticle.classList.remove('active');
-    });
-
-    const keys = { w: false, a: false, s: false, d: false };
-    window.addEventListener('keydown', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'w' || k === 'arrowup') keys.w = true;
-      if (k === 's' || k === 'arrowdown') keys.s = true;
-      if (k === 'a' || k === 'arrowleft') keys.a = true;
-      if (k === 'd' || k === 'arrowright') keys.d = true;
-    });
-    window.addEventListener('keyup', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'w' || k === 'arrowup') keys.w = false;
-      if (k === 's' || k === 'arrowdown') keys.s = false;
-      if (k === 'a' || k === 'arrowleft') keys.a = false;
-      if (k === 'd' || k === 'arrowright') keys.d = false;
-    });
-
-    const pauseMenu = document.getElementById('pause-menu');
-    document.getElementById('pause-btn').addEventListener('click', () => {
-      if (isGameOver) return;
-      isPaused = true;
-      pauseMenu.classList.add('open');
-    });
-    document.getElementById('resume-btn').addEventListener('click', () => {
-      isPaused = false;
-      pauseMenu.classList.remove('open');
-    });
-    document.getElementById('reset-btn').addEventListener('click', resetGameState);
-    document.getElementById('retry-btn').addEventListener('click', resetGameState);
-
-    const clock = new THREE.Clock();
-    let walkCycle = 0;
-
-    function animate() {
-      requestAnimationFrame(animate);
-      const delta = Math.min(clock.getDelta(), 0.1);
-      if (isPaused || isGameOver) return;
-
-      timeLeft -= delta;
-      timeValEl.textContent = Math.max(0, Math.ceil(timeLeft)) + 's';
-      if (timeLeft <= 0) {
-        triggerGameOver("Time ran out before completing the mission!");
-        return;
-      }
-
-      let moveDir = new THREE.Vector3();
-      if (isTouching || isMouseDown) {
-        const toTarget = new THREE.Vector3().subVectors(targetWorldPos, catGroup.position);
-        toTarget.y = 0;
-        const d = toTarget.length();
-        if (d > 0.4) {
-          moveDir.copy(toTarget.normalize());
-          moveDir.multiplyScalar(Math.min(d * 2.8, 1.0));
-        }
-      } else {
-        if (keys.w) moveDir.z -= 1;
-        if (keys.s) moveDir.z += 1;
-        if (keys.a) moveDir.x -= 1;
-        if (keys.d) moveDir.x += 1;
-        if (moveDir.lengthSq() > 0) moveDir.normalize();
-      }
-
-      const isMoving = moveDir.lengthSq() > 0.05;
-      if (isMoving) {
-        const dynamicSpeed = 12.0 + Math.sqrt(catCurrentScale) * 1.5;
-        catVelocity.lerp(moveDir.multiplyScalar(dynamicSpeed), 0.18);
-        catGroup.position.addScaledVector(catVelocity, delta);
-
-        // Cat faces exact moving direction
-        const targetAngle = Math.atan2(catVelocity.x, catVelocity.z);
-        let diff = targetAngle - catGroup.rotation.y;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        catGroup.rotation.y += diff * 0.22;
-
-        walkCycle += delta * (13 + catCurrentScale);
-      } else {
-        catVelocity.lerp(new THREE.Vector3(0, 0, 0), 0.2);
-        walkCycle += delta * 2;
-      }
-
-      floor.position.x = catGroup.position.x;
-      floor.position.z = catGroup.position.z;
-      const gridSize = floorSize / 120;
-      grid.position.x = Math.floor(catGroup.position.x / gridSize) * gridSize;
-      grid.position.z = Math.floor(catGroup.position.z / gridSize) * gridSize;
-
-      dirLight.position.set(catGroup.position.x + 20, 35, catGroup.position.z + 25);
-      dirLight.target = catGroup;
-
-      // Leg Walking Swing
-      legs.forEach((leg, idx) => {
-        const offset = idx % 2 === 0 ? 0 : Math.PI;
-        leg.rotation.x = isMoving ? Math.sin(walkCycle + offset) * 0.6 : 0;
-      });
-
-      // Tail Wagging
-      const wagAngle = Math.sin(walkCycle * 1.5) * 0.25;
-      tailJoints.forEach((j) => {
-        j.rotation.y = wagAngle;
-      });
-
-      // Eating Chomp Animation
-      if (eatingAnimTimer > 0) {
-        eatingAnimTimer -= delta * 5.0;
-        const chomp = Math.sin(eatingAnimTimer * Math.PI) * 0.35;
-        headGroup.scale.set(1 + chomp, 1 - chomp * 0.5, 1 + chomp);
-      } else {
-        headGroup.scale.set(1, 1, 1);
-      }
-
-      // Smooth Growth Scaling
-      catCurrentScale = THREE.MathUtils.lerp(catCurrentScale, catTargetScale, delta * 3.5);
-      catGroup.scale.set(catCurrentScale, catCurrentScale, catCurrentScale);
-      scaleValEl.textContent = catCurrentScale.toFixed(1) + 'x';
-
-      const catPos = catGroup.position;
-      const hitRadius = 1.25 * catCurrentScale;
-
-      // Hazards Collision
-      for (let i = hazards.length - 1; i >= 0; i--) {
-        const h = hazards[i];
-        h.rotation.y += delta * 2;
-        h.rotation.x += delta * 1.5;
-        const d = Math.hypot(h.position.x - catPos.x, h.position.z - catPos.z);
-        if (d < hitRadius + 0.5) {
-          triggerGameOver("The cat hit a poisonous spike bomb!");
-          return;
-        } else if (d > SPAWN_RADIUS + 30) {
-          scene.remove(h);
-          hazards.splice(i, 1);
-          spawnHazardNear(catPos.x, catPos.z);
-        }
-      }
-      while (hazards.length < MAX_HAZARDS) {
-        spawnHazardNear(catPos.x, catPos.z);
-      }
-
-      // Foods Collision
-      for (let i = foods.length - 1; i >= 0; i--) {
-        const f = foods[i];
-        f.rotation.y += delta * 3;
-        f.position.y = f.userData.baseY + Math.sin(clock.getElapsedTime() * 3 + i) * 0.2;
-
-        const d = Math.hypot(f.position.x - catPos.x, f.position.z - catPos.z);
-        if (d < hitRadius + (0.5 * f.userData.scale)) {
-          const item = f.userData;
-          playChompSound(item.type === 'large');
-
-          catTargetScale += item.growthVal / (1 + (catTargetScale - 1) * 0.25);
-          timeLeft += item.timeBonus;
-          eatingAnimTimer = 1.0;
-
-          score += item.type === 'large' ? 5 : (item.type === 'medium' ? 2 : 1);
-          scoreValEl.textContent = score;
-
-          const screenPos = f.position.clone().project(camera);
-          const sx = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
-          const sy = (-(screenPos.y * 0.5) + 0.5) * window.innerHeight;
-          triggerFloatingText(`${item.text} (+${item.timeBonus}s)`, sx, sy, item.type === 'large', false);
-
-          checkMissionAdvance(item.type);
-
-          scene.remove(f);
-          foods.splice(i, 1);
-          spawnFoodNear(catPos.x, catPos.z);
-        } else if (d > SPAWN_RADIUS + 25) {
-          scene.remove(f);
-          foods.splice(i, 1);
-          spawnFoodNear(catPos.x, catPos.z);
-        }
-      }
-
-      while (foods.length < MAX_FOODS) {
-        spawnFoodNear(catPos.x, catPos.z);
-      }
-
-      if (MISSIONS[currentMissionIdx] && MISSIONS[currentMissionIdx].reqType === 'scale') {
-        checkMissionAdvance('scale');
-      }
-
-      const desiredCamPos = new THREE.Vector3(
-        catPos.x,
-        catPos.y + (16 + catCurrentScale * 4.5),
-        catPos.z + (20 + catCurrentScale * 6.0)
-      );
-      camera.position.lerp(desiredCamPos, 0.08);
-      camera.lookAt(catPos.x, catPos.y + 1.0 * catCurrentScale, catPos.z);
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    });
-  </script>
+  }
+  while (foods.length < MAX_FOODS) spawnFoodNear(catPos.x, catPos.z);
+
+  const cm = MISSIONS[currentMissionIdx];
+  if (cm && cm.reqType === 'scale') checkMissionAdvance('scale');
+
+  camera.position.lerp(new THREE.Vector3(catPos.x, catPos.y + 16 + catCurrentScale * 4.5, catPos.z + 20 + catCurrentScale * 6.0), 0.08);
+  camera.lookAt(catPos.x, catPos.y + catCurrentScale, catPos.z);
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
 </body>
 </html>

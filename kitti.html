@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>CAT SPINNERS: REALISTIC SURVIVAL</title>
+  <title>CAT SPINNERS: CHUBBY CAT SURVIVAL</title>
   <style>
     * {
       box-sizing: border-box;
@@ -203,7 +203,6 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
   <div id="canvas-container"></div>
@@ -313,13 +312,12 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xdbeafe, 1.0);
+    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.85);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
+    const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.2);
     dirLight.position.set(20, 35, 25);
     dirLight.castShadow = true;
     scene.add(dirLight);
@@ -337,86 +335,110 @@
     grid.position.y = 0.02;
     scene.add(grid);
 
+    // ==================== CUTE CHUBBY MOTA CAT BUILD ====================
     const catGroup = new THREE.Group();
     scene.add(catGroup);
 
-    let catMixer = null;
-    let animActions = {};
-    let isGltfLoaded = false;
-    let catNeckBone = null;
+    const furMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
+    const whiteFurMat = new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.6 });
+    const innerEarMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4 });
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x020617 });
 
-    const gltfLoader = new THREE.GLTFLoader();
-    const MODEL_SOURCES = [
-      './cat.glb',
-      'https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/models/gltf/Cat.glb',
-      'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Fox/glTF-Binary/Fox.glb'
-    ];
+    // Round Chubby Body
+    const bodyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.98, 2.0, 16), furMat);
+    bodyMesh.rotation.x = Math.PI / 2;
+    bodyMesh.position.set(0, 1.0, 0);
+    bodyMesh.castShadow = true;
+    catGroup.add(bodyMesh);
 
-    function applyModelSetup(gltf) {
-      const model = gltf.scene;
-      const box = new THREE.Box3().setFromObject(model);
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scaleFactor = maxDim > 0 ? (2.2 / maxDim) : 1.0;
-      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-      model.position.set(0, 0, 0);
+    // Cute Chubby White Belly
+    const bellyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.76, 0.88, 1.4, 16, 1, false, 0, Math.PI), whiteFurMat);
+    bellyMesh.rotation.x = Math.PI / 2;
+    bellyMesh.rotation.y = Math.PI / 2;
+    bellyMesh.position.set(0, 0.95, 0);
+    catGroup.add(bellyMesh);
 
-      model.traverse((node) => {
-        if (node.isMesh) {
-          node.castShadow = true;
-          node.receiveShadow = true;
-          if (node.material) {
-            node.material.roughness = 0.6;
-            node.material.metalness = 0.05;
-          }
-        }
-        if (node.isBone) {
-          const bName = node.name.toLowerCase();
-          if (bName.includes('neck') || bName.includes('head')) {
-            catNeckBone = node;
-          }
-        }
-      });
+    // Head Container
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 1.42, 1.25);
+    catGroup.add(headGroup);
 
-      catMixer = new THREE.AnimationMixer(model);
-      if (gltf.animations && gltf.animations.length > 0) {
-        gltf.animations.forEach((clip) => {
-          const name = clip.name.toLowerCase();
-          const action = catMixer.clipAction(clip);
-          if (name.includes('run') || name.includes('fast')) animActions['run'] = action;
-          else if (name.includes('walk') || name.includes('trot')) animActions['walk'] = action;
-          else if (name.includes('idle') || name.includes('sit') || name.includes('stand')) animActions['idle'] = action;
-        });
+    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), furMat);
+    headMesh.castShadow = true;
+    headGroup.add(headMesh);
 
-        if (!animActions['idle']) animActions['idle'] = catMixer.clipAction(gltf.animations[0]);
-        if (!animActions['walk']) animActions['walk'] = animActions['idle'];
-        if (!animActions['run']) animActions['run'] = animActions['walk'];
-        animActions['idle'].play();
-      }
+    // Snout
+    const muzzleMesh = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), whiteFurMat);
+    muzzleMesh.scale.set(1.1, 0.7, 0.9);
+    muzzleMesh.position.set(0, -0.15, 0.65);
+    headGroup.add(muzzleMesh);
 
-      while (catGroup.children.length > 0) {
-        catGroup.remove(catGroup.children[0]);
-      }
-      catGroup.add(model);
-      isGltfLoaded = true;
+    const noseMesh = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.08, 6), innerEarMat);
+    noseMesh.rotation.x = Math.PI;
+    noseMesh.position.set(0, -0.07, 0.92);
+    headGroup.add(noseMesh);
+
+    function createEye(x) {
+      const g = new THREE.Group();
+      g.position.set(x, 0.12, 0.62);
+      const cornea = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), eyeMat);
+      const pupil = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8), pupilMat);
+      pupil.position.z = 0.09;
+      g.add(cornea, pupil);
+      return g;
+    }
+    headGroup.add(createEye(-0.3), createEye(0.3));
+
+    function createEar(x, rotZ) {
+      const g = new THREE.Group();
+      g.position.set(x, 0.72, 0.1);
+      g.rotation.z = rotZ;
+      g.rotation.x = -0.15;
+      const outer = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.5, 5), furMat);
+      const inner = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.42, 5), innerEarMat);
+      inner.position.z = 0.05;
+      g.add(outer, inner);
+      return g;
+    }
+    headGroup.add(createEar(-0.4, 0.35), createEar(0.4, -0.35));
+
+    // Tail
+    const tailGroup = new THREE.Group();
+    tailGroup.position.set(0, 1.2, -1.0);
+    catGroup.add(tailGroup);
+
+    const tailJoints = [];
+    let parentJoint = tailGroup;
+    for (let i = 0; i < 4; i++) {
+      const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.45, 8), i % 2 === 0 ? furMat : whiteFurMat);
+      seg.position.y = 0.2;
+      const jNode = new THREE.Group();
+      jNode.position.y = 0.35;
+      jNode.add(seg);
+      parentJoint.add(jNode);
+      tailJoints.push(jNode);
+      parentJoint = jNode;
     }
 
-    function tryLoadChain(urls, index) {
-      if (index >= urls.length) return;
-      gltfLoader.load(
-        urls[index],
-        (gltf) => {
-          applyModelSetup(gltf);
-        },
-        undefined,
-        () => {
-          tryLoadChain(urls, index + 1);
-        }
-      );
-    }
-
-    tryLoadChain(MODEL_SOURCES, 0);
+    // Legs
+    const legs = [];
+    const legGeo = new THREE.CylinderGeometry(0.2, 0.16, 0.9, 10);
+    [
+      { x: -0.55, z: 0.65 },
+      { x: 0.55, z: 0.65 },
+      { x: -0.55, z: -0.65 },
+      { x: 0.55, z: -0.65 }
+    ].forEach((pos) => {
+      const legG = new THREE.Group();
+      legG.position.set(pos.x, 0.75, pos.z);
+      const legMesh = new THREE.Mesh(legGeo, furMat);
+      legMesh.position.y = -0.3;
+      legMesh.castShadow = true;
+      legG.add(legMesh);
+      catGroup.add(legG);
+      legs.push(legG);
+    });
 
     let catCurrentScale = 1.0;
     let catTargetScale = 1.0;
@@ -724,23 +746,12 @@
     document.getElementById('retry-btn').addEventListener('click', resetGameState);
 
     const clock = new THREE.Clock();
-    let currentAnimMode = 'idle';
-
-    function setAnimationState(mode) {
-      if (currentAnimMode === mode) return;
-      if (animActions[currentAnimMode]) animActions[currentAnimMode].fadeOut(0.2);
-      if (animActions[mode]) {
-        animActions[mode].reset().fadeIn(0.2).play();
-      }
-      currentAnimMode = mode;
-    }
+    let walkCycle = 0;
 
     function animate() {
       requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), 0.1);
       if (isPaused || isGameOver) return;
-
-      if (catMixer) catMixer.update(delta);
 
       timeLeft -= delta;
       timeValEl.textContent = Math.max(0, Math.ceil(timeLeft)) + 's';
@@ -772,21 +783,17 @@
         catVelocity.lerp(moveDir.multiplyScalar(dynamicSpeed), 0.18);
         catGroup.position.addScaledVector(catVelocity, delta);
 
+        // Cat faces exact moving direction
         const targetAngle = Math.atan2(catVelocity.x, catVelocity.z);
         let diff = targetAngle - catGroup.rotation.y;
         while (diff < -Math.PI) diff += Math.PI * 2;
         while (diff > Math.PI) diff -= Math.PI * 2;
         catGroup.rotation.y += diff * 0.22;
 
-        if (isGltfLoaded) {
-          setAnimationState(catVelocity.length() > 8 ? 'run' : 'walk');
-        }
+        walkCycle += delta * (13 + catCurrentScale);
       } else {
         catVelocity.lerp(new THREE.Vector3(0, 0, 0), 0.2);
-
-        if (isGltfLoaded) {
-          setAnimationState('idle');
-        }
+        walkCycle += delta * 2;
       }
 
       floor.position.x = catGroup.position.x;
@@ -798,16 +805,28 @@
       dirLight.position.set(catGroup.position.x + 20, 35, catGroup.position.z + 25);
       dirLight.target = catGroup;
 
+      // Leg Walking Swing
+      legs.forEach((leg, idx) => {
+        const offset = idx % 2 === 0 ? 0 : Math.PI;
+        leg.rotation.x = isMoving ? Math.sin(walkCycle + offset) * 0.6 : 0;
+      });
+
+      // Tail Wagging
+      const wagAngle = Math.sin(walkCycle * 1.5) * 0.25;
+      tailJoints.forEach((j) => {
+        j.rotation.y = wagAngle;
+      });
+
+      // Eating Chomp Animation
       if (eatingAnimTimer > 0) {
         eatingAnimTimer -= delta * 5.0;
         const chomp = Math.sin(eatingAnimTimer * Math.PI) * 0.35;
-        if (catNeckBone) {
-          catNeckBone.rotation.x = chomp * 0.45;
-        }
-      } else if (catNeckBone) {
-        catNeckBone.rotation.x = 0;
+        headGroup.scale.set(1 + chomp, 1 - chomp * 0.5, 1 + chomp);
+      } else {
+        headGroup.scale.set(1, 1, 1);
       }
 
+      // Smooth Growth Scaling
       catCurrentScale = THREE.MathUtils.lerp(catCurrentScale, catTargetScale, delta * 3.5);
       catGroup.scale.set(catCurrentScale, catCurrentScale, catCurrentScale);
       scaleValEl.textContent = catCurrentScale.toFixed(1) + 'x';
@@ -815,6 +834,7 @@
       const catPos = catGroup.position;
       const hitRadius = 1.25 * catCurrentScale;
 
+      // Hazards Collision
       for (let i = hazards.length - 1; i >= 0; i--) {
         const h = hazards[i];
         h.rotation.y += delta * 2;
@@ -833,6 +853,7 @@
         spawnHazardNear(catPos.x, catPos.z);
       }
 
+      // Foods Collision
       for (let i = foods.length - 1; i >= 0; i--) {
         const f = foods[i];
         f.rotation.y += delta * 3;

@@ -44,12 +44,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050711;font-family:
 .acard.dog{background:radial-gradient(circle at 22% 28%,#451a03 0 8px,transparent 9px),radial-gradient(circle at 80% 70%,#451a03 0 11px,transparent 12px),#92400e;border-color:#fde68a}
 .acard.panda{background:radial-gradient(circle at 10% 15%,#111 0 9px,transparent 10px),radial-gradient(circle at 90% 15%,#111 0 9px,transparent 10px),#f8fafc;color:#111;text-shadow:none;border-color:#111}
 html,body{overscroll-behavior:none}
-#joy{position:fixed;width:130px;height:130px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.4);z-index:100;pointer-events:none;opacity:0;transition:opacity .15s}
+#joy{position:fixed;width:100px;height:100px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.4);z-index:100;pointer-events:none;opacity:0;transition:opacity .15s}
 body.playing #joy{opacity:.7}
 body.playing #joy.active{opacity:1}
 #dash-btn{display:none}
 body.playing #dash-btn{display:block}
-#joy-knob{position:absolute;left:37px;top:37px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.8);will-change:transform}
+#joy-knob{position:absolute;left:27px;top:27px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.8);will-change:transform}
 #joy.active #joy-knob{background:rgba(96,165,250,.85)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -80,7 +80,7 @@ body.playing #dash-btn{display:block}
 </div>
 
 <div id="joy"><div id="joy-knob"></div></div>
-<button class="btn" id="dash-btn" style="position:fixed;right:28px;bottom:36px;width:84px;height:84px;border-radius:50%;font-size:14px;letter-spacing:1px;background:rgba(255,255,255,.1);border:2px solid rgba(250,204,21,.85);z-index:12;touch-action:none">DASH</button>
+<button class="btn" id="dash-btn" style="position:fixed;right:24px;bottom:30px;width:72px;height:72px;border-radius:50%;font-size:14px;letter-spacing:1px;background:rgba(255,255,255,.1);border:2px solid rgba(250,204,21,.85);z-index:12;touch-action:none">DASH</button>
 <div class="mission-popup" id="mission-alert">🎉 MISSION COMPLETE!<br /><span style="font-size:13px;color:#fef08a;font-weight:600" id="mission-reward-text"></span></div>
 
 <div class="modal-overlay open" id="select-menu">
@@ -510,9 +510,9 @@ const blocked = (e) => isPaused || isGameOver || e.target.closest('button') || e
 
 // Virtual joystick (left side of screen, like BGMI / Free Fire)
 const joy = $('joy'), joyKnob = $('joy-knob');
-const JR = 40, joyVec = { x: 0, y: 0 };
+const JR = 32, joyVec = { x: 0, y: 0 };
 let joyId = null, joyCX = 0, joyCY = 0;
-function joyDefault() { joy.style.left = '110px'; joy.style.top = (innerHeight - 110) + 'px'; }
+function joyDefault() { joy.style.left = '80px'; joy.style.top = (innerHeight - 80) + 'px'; }
 function joyMove(t) {
   let dx = t.clientX - joyCX, dy = t.clientY - joyCY;
   const d = Math.hypot(dx, dy);

@@ -35,11 +35,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050711;font-family:
 .modal-overlay.open{display:flex}
 .menu-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);padding:24px;border-radius:18px;text-align:center;width:290px}
 .pick{width:100%;padding:12px;margin-bottom:8px;font-size:15px;pointer-events:auto}
+.acard{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px;border-radius:16px;border:2px solid rgba(255,255,255,.35);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);transition:transform .15s}
+.acard:hover{transform:scale(1.03)}
+.acard .av{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-size:26px;text-shadow:none;flex:none}
+.acard b{display:block;font-size:16px}
+.acard small{font-size:11px;opacity:.9;font-weight:600}
+.acard.cat{background:repeating-linear-gradient(115deg,#f97316 0 14px,#c2410c 14px 19px,#f97316 19px 33px);border-color:#fed7aa}
+.acard.dog{background:radial-gradient(circle at 22% 28%,#451a03 0 8px,transparent 9px),radial-gradient(circle at 80% 70%,#451a03 0 11px,transparent 12px),#92400e;border-color:#fde68a}
+.acard.panda{background:radial-gradient(circle at 10% 15%,#111 0 9px,transparent 10px),radial-gradient(circle at 90% 15%,#111 0 9px,transparent 10px),#f8fafc;color:#111;text-shadow:none;border-color:#111}
 html,body{overscroll-behavior:none}
-#joy{position:fixed;width:140px;height:140px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(15,23,42,.45);border:3px solid rgba(255,255,255,.7);box-shadow:0 0 18px rgba(96,165,250,.6),inset 0 0 20px rgba(96,165,250,.25);z-index:100;pointer-events:none;opacity:.75;transition:opacity .15s}
-#joy.active{opacity:1}
-#joy-knob{position:absolute;left:37px;top:37px;width:60px;height:60px;border-radius:50%;background:#60a5fa;border:3px solid #fff;box-shadow:0 0 14px rgba(96,165,250,.9);will-change:transform}
-#joy.active #joy-knob{background:#facc15;box-shadow:0 0 18px #facc15}
+#joy{position:fixed;width:130px;height:130px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.4);z-index:100;pointer-events:none;opacity:0;transition:opacity .15s}
+body.playing #joy{opacity:.7}
+body.playing #joy.active{opacity:1}
+#dash-btn{display:none}
+body.playing #dash-btn{display:block}
+#joy-knob{position:absolute;left:37px;top:37px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.8);will-change:transform}
+#joy.active #joy-knob{background:rgba(96,165,250,.85)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -69,16 +80,16 @@ html,body{overscroll-behavior:none}
 </div>
 
 <div id="joy"><div id="joy-knob"></div></div>
-<button class="btn" id="dash-btn" style="position:fixed;right:28px;bottom:36px;width:96px;height:96px;border-radius:50%;font-size:16px;background:rgba(250,204,21,.25);border:3px solid #facc15;z-index:12;touch-action:none">DASH</button>
+<button class="btn" id="dash-btn" style="position:fixed;right:28px;bottom:36px;width:84px;height:84px;border-radius:50%;font-size:14px;letter-spacing:1px;background:rgba(255,255,255,.1);border:2px solid rgba(250,204,21,.85);z-index:12;touch-action:none">DASH</button>
 <div class="mission-popup" id="mission-alert">🎉 MISSION COMPLETE!<br /><span style="font-size:13px;color:#fef08a;font-weight:600" id="mission-reward-text"></span></div>
 
 <div class="modal-overlay open" id="select-menu">
 <div class="menu-card">
 <h2 style="margin-bottom:6px">CHOOSE YOUR ANIMAL</h2>
 <p style="font-size:12px;color:#cbd5e1;margin-bottom:16px">Khao, bado, spike se bacho!</p>
-<button class="btn pick" data-a="cat" style="background:#ea580c">🐱 Cat (Fish)</button>
-<button class="btn pick" data-a="dog" style="background:#92400e">🐶 Dog (Bone)</button>
-<button class="btn pick" data-a="panda" style="background:#15803d">🐼 Panda (Bamboo)</button>
+<button class="btn pick acard cat" data-a="cat"><span class="av">🐱</span><span><b>Cat</b><small>Tabby · Eats Fish</small></span></button>
+<button class="btn pick acard dog" data-a="dog"><span class="av">🐕</span><span><b>Dog</b><small>Spotted · Eats Bones</small></span></button>
+<button class="btn pick acard panda" data-a="panda"><span class="av">🐼</span><span><b>Panda</b><small>Chubby · Eats Bamboo</small></span></button>
 </div>
 </div>
 
@@ -499,7 +510,7 @@ const blocked = (e) => isPaused || isGameOver || e.target.closest('button') || e
 
 // Virtual joystick (left side of screen, like BGMI / Free Fire)
 const joy = $('joy'), joyKnob = $('joy-knob');
-const JR = 55, joyVec = { x: 0, y: 0 };
+const JR = 40, joyVec = { x: 0, y: 0 };
 let joyId = null, joyCX = 0, joyCY = 0;
 function joyDefault() { joy.style.left = '110px'; joy.style.top = (innerHeight - 110) + 'px'; }
 function joyMove(t) {
@@ -545,6 +556,7 @@ function goFullscreen() {
 $('fs-btn').addEventListener('click', goFullscreen);
 
 // Dash, power-ups, shield
+if (matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch');
 function doDash() {
   if (isPaused || isGameOver || dashCD > 0) return;
   dashT = 0.35; dashCD = 3; playChompSound(true);
@@ -638,6 +650,7 @@ let walkCycle = 0;
 function animate() {
   requestAnimationFrame(animate);
   const delta = Math.min(clock.getDelta(), 0.1);
+  document.body.classList.toggle('playing', !isPaused && !isGameOver);
   if (isPaused || isGameOver) { renderer.render(scene, camera); return; }
 
   timeLeft -= delta; elapsed += delta;

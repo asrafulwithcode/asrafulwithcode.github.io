@@ -4,14 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About Us - FinGrowTools</title>
+  <meta name="description" content="FinGrowTools offers free SIP, EMI and income tax calculators, an image and signature compressor, and an age calculator for govt job eligibility." />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
   <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
       <a href="/" class="text-2xl font-black tracking-tight text-blue-600">FinGrow<span class="text-slate-900">Tools</span></a>
-      <nav class="flex items-center space-x-4 text-sm font-medium text-slate-600">
+      <nav class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-slate-600">
         <a href="/" class="hover:text-blue-600">Calculators</a>
+        <a href="compressor.html" class="hover:text-blue-600">Compressor</a>
+        <a href="age-calculator.html" class="hover:text-blue-600">Age Calculator</a>
         <a href="about.html" class="text-blue-600 font-bold">About Us</a>
         <a href="privacy.html" class="hover:text-blue-600">Privacy Policy</a>
       </nav>
@@ -22,29 +25,44 @@
     <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
       <h1 class="text-3xl font-extrabold text-slate-900">About FinGrowTools</h1>
       <p class="text-slate-600 leading-relaxed">
-        Welcome to <strong>FinGrowTools</strong>, a free online utility platform dedicated to making financial planning, calculations, and digital utilities accessible to everyone. Our mission is to empower individuals, salaried professionals, and everyday investors with accurate, real-time computational tools without requiring complex spreadsheets or expensive software.
+        Welcome to <strong>FinGrowTools</strong>, a free online utility website that makes financial calculations and everyday digital tools easy for everyone. Our goal is to help students, salaried professionals and everyday investors get quick, accurate results without complex spreadsheets or paid software.
       </p>
 
       <h2 class="text-xl font-bold text-slate-900 pt-2">What We Offer</h2>
       <ul class="list-disc pl-5 space-y-2 text-slate-600">
-        <li><strong>Smart Financial Calculators:</strong> Accurate tools for estimating Systematic Investment Plans (SIP), Monthly EMI calculations for personal/home loans, and modern Income Tax computations based on the latest tax slabs.</li>
-        <li><strong>Browser-Based Image Utilities:</strong> Fast client-side image compression tools that optimize file size directly within your browser without sending private photos to any remote server.</li>
-        <li><strong>Interactive Web Experiences:</strong> Lightweight 3D cosmic web games built using WebGL and Three.js designed for smooth performance across mobile and desktop browsers.</li>
+        <li><strong>Financial Calculators:</strong> SIP calculator, loan EMI calculator and income tax estimator based on the current tax slabs.</li>
+        <li><strong>Image &amp; Signature Compressor:</strong> Reduce photo and signature size (for example to 50KB or 20KB) for online form uploads, directly in your browser.</li>
+        <li><strong>Age Calculator:</strong> Find your exact age and check age eligibility for government job forms.</li>
       </ul>
 
-      <h2 class="text-xl font-bold text-slate-900 pt-2">Privacy & Client-Side Execution</h2>
+      <h2 class="text-xl font-bold text-slate-900 pt-2">Who Runs This Site</h2>
       <p class="text-slate-600 leading-relaxed">
-        At FinGrowTools, user privacy is our core architectural focus. All financial formulas, loan amortization schedules, and graphic tools run entirely on client-side JavaScript. We do not store, harvest, or log any personal financial inputs, income figures, or uploaded media onto external databases.
+        FinGrowTools is built and maintained by an independent developer from India. We update the tools when rules, tax slabs or requirements change.
       </p>
 
-      <h2 class="text-xl font-bold text-slate-900 pt-2">Contact & Inquiries</h2>
+      <h2 class="text-xl font-bold text-slate-900 pt-2">Privacy &amp; Client-Side Execution</h2>
       <p class="text-slate-600 leading-relaxed">
-        Have feedback, suggestions, or technical questions regarding our tools? Feel free to reach out to our team at <a href="mailto:contact@asrafulwithcode.github.io" class="text-blue-600 font-semibold underline">contact@asrafulwithcode.github.io</a>.
+        Our calculators and the image compressor run in your browser using JavaScript. The numbers you enter and the images you upload are not sent to or stored on our servers. For more details, read our <a href="privacy.html" class="text-blue-600 underline">Privacy Policy</a>.
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 pt-2">Disclaimer</h2>
+      <p class="text-slate-600 leading-relaxed">
+        The results from our calculators are estimates for general information only. They are not financial, tax or legal advice. Please check with a qualified professional before making financial decisions.
+      </p>
+
+      <h2 id="contact" class="text-xl font-bold text-slate-900 pt-2">Contact &amp; Inquiries</h2>
+      <p class="text-slate-600 leading-relaxed">
+        Have feedback, suggestions or a question about our tools? Email us at <a href="mailto:YOUR_EMAIL@gmail.com" class="text-blue-600 font-semibold underline">YOUR_EMAIL@gmail.com</a>.
       </p>
     </div>
   </main>
 
   <footer class="py-6 border-t border-slate-200 bg-white text-center text-sm text-slate-500">
+    <p class="mb-2">
+      <a href="about.html" class="hover:text-blue-600">About</a> ·
+      <a href="privacy.html" class="hover:text-blue-600">Privacy Policy</a> ·
+      <a href="about.html#contact" class="hover:text-blue-600">Contact</a>
+    </p>
     <p>© 2026 FinGrowTools. All rights reserved.</p>
   </footer>
 </body>

@@ -3,117 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exact Age Calculator & Govt Job Eligibility Check - FinGrowTools</title>
-  <meta name="description" content="Free online Age Calculator for SSC, Railway, UPSC, and State Govt forms. Calculate exact age in years, months, days, total weeks, and next birthday countdown in DD-MM-YYYY format." />
+  <title>Exact Age Calculator &amp; Govt Job Eligibility Check - FinGrowTools</title>
+  <meta name="description" content="Free online Age Calculator for SSC, Railway, UPSC and State Govt forms. Find your exact age in years, months and days on any cut-off date, with age relaxation and eligibility check." />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
 
-  <!-- Header with Navigation -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <a href="/" class="text-2xl font-black tracking-tight text-blue-600">FinGrow<span class="text-slate-900">Tools</span></a>
-      </div>
-      <nav class="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm font-medium text-slate-600">
-        <a href="/" class="hover:text-blue-600 transition">Calculators</a>
-        <a href="/compressor.html" class="hover:text-blue-600 transition">Photo Compressor</a>
-        <!-- Active Tab -->
-        <a href="/age-calculator.html" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-semibold border border-blue-200">Age Calculator</a>
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      <a href="/" class="text-2xl font-black tracking-tight text-blue-600">FinGrow<span class="text-slate-900">Tools</span></a>
+      <nav class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-slate-600">
+        <a href="/" class="hover:text-blue-600">Calculators</a>
+        <a href="compressor.html" class="hover:text-blue-600">Compressor</a>
+        <a href="age-calculator.html" class="text-blue-600 font-bold">Age Calculator</a>
+        <a href="about.html" class="hover:text-blue-600">About Us</a>
+        <a href="privacy.html" class="hover:text-blue-600">Privacy Policy</a>
       </nav>
     </div>
   </header>
 
-  <!-- Main Container -->
   <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
     <div class="text-center mb-8">
-      <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-2">Govt Exam & Job Utilities</span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">Accurate Age & Eligibility Calculator</h1>
+      <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-2">Govt Exam &amp; Job Utilities</span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">Age &amp; Eligibility Calculator</h1>
       <p class="text-slate-600 max-w-lg mx-auto text-sm sm:text-base">
-        Calculate exact age in years, months, and days as of any specific cutoff date for SSC, UPSC, IBPS, or State exams.
+        Find your exact age in years, months and days on any cut-off date, and check it against an exam age limit.
       </p>
     </div>
 
-    <!-- Calculator Card -->
     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8 max-w-2xl mx-auto space-y-6">
-      
-      <!-- Date of Birth Selection with Distinct Vertical Labels -->
+
+      <!-- DOB -->
       <div class="space-y-1.5">
         <label class="block text-xs font-bold uppercase tracking-wider text-slate-800">Date of Birth (DOB)</label>
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label for="dobDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</label>
-            <select id="dobDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+            <label for="dobDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Day</label>
+            <select id="dobDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium"></select>
           </div>
           <div>
             <label for="dobMonth" class="block text-[11px] font-semibold text-slate-500 mb-1">Month</label>
-            <select id="dobMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-              <option value="0">January (01)</option>
-              <option value="1">February (02)</option>
-              <option value="2">March (03)</option>
-              <option value="3">April (04)</option>
-              <option value="4">May (05)</option>
-              <option value="5">June (06)</option>
-              <option value="6">July (07)</option>
-              <option value="7">August (08)</option>
-              <option value="8">September (09)</option>
-              <option value="9">October (10)</option>
-              <option value="10">November (11)</option>
-              <option value="11">December (12)</option>
-            </select>
+            <select id="dobMonth" onchange="onMonthYearChange()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium"></select>
           </div>
           <div>
             <label for="dobYear" class="block text-[11px] font-semibold text-slate-500 mb-1">Year</label>
-            <select id="dobYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+            <select id="dobYear" onchange="onMonthYearChange()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium"></select>
           </div>
         </div>
       </div>
 
-      <!-- Cut-off Target Date Selection with Distinct Vertical Labels -->
+      <!-- Cut-off -->
       <div class="space-y-1.5">
         <label class="block text-xs font-bold uppercase tracking-wider text-slate-800">Age as on (Cut-off Date)</label>
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label for="targetDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Date / Day</label>
-            <select id="targetDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+            <label for="targetDay" class="block text-[11px] font-semibold text-slate-500 mb-1">Day</label>
+            <select id="targetDay" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium"></select>
           </div>
           <div>
             <label for="targetMonth" class="block text-[11px] font-semibold text-slate-500 mb-1">Month</label>
-            <select id="targetMonth" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-              <option value="0">January (01)</option>
-              <option value="1">February (02)</option>
-              <option value="2">March (03)</option>
-              <option value="3">April (04)</option>
-              <option value="4">May (05)</option>
-              <option value="5">June (06)</option>
-              <option value="6">July (07)</option>
-              <option value="7">August (08)</option>
-              <option value="8">September (09)</option>
-              <option value="9">October (10)</option>
-              <option value="10">November (11)</option>
-              <option value="11">December (12)</option>
-            </select>
+            <select id="targetMonth" onchange="onMonthYearChange()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium"></select>
           </div>
           <div>
             <label for="targetYear" class="block text-[11px] font-semibold text-slate-500 mb-1">Year</label>
-            <select id="targetYear" onchange="calculateAge()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+            <select id="targetYear" onchange="onMonthYearChange()" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium"></select>
           </div>
         </div>
+        <p class="text-xs text-slate-500">The cut-off date is given in the official notification of your exam.</p>
       </div>
 
-      <!-- Main Result Display -->
+      <!-- Result -->
       <div id="resultBox" class="p-6 bg-blue-50/70 border border-blue-100 rounded-xl text-center space-y-2">
         <span class="text-xs uppercase font-bold tracking-wider text-blue-600">Your Exact Age</span>
-        <div id="mainAgeText" class="text-2xl sm:text-3xl font-extrabold text-blue-700">
-          Calculating...
-        </div>
+        <div id="mainAgeText" class="text-2xl sm:text-3xl font-extrabold text-blue-700">Calculating...</div>
         <p id="nextBirthdayText" class="text-xs sm:text-sm text-slate-600 pt-1 font-medium"></p>
       </div>
 
-      <!-- Detailed Breakdown Cards -->
-      <div id="breakdownGrid" class="grid grid-cols-3 gap-3 text-center">
+      <div class="grid grid-cols-3 gap-3 text-center">
         <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl">
           <span class="block text-[11px] font-semibold text-slate-500 uppercase">Total Months</span>
           <span id="totalMonths" class="text-base sm:text-lg font-bold text-slate-800">-</span>
@@ -128,181 +96,280 @@
         </div>
       </div>
 
-      <!-- Govt Exam Eligibility Checker -->
+      <!-- Eligibility -->
       <div class="border-t border-slate-200 pt-5 space-y-3">
         <h3 class="text-sm font-bold text-slate-800">Quick Eligibility Check</h3>
-        <div class="flex items-center space-x-2 text-xs sm:text-sm text-slate-600">
-          <span>Target exam limit:</span>
-          <select id="examCriteria" onchange="checkEligibility()" class="border border-slate-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800">
-            <option value="18-27">18 to 27 Years (SSC CGL / CHSL Gen)</option>
-            <option value="18-30">18 to 30 Years (Railway / Defence / Police)</option>
-            <option value="21-32">21 to 32 Years (UPSC / Civil Services Gen)</option>
-            <option value="18-35">18 to 35 Years (State PCS / General)</option>
-          </select>
+
+        <div class="grid sm:grid-cols-2 gap-3 text-xs sm:text-sm text-slate-600">
+          <div>
+            <label for="examCriteria" class="block text-[11px] font-semibold text-slate-500 mb-1">Age limit (example)</label>
+            <select id="examCriteria" onchange="onCriteriaChange()" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-slate-800 bg-white">
+              <option value="18-27">18 to 27 years (e.g. SSC CGL / CHSL)</option>
+              <option value="18-30">18 to 30 years</option>
+              <option value="21-32">21 to 32 years (e.g. UPSC Civil Services, General)</option>
+              <option value="18-35">18 to 35 years</option>
+              <option value="custom">Custom (enter your own)</option>
+            </select>
+          </div>
+          <div>
+            <label for="relaxation" class="block text-[11px] font-semibold text-slate-500 mb-1">Age relaxation</label>
+            <select id="relaxation" onchange="checkEligibility()" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-slate-800 bg-white">
+              <option value="0">None (General / EWS)</option>
+              <option value="3">OBC (+3 years)</option>
+              <option value="5">SC / ST (+5 years)</option>
+              <option value="10">PwD General (+10 years)</option>
+            </select>
+          </div>
         </div>
-        <div id="eligibilityResult" class="p-3 rounded-lg text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100">
-          Calculating eligibility...
+
+        <div id="customBox" class="hidden grid grid-cols-2 gap-3 text-xs sm:text-sm">
+          <div>
+            <label for="customMin" class="block text-[11px] font-semibold text-slate-500 mb-1">Minimum age (years)</label>
+            <input type="number" id="customMin" min="0" max="80" value="18" oninput="checkEligibility()" class="w-full border border-slate-300 rounded-lg px-2 py-2" />
+          </div>
+          <div>
+            <label for="customMax" class="block text-[11px] font-semibold text-slate-500 mb-1">Maximum age (years)</label>
+            <input type="number" id="customMax" min="0" max="80" value="30" oninput="checkEligibility()" class="w-full border border-slate-300 rounded-lg px-2 py-2" />
+          </div>
         </div>
+
+        <div id="eligibilityResult" class="p-3 rounded-lg text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100">Calculating eligibility...</div>
+        <p class="text-xs text-slate-500">Limits and relaxations differ for every exam. Always confirm with the official notification before you apply.</p>
       </div>
     </div>
 
-    <!-- Educational Content & Guide for SEO -->
+    <!-- Guide -->
     <section class="mt-12 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto">
-      <h2 class="text-xl font-bold text-slate-900 mb-4">How is Cut-Off Age Calculated for Government Forms?</h2>
+      <h2 class="text-xl font-bold text-slate-900 mb-4">How Is Cut-Off Age Calculated for Government Forms?</h2>
       <div class="space-y-4 text-sm text-slate-600">
         <div>
-          <h3 class="font-semibold text-slate-800">Standard DD / MM / YYYY Format</h3>
-          <p class="mt-1">In India and competitive recruitment portals, dates follow the Day-Month-Year sequence. Our calculator strictly uses this order so you never mix up months and dates while verifying your cutoff limits.</p>
+          <h3 class="font-semibold text-slate-800">What Is a Cut-Off Date?</h3>
+          <p class="mt-1">For most recruitment exams your age is not checked on today's date. The official notification gives a fixed date (for example 1 January or 1 August), and you must meet the age limit on that day.</p>
         </div>
         <div>
-          <h3 class="font-semibold text-slate-800">What is a Cut-Off Date?</h3>
-          <p class="mt-1">In competitive exams like SSC, Banking, and UPSC, age is not checked as of today's date. Official notifications give a fixed benchmark date (e.g., 1st August or 1st January). You must meet the age requirements precisely on that day.</p>
+          <h3 class="font-semibold text-slate-800">How We Count Years, Months and Days</h3>
+          <p class="mt-1">We subtract your date of birth from the cut-off date. If the day or month of the cut-off is smaller, we borrow from the previous month, exactly like normal subtraction.</p>
         </div>
+        <div>
+          <h3 class="font-semibold text-slate-800">Age Relaxation</h3>
+          <p class="mt-1">Many exams add extra years of relaxation for categories such as OBC, SC/ST and persons with disability. The extra years are added to the maximum age. Rules differ by exam, so check your notification.</p>
+        </div>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 mt-8 mb-4">Frequently Asked Questions</h2>
+      <div class="space-y-3 text-sm text-slate-600">
+        <details class="border border-slate-200 rounded-xl p-3">
+          <summary class="font-semibold text-slate-800 cursor-pointer">Which date should I enter as the cut-off date?</summary>
+          <p class="mt-2">Use the date written in the official notification under "age as on" or "cut-off date".</p>
+        </details>
+        <details class="border border-slate-200 rounded-xl p-3">
+          <summary class="font-semibold text-slate-800 cursor-pointer">If the maximum age is 27, am I eligible at exactly 27 years?</summary>
+          <p class="mt-2">In many notices the candidate must be younger than 27 years on the cut-off date, so exactly 27 years 0 months 0 days is not allowed. This calculator follows that common rule. Always check your own notification.</p>
+        </details>
+        <details class="border border-slate-200 rounded-xl p-3">
+          <summary class="font-semibold text-slate-800 cursor-pointer">What if I was born on 29 February?</summary>
+          <p class="mt-2">The age calculation works normally. For the next-birthday countdown, a non-leap year uses 1 March.</p>
+        </details>
+        <details class="border border-slate-200 rounded-xl p-3">
+          <summary class="font-semibold text-slate-800 cursor-pointer">Is my date of birth saved anywhere?</summary>
+          <p class="mt-2">No. Everything is calculated in your browser and nothing is sent to a server.</p>
+        </details>
       </div>
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-    <p>© 2026 FinGrowTools · Fast, Accurate Online Utilities & Tools</p>
+  <footer class="py-6 border-t border-slate-200 bg-white text-center text-sm text-slate-500">
+    <p class="mb-2">
+      <a href="about.html" class="hover:text-blue-600">About</a> ·
+      <a href="privacy.html" class="hover:text-blue-600">Privacy Policy</a> ·
+      <a href="about.html#contact" class="hover:text-blue-600">Contact</a>
+    </p>
+    <p>© 2026 FinGrowTools. All rights reserved.</p>
   </footer>
 
   <script>
-    function populateDays(elementId) {
-      const el = document.getElementById(elementId);
-      el.innerHTML = '';
-      for (let i = 1; i <= 31; i++) {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.innerText = i < 10 ? '0' + i : i;
-        el.appendChild(opt);
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    let age = null; // {y, m, d} or null
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function daysIn(y, m) { return new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); }
+    function el(id) { return document.getElementById(id); }
+
+    function fillMonths(id) {
+      const s = el(id);
+      s.innerHTML = '';
+      MONTHS.forEach(function (name, i) {
+        const o = document.createElement('option');
+        o.value = i;
+        o.textContent = name + ' (' + pad(i + 1) + ')';
+        s.appendChild(o);
+      });
+    }
+
+    function fillYears(id, from, to) {
+      const s = el(id);
+      s.innerHTML = '';
+      for (let y = to; y >= from; y--) {
+        const o = document.createElement('option');
+        o.value = y;
+        o.textContent = y;
+        s.appendChild(o);
       }
     }
 
-    function populateYears(elementId, startYear, endYear) {
-      const el = document.getElementById(elementId);
-      el.innerHTML = '';
-      for (let y = endYear; y >= startYear; y--) {
-        const opt = document.createElement('option');
-        opt.value = y;
-        opt.innerText = y;
-        el.appendChild(opt);
+    // Rebuilds the day list so that 31 Feb etc. cannot be chosen
+    function fillDays(dayId, monthId, yearId) {
+      const s = el(dayId);
+      const n = daysIn(parseInt(el(yearId).value, 10), parseInt(el(monthId).value, 10));
+      const prev = parseInt(s.value, 10) || 1;
+      s.innerHTML = '';
+      for (let i = 1; i <= n; i++) {
+        const o = document.createElement('option');
+        o.value = i;
+        o.textContent = pad(i);
+        s.appendChild(o);
       }
+      s.value = Math.min(prev, n);
     }
 
-    const today = new Date();
-    const currentYear = today.getFullYear();
+    function onMonthYearChange() {
+      fillDays('dobDay', 'dobMonth', 'dobYear');
+      fillDays('targetDay', 'targetMonth', 'targetYear');
+      calculateAge();
+    }
 
-    populateDays('dobDay');
-    populateDays('targetDay');
-    populateYears('dobYear', 1950, currentYear);
-    populateYears('targetYear', 1980, currentYear + 10);
-
-    document.getElementById('targetDay').value = today.getDate();
-    document.getElementById('targetMonth').value = today.getMonth();
-    document.getElementById('targetYear').value = today.getFullYear();
-
-    document.getElementById('dobDay').value = 14;
-    document.getElementById('dobMonth').value = 11;
-    document.getElementById('dobYear').value = 2007;
-
-    let calculatedYears = 0;
-    let calculatedMonths = 0;
-    let calculatedDays = 0;
+    function fmtDate(utcMs) {
+      return new Date(utcMs).toLocaleDateString('en-GB', { timeZone: 'UTC', day: '2-digit', month: 'short', year: 'numeric' });
+    }
 
     function calculateAge() {
-      const bDay = parseInt(document.getElementById('dobDay').value);
-      const bMonth = parseInt(document.getElementById('dobMonth').value);
-      const bYear = parseInt(document.getElementById('dobYear').value);
+      const bD = parseInt(el('dobDay').value, 10);
+      const bM = parseInt(el('dobMonth').value, 10);
+      const bY = parseInt(el('dobYear').value, 10);
+      const tD = parseInt(el('targetDay').value, 10);
+      const tM = parseInt(el('targetMonth').value, 10);
+      const tY = parseInt(el('targetYear').value, 10);
 
-      const tDay = parseInt(document.getElementById('targetDay').value);
-      const tMonth = parseInt(document.getElementById('targetMonth').value);
-      const tYear = parseInt(document.getElementById('targetYear').value);
+      const b = Date.UTC(bY, bM, bD);
+      const t = Date.UTC(tY, tM, tD);
+      const main = el('mainAgeText');
 
-      const birthDate = new Date(bYear, bMonth, bDay);
-      const targetDate = new Date(tYear, tMonth, tDay);
-
-      if (birthDate > targetDate) {
-        document.getElementById('mainAgeText').innerText = "Birth date cannot be after the cutoff date!";
-        document.getElementById('mainAgeText').className = "text-lg font-bold text-rose-600";
-        document.getElementById('nextBirthdayText').innerText = "";
-        document.getElementById('totalMonths').innerText = "-";
-        document.getElementById('totalWeeks').innerText = "-";
-        document.getElementById('totalDays').innerText = "-";
+      if (b > t) {
+        age = null;
+        main.innerText = 'Birth date cannot be after the cut-off date!';
+        main.className = 'text-lg font-bold text-rose-600';
+        el('nextBirthdayText').innerText = '';
+        el('totalMonths').innerText = '-';
+        el('totalWeeks').innerText = '-';
+        el('totalDays').innerText = '-';
+        checkEligibility();
         return;
       }
 
-      let y = targetDate.getFullYear() - birthDate.getFullYear();
-      let m = targetDate.getMonth() - birthDate.getMonth();
-      let d = targetDate.getDate() - birthDate.getDate();
-
+      let y = tY - bY;
+      let m = tM - bM;
+      let d = tD - bD;
       if (d < 0) {
         m--;
-        const prevMonthDays = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0).getDate();
-        d += prevMonthDays;
+        d += daysIn(tY, tM - 1); // days in the month before the cut-off month
       }
-
       if (m < 0) {
         y--;
         m += 12;
       }
+      age = { y: y, m: m, d: d };
 
-      calculatedYears = y;
-      calculatedMonths = m;
-      calculatedDays = d;
+      main.innerText = y + ' Years, ' + m + ' Months, ' + d + ' Days';
+      main.className = 'text-2xl sm:text-3xl font-extrabold text-blue-700';
 
-      const mainText = `${y} Years, ${m} Months, ${d} Days`;
-      const mainEl = document.getElementById('mainAgeText');
-      mainEl.innerText = mainText;
-      mainEl.className = "text-2xl sm:text-3xl font-extrabold text-blue-700";
+      const totalDaysCount = Math.round((t - b) / 86400000);
+      el('totalMonths').innerText = (y * 12 + m).toLocaleString();
+      el('totalWeeks').innerText = Math.floor(totalDaysCount / 7).toLocaleString();
+      el('totalDays').innerText = totalDaysCount.toLocaleString();
 
-      const diffMs = targetDate.getTime() - birthDate.getTime();
-      const totalDaysCount = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      const totalWeeksCount = Math.floor(totalDaysCount / 7);
-      const totalMonthsCount = (y * 12) + m;
-
-      document.getElementById('totalMonths').innerText = totalMonthsCount.toLocaleString();
-      document.getElementById('totalWeeks').innerText = totalWeeksCount.toLocaleString();
-      document.getElementById('totalDays').innerText = totalDaysCount.toLocaleString();
-
-      let nextBday = new Date(today.getFullYear(), bMonth, bDay);
-      if (nextBday < today) {
-        nextBday.setFullYear(today.getFullYear() + 1);
-      }
-      const bdayDiffDays = Math.ceil((nextBday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      
-      const bdayEl = document.getElementById('nextBirthdayText');
-      if (bdayDiffDays === 0 || bdayDiffDays === 365) {
-        bdayEl.innerText = "🎉 Today is the birthday! Happy Birthday!";
+      // Next birthday (counted from the real today)
+      const now = new Date();
+      const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+      const bdayEl = el('nextBirthdayText');
+      if (b > todayUtc) {
+        bdayEl.innerText = '';
       } else {
-        bdayEl.innerText = `🎂 Next birthday in: ${bdayDiffDays} days (${nextBday.toDateString()})`;
+        let nb = Date.UTC(now.getFullYear(), bM, bD);
+        if (nb < todayUtc) nb = Date.UTC(now.getFullYear() + 1, bM, bD);
+        const diff = Math.round((nb - todayUtc) / 86400000);
+        bdayEl.innerText = diff === 0
+          ? '🎉 Today is the birthday! Happy Birthday!'
+          : '🎂 Next birthday in ' + diff + ' days (' + fmtDate(nb) + ')';
       }
 
       checkEligibility();
     }
 
+    function onCriteriaChange() {
+      el('customBox').classList.toggle('hidden', el('examCriteria').value !== 'custom');
+      checkEligibility();
+    }
+
     function checkEligibility() {
-      const criteria = document.getElementById('examCriteria').value.split('-');
-      const minAge = parseInt(criteria[0]);
-      const maxAge = parseInt(criteria[1]);
-      const resultBox = document.getElementById('eligibilityResult');
+      const box = el('eligibilityResult');
 
-      if (calculatedYears === 0 && calculatedMonths === 0 && calculatedDays === 0) return;
+      if (!age) {
+        box.className = 'p-3 rounded-lg text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100';
+        box.innerText = 'Please enter valid dates to check eligibility.';
+        return;
+      }
 
-      const isEligible = calculatedYears >= minAge && (calculatedYears < maxAge || (calculatedYears === maxAge && calculatedMonths === 0 && calculatedDays === 0));
-
-      if (isEligible) {
-        resultBox.className = "p-3 rounded-lg text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200";
-        resultBox.innerHTML = `✅ <strong>Eligible!</strong> Your age (${calculatedYears}y ${calculatedMonths}m) is within the required ${minAge} to ${maxAge} years window.`;
-      } else {
-        resultBox.className = "p-3 rounded-lg text-xs sm:text-sm font-semibold text-rose-800 bg-rose-50 border border-rose-200";
-        if (calculatedYears < minAge) {
-          resultBox.innerHTML = `❌ <strong>Underage:</strong> You must be at least ${minAge} years old on the cutoff date.`;
-        } else {
-          resultBox.innerHTML = `❌ <strong>Overage:</strong> You exceed the maximum age limit of ${maxAge} years on the cutoff date.`;
+      let minAge, maxAge;
+      const val = el('examCriteria').value;
+      if (val === 'custom') {
+        minAge = parseInt(el('customMin').value, 10);
+        maxAge = parseInt(el('customMax').value, 10);
+        if (isNaN(minAge) || isNaN(maxAge) || minAge > maxAge) {
+          box.className = 'p-3 rounded-lg text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100';
+          box.innerText = 'Enter a valid minimum and maximum age.';
+          return;
         }
+      } else {
+        const parts = val.split('-');
+        minAge = parseInt(parts[0], 10);
+        maxAge = parseInt(parts[1], 10);
+      }
+
+      const relax = parseInt(el('relaxation').value, 10) || 0;
+      const finalMax = maxAge + relax;
+      const label = relax > 0 ? finalMax + ' years (including +' + relax + ' relaxation)' : finalMax + ' years';
+
+      // Minimum age is inclusive; maximum means younger than the limit on the cut-off date
+      if (age.y < minAge) {
+        box.className = 'p-3 rounded-lg text-xs sm:text-sm font-semibold text-rose-800 bg-rose-50 border border-rose-200';
+        box.innerHTML = '❌ <strong>Underage:</strong> you must be at least ' + minAge + ' years old on the cut-off date.';
+      } else if (age.y >= finalMax) {
+        box.className = 'p-3 rounded-lg text-xs sm:text-sm font-semibold text-rose-800 bg-rose-50 border border-rose-200';
+        box.innerHTML = '❌ <strong>Overage:</strong> your age (' + age.y + 'y ' + age.m + 'm ' + age.d + 'd) is not within the limit of ' + label + '.';
+      } else {
+        box.className = 'p-3 rounded-lg text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200';
+        box.innerHTML = '✅ <strong>Eligible!</strong> Your age (' + age.y + 'y ' + age.m + 'm ' + age.d + 'd) fits the ' + minAge + ' to ' + label + ' window.';
       }
     }
+
+    // ---- Setup ----
+    const nowInit = new Date();
+    const thisYear = nowInit.getFullYear();
+
+    fillMonths('dobMonth');
+    fillMonths('targetMonth');
+    fillYears('dobYear', 1950, thisYear);
+    fillYears('targetYear', 1980, thisYear + 10);
+
+    el('dobMonth').value = 0;
+    el('dobYear').value = 2000;
+    el('targetMonth').value = nowInit.getMonth();
+    el('targetYear').value = thisYear;
+
+    fillDays('dobDay', 'dobMonth', 'dobYear');
+    fillDays('targetDay', 'targetMonth', 'targetYear');
+    el('dobDay').value = 1;
+    el('targetDay').value = nowInit.getDate();
 
     calculateAge();
   </script>

@@ -4,43 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="QLGSGB8q8agdGvZuimjBGNTN9xyQhORNmEK_pUxUBtU" />
-  <title>FinGrowTools - Smart Financial Calculators & Utilities</title>
-  <meta name="description" content="Free online financial calculators for SIP, Loan EMI, and New Regime Income Tax with standard deduction. Fast, accurate, and easy to use." />
+  <title>FinGrowTools - Free SIP, EMI &amp; Income Tax Calculators</title>
+  <meta name="description" content="Free online SIP calculator, loan EMI calculator and New Regime income tax estimator for FY 2026-27 with standard deduction, rebate and cess. Fast, private and easy to use." />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7999276757460411" crossorigin="anonymous"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
 
-  <!-- Header with Navigation -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <a href="/" class="text-2xl font-black tracking-tight text-blue-600">FinGrow<span class="text-slate-900">Tools</span></a>
-      </div>
-      <nav class="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm font-medium text-slate-600">
-        <a href="/" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-semibold border border-blue-200">Calculators</a>
-        <a href="about.html" class="hover:text-blue-600 px-2 py-1 transition">About</a>
-        <a href="privacy.html" class="hover:text-blue-600 px-2 py-1 transition">Privacy</a>
-        <a href="compressor.html" class="hover:text-blue-600 px-2 py-1 transition">Compressor</a>
-        <a href="battle.html" class="text-pink-600 font-bold hover:text-pink-700 px-2 py-1 transition">Neon Wave</a>
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      <a href="/" class="text-2xl font-black tracking-tight text-blue-600">FinGrow<span class="text-slate-900">Tools</span></a>
+      <nav class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-slate-600">
+        <a href="/" class="text-blue-600 font-bold">Calculators</a>
+        <a href="compressor.html" class="hover:text-blue-600">Compressor</a>
+        <a href="age-calculator.html" class="hover:text-blue-600">Age Calculator</a>
+        <a href="about.html" class="hover:text-blue-600">About Us</a>
+        <a href="privacy.html" class="hover:text-blue-600">Privacy Policy</a>
       </nav>
     </div>
   </header>
 
-  <!-- Main Content Container -->
   <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-    
-    <!-- Hero Introduction -->
+
     <div class="text-center max-w-2xl mx-auto mb-10">
       <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Personal Finance Calculators</h1>
-      <p class="mt-2 text-slate-600 text-sm sm:text-base">Accurate, private, and instant estimates for your investments, monthly home loans, and income taxes.</p>
+      <p class="mt-2 text-slate-600 text-sm sm:text-base">Quick, private estimates for your SIP investments, home loan EMI and income tax. Everything runs in your browser.</p>
     </div>
 
-    <!-- Calculators Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      <!-- SIP Calculator Card -->
+      <!-- SIP -->
       <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
         <div>
           <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -48,28 +42,28 @@
           </h2>
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Monthly Investment (₹)</label>
-              <input type="number" id="sipAmount" value="5000" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-blue-500" />
+              <label for="sipAmount" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Monthly Investment (₹)</label>
+              <input type="number" id="sipAmount" value="5000" min="0" inputmode="decimal" oninput="calculateSIP()" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Expected Return Rate (% p.a.)</label>
-              <input type="number" id="sipRate" value="12" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-blue-500" />
+              <label for="sipRate" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Expected Return Rate (% p.a.)</label>
+              <input type="number" id="sipRate" value="12" min="0" step="0.1" inputmode="decimal" oninput="calculateSIP()" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-blue-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Time Period (Years)</label>
-              <input type="number" id="sipYears" value="10" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-blue-500" />
+              <label for="sipYears" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Time Period (Years)</label>
+              <input type="number" id="sipYears" value="10" min="0" inputmode="decimal" oninput="calculateSIP()" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-blue-500" />
             </div>
-            <button onclick="calculateSIP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition">Calculate Returns</button>
+            <button type="button" onclick="calculateSIP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition">Calculate Returns</button>
           </div>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50 p-4 rounded-xl">
-          <div class="flex justify-between text-xs text-slate-500 mb-1">Invested: <span id="sipInvested" class="font-bold text-slate-700">₹6,00,000</span></div>
-          <div class="flex justify-between text-xs text-slate-500 mb-1">Estimated Gain: <span id="sipGain" class="font-bold text-green-600">₹5,61,695</span></div>
-          <div class="flex justify-between text-sm font-bold text-slate-900 mt-2 border-t border-slate-200 pt-2">Total Value: <span id="sipTotal" class="text-blue-600">₹11,61,695</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Invested: <span id="sipInvested" class="font-bold text-slate-700">-</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Estimated Gain: <span id="sipGain" class="font-bold text-green-600">-</span></div>
+          <div class="flex justify-between text-sm font-bold text-slate-900 mt-2 border-t border-slate-200 pt-2">Total Value: <span id="sipTotal" class="text-blue-600">-</span></div>
         </div>
       </section>
 
-      <!-- Loan EMI Calculator Card -->
+      <!-- EMI -->
       <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
         <div>
           <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -77,28 +71,28 @@
           </h2>
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Loan Amount (₹)</label>
-              <input type="number" id="emiPrincipal" value="1000000" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-emerald-500" />
+              <label for="emiPrincipal" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Loan Amount (₹)</label>
+              <input type="number" id="emiPrincipal" value="1000000" min="0" inputmode="decimal" oninput="calculateEMI()" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-emerald-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Interest Rate (% p.a.)</label>
-              <input type="number" id="emiRate" value="8.5" step="0.1" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-emerald-500" />
+              <label for="emiRate" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Interest Rate (% p.a.)</label>
+              <input type="number" id="emiRate" value="8.5" min="0" step="0.1" inputmode="decimal" oninput="calculateEMI()" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-emerald-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tenure (Years)</label>
-              <input type="number" id="emiYears" value="15" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-emerald-500" />
+              <label for="emiYears" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tenure (Years)</label>
+              <input type="number" id="emiYears" value="15" min="0" inputmode="decimal" oninput="calculateEMI()" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-emerald-500" />
             </div>
-            <button onclick="calculateEMI()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition">Calculate EMI</button>
+            <button type="button" onclick="calculateEMI()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition">Calculate EMI</button>
           </div>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50 p-4 rounded-xl">
-          <div class="flex justify-between text-xs text-slate-500 mb-1">Monthly EMI: <span id="monthlyEmi" class="font-bold text-emerald-600 text-base">₹9,847</span></div>
-          <div class="flex justify-between text-xs text-slate-500 mb-1">Total Interest: <span id="totalInterest" class="font-bold text-slate-700">₹7,72,534</span></div>
-          <div class="flex justify-between text-sm font-bold text-slate-900 mt-2 border-t border-slate-200 pt-2">Total Amount: <span id="totalPayment" class="text-slate-900">₹17,72,534</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Monthly EMI: <span id="monthlyEmi" class="font-bold text-emerald-600 text-base">-</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Total Interest: <span id="totalInterest" class="font-bold text-slate-700">-</span></div>
+          <div class="flex justify-between text-sm font-bold text-slate-900 mt-2 border-t border-slate-200 pt-2">Total Amount: <span id="totalPayment" class="text-slate-900">-</span></div>
         </div>
       </section>
 
-      <!-- Income Tax Calculator Card -->
+      <!-- Tax -->
       <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
         <div>
           <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -106,68 +100,108 @@
           </h2>
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Annual Income (₹)</label>
-              <input type="number" id="annualIncome" value="850000" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-indigo-500" />
+              <label for="annualIncome" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Annual Income (₹)</label>
+              <input type="number" id="annualIncome" value="1500000" min="0" inputmode="decimal" oninput="calculateTax()" class="w-full px-3 py-2 border rounded-xl font-semibold text-slate-800 focus:outline-indigo-500" />
             </div>
-            <p class="text-xs text-slate-500">Calculates based on the New Tax Regime slabs including the ₹75,000 standard deduction and Section 87A rebate.</p>
-            <button onclick="calculateTax()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl transition">Estimate Tax</button>
+            <label class="flex items-center gap-2 text-sm text-slate-600">
+              <input type="checkbox" id="isSalaried" checked onchange="calculateTax()" class="w-4 h-4" />
+              I am a salaried employee (₹75,000 standard deduction)
+            </label>
+            <p class="text-xs text-slate-500">New Tax Regime, FY 2026-27 (AY 2027-28), for resident individuals. Includes Section 87A rebate and 4% cess.</p>
+            <button type="button" onclick="calculateTax()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl transition">Estimate Tax</button>
           </div>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50 p-4 rounded-xl">
-          <div class="flex justify-between text-xs text-slate-500 mb-1">Standard Deduction: <span class="font-bold text-slate-700">₹75,000</span></div>
-          <div class="flex justify-between text-xs text-slate-500 mb-1">Taxable Income: <span id="taxableIncome" class="font-bold text-slate-700">₹7,75,000</span></div>
-          <div class="flex justify-between text-sm font-bold text-slate-900 mt-2 border-t border-slate-200 pt-2">Net Tax Payable: <span id="netTax" class="text-indigo-600">₹0</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Standard Deduction: <span id="stdDed" class="font-bold text-slate-700">-</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Taxable Income: <span id="taxableIncome" class="font-bold text-slate-700">-</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Tax after rebate: <span id="taxBeforeCess" class="font-bold text-slate-700">-</span></div>
+          <div class="flex justify-between text-xs text-slate-500 mb-1">Cess (4%): <span id="cessAmt" class="font-bold text-slate-700">-</span></div>
+          <div class="flex justify-between text-sm font-bold text-slate-900 mt-2 border-t border-slate-200 pt-2">Net Tax Payable: <span id="netTax" class="text-indigo-600">-</span></div>
         </div>
       </section>
 
     </div>
 
-    <!-- Expanded Comprehensive Financial Guide for AdSense Compliance -->
-    <article class="mt-16 bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 text-slate-700 text-sm sm:text-base leading-relaxed space-y-8">
+    <p class="mt-6 text-center text-xs text-slate-500 max-w-3xl mx-auto">
+      These calculators give estimates for general information only. They are not financial, tax or legal advice. The tax estimator does not include surcharge (applicable above ₹50 lakh), capital gains or special-rate income. Please check with a qualified professional before making decisions.
+    </p>
+
+    <!-- Guide -->
+    <article class="mt-12 bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 text-slate-700 text-sm sm:text-base leading-relaxed space-y-8">
       <div class="border-b border-slate-100 pb-4">
-        <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900">A Comprehensive Guide to Modern Financial Planning & Investment Compounding</h3>
-        <p class="text-slate-500 text-xs sm:text-sm mt-1">Written for retail investors, salaried professionals, and long-term wealth builders.</p>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">A Simple Guide to SIP, EMI and Income Tax</h2>
+        <p class="text-slate-500 text-xs sm:text-sm mt-1">For students, salaried professionals and first-time investors.</p>
       </div>
 
       <section class="space-y-3">
-        <h4 class="text-xl font-bold text-slate-800">1. The Mechanics of Systematic Investment Plans (SIP) and Compounding</h4>
-        <p>A Systematic Investment Plan (SIP) allows retail investors to invest small, fixed amounts of money periodically (monthly, quarterly, or weekly) into mutual funds and equity schemes. Rather than trying to time the financial markets, SIP enables investors to take advantage of <strong>Rupee Cost Averaging</strong> and the mathematical phenomenon known as the <strong>Power of Compounding</strong>.</p>
-        <p>When stock market valuations fall, your fixed monthly contribution automatically purchases a higher number of mutual fund units. Conversely, when valuations rise, your allocation buys fewer units. Over extended periods (7, 10, or 15+ years), this disciplines the portfolio and significantly smooths out standard volatility.</p>
+        <h3 class="text-xl font-bold text-slate-800">1. How a Systematic Investment Plan (SIP) Works</h3>
+        <p>A Systematic Investment Plan (SIP) lets you invest a fixed amount at regular intervals, usually every month, into a mutual fund. Because you invest every month, you buy more units when prices are low and fewer units when prices are high. This is called <strong>rupee cost averaging</strong>, and it reduces the need to time the market.</p>
+        <p>Over many years your returns also earn returns. This is <strong>compounding</strong>, and it is why starting early matters more than investing a large amount later.</p>
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs sm:text-sm">
-          <strong>The Compound Interest Mathematical Formula:</strong><br />
-          <code>M = P × [ (1 + i)^n - 1 ] × (1 + i) / i</code><br />
-          <em>Where: M is the expected maturity amount, P is regular periodic investment, i is monthly periodic interest rate (annual rate / 12 / 100), and n is total number of monthly payments.</em>
+          <strong>Formula used:</strong><br />
+          <code>M = P × [ (1 + i)^n − 1 ] × (1 + i) / i</code><br />
+          <em>M is the maturity amount, P is the monthly investment, i is the monthly rate (annual rate ÷ 12 ÷ 100) and n is the number of months.</em>
+        </div>
+        <p>The return rate you enter is only an assumption. Real mutual fund returns go up and down and are not guaranteed.</p>
+      </section>
+
+      <section class="space-y-3">
+        <h3 class="text-xl font-bold text-slate-800">2. Understanding Loan EMI</h3>
+        <p>An Equated Monthly Instalment (EMI) is the fixed amount you pay your lender every month. Each EMI has two parts: <strong>principal</strong> and <strong>interest</strong>. In the early years most of the EMI goes towards interest, and over time more of it goes towards principal.</p>
+        <p>Before taking a loan, check that your total EMIs stay within a comfortable share of your monthly take-home income. Many lenders prefer that total EMIs do not go above roughly 40% to 50% of income, and a lower share is safer.</p>
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs sm:text-sm">
+          <strong>Formula used:</strong><br />
+          <code>EMI = P × r × (1 + r)^n / [ (1 + r)^n − 1 ]</code><br />
+          <em>P is the loan amount, r is the monthly interest rate and n is the number of monthly instalments.</em>
         </div>
       </section>
 
       <section class="space-y-3">
-        <h4 class="text-xl font-bold text-slate-800">2. Understanding Equated Monthly Installments (EMI) and Loan Amortization</h4>
-        <p>An Equated Monthly Installment (EMI) represents a fixed monthly payment made by a borrower to a bank or financial institution on a designated date each month. Every EMI payment comprises two distinct components: the <strong>principal repayment</strong> and the <strong>accrued interest</strong>.</p>
-        <p>During the early tenure of a long-term mortgage or home loan, a massive percentage of each monthly installment goes towards servicing the interest charges, with only a small slice reducing the original borrowed principal. As the outstanding loan balance decreases over time, this balance gradually shifts, directing a larger percentage of your EMI towards clearing the remaining loan principal.</p>
-        <p>Calculating your EMI beforehand enables borrowers to maintain a safe <strong>Debt-to-Income (DTI) ratio</strong>, ensuring total debt obligations do not exceed 35% to 40% of their net monthly take-home income.</p>
+        <h3 class="text-xl font-bold text-slate-800">3. Income Tax Under the New Regime (FY 2026-27)</h3>
+        <p>Under the new tax regime, income up to ₹4 lakh has no tax. After that the rates are 5% (₹4–8 lakh), 10% (₹8–12 lakh), 15% (₹12–16 lakh), 20% (₹16–20 lakh), 25% (₹20–24 lakh) and 30% above ₹24 lakh. Salaried taxpayers can reduce ₹75,000 as standard deduction before applying these slabs.</p>
+        <p>The <strong>Section 87A rebate</strong> removes the tax completely if your taxable income is up to ₹12 lakh, which means salaried income up to about ₹12.75 lakh. If your income is slightly above ₹12 lakh, <strong>marginal relief</strong> makes sure the tax is not more than the amount by which you cross ₹12 lakh. A 4% health and education cess is added on the tax.</p>
+        <p>Tax rules can change in every Budget, and your own situation (old regime, other income, capital gains) may be different. Use this tool as a quick estimate, and confirm with the Income Tax Department website or a tax professional before filing.</p>
       </section>
 
       <section class="space-y-3">
-        <h4 class="text-xl font-bold text-slate-800">3. Income Tax Optimization: Standard Deductions and Rebates Explained</h4>
-        <p>Navigating personal income taxes requires an accurate assessment of gross earnings, eligible statutory exemptions, and flat standard deductions. Under modern tax provisions, salaried taxpayers receive an automatic, upfront <strong>Standard Deduction (₹75,000)</strong> directly subtracted from gross taxable salary before entering progressive slab brackets.</p>
-        <p>Furthermore, tax provisions include full rebates under <strong>Section 87A</strong> for low-to-moderate annual earners, resulting in zero net tax payable for taxable income falling within the rebate boundaries. By regularly forecasting tax liabilities, individuals can coordinate insurance requirements, medical contingencies, and retirement contributions well before financial year-end deadlines.</p>
+        <h3 class="text-xl font-bold text-slate-800">4. Building a Strong Financial Base</h3>
+        <p>A sound plan usually has three parts: an emergency fund that covers about six months of expenses, term life and health insurance, and long-term investments linked to your goals. Use these calculators to see how your monthly amounts add up before you commit.</p>
       </section>
 
       <section class="space-y-3">
-        <h4 class="text-xl font-bold text-slate-800">4. Building a Resilient Personal Financial Portfolio</h4>
-        <p>A balanced financial life requires three fundamental pillars: an emergency reserve covering 6 months of mandatory living expenses, active insurance coverage (term life and comprehensive health cover), and long-term goal-oriented investment buckets.</p>
-        <p>Using online computation tools ensures your personal savings goals align mathematically with real inflation rates and historical asset returns.</p>
+        <h3 class="text-xl font-bold text-slate-800">Frequently Asked Questions</h3>
+        <div class="space-y-3 text-sm">
+          <details class="border border-slate-200 rounded-xl p-3">
+            <summary class="font-semibold text-slate-800 cursor-pointer">Is my data stored anywhere?</summary>
+            <p class="mt-2">No. All calculations happen in your browser. The numbers you type are not sent to our servers.</p>
+          </details>
+          <details class="border border-slate-200 rounded-xl p-3">
+            <summary class="font-semibold text-slate-800 cursor-pointer">Is SIP return guaranteed?</summary>
+            <p class="mt-2">No. The calculator uses the rate you enter as an assumption. Actual market-linked returns can be higher or lower.</p>
+          </details>
+          <details class="border border-slate-200 rounded-xl p-3">
+            <summary class="font-semibold text-slate-800 cursor-pointer">Does the EMI include processing fees or insurance?</summary>
+            <p class="mt-2">No. It only shows the EMI from the loan amount, interest rate and tenure. Fees and insurance are extra.</p>
+          </details>
+          <details class="border border-slate-200 rounded-xl p-3">
+            <summary class="font-semibold text-slate-800 cursor-pointer">Why is my tax zero?</summary>
+            <p class="mt-2">Under the new regime, taxable income up to ₹12 lakh gets a full rebate under Section 87A. For salaried people this is about ₹12.75 lakh of income after the ₹75,000 standard deduction.</p>
+          </details>
+          <details class="border border-slate-200 rounded-xl p-3">
+            <summary class="font-semibold text-slate-800 cursor-pointer">Does the tax estimator cover the old regime?</summary>
+            <p class="mt-2">Not at the moment. It covers the new regime only, without surcharge, capital gains or special-rate income.</p>
+          </details>
+        </div>
       </section>
     </article>
 
   </main>
 
-  <!-- Complete Compliance Footer -->
   <footer class="mt-16 py-8 border-t border-slate-200 bg-white text-center text-sm text-slate-500">
-    <div class="space-x-6 mb-3 font-medium">
+    <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-3 font-medium">
       <a href="about.html" class="hover:text-blue-600 underline">About Us</a>
       <a href="privacy.html" class="hover:text-blue-600 underline">Privacy Policy</a>
-      <a href="battle.html" class="hover:text-blue-600 underline">Neon Wave Game</a>
+      <a href="about.html#contact" class="hover:text-blue-600 underline">Contact</a>
       <a href="compressor.html" class="hover:text-blue-600 underline">Photo Compressor</a>
       <a href="age-calculator.html" class="hover:text-blue-600 underline">Age Calculator</a>
     </div>
@@ -175,63 +209,90 @@
   </footer>
 
   <script>
-    function calculateSIP() {
-      const P = parseFloat(document.getElementById('sipAmount').value) || 0;
-      const r = (parseFloat(document.getElementById('sipRate').value) || 0) / 12 / 100;
-      const n = (parseFloat(document.getElementById('sipYears').value) || 0) * 12;
-      const totalInvested = P * n;
-      const maturity = r > 0 ? P * ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : totalInvested;
-      const gains = maturity - totalInvested;
+    function num(id) {
+      const v = parseFloat(document.getElementById(id).value);
+      return isNaN(v) || v < 0 ? 0 : v;
+    }
+    function inr(x) {
+      return '₹' + Math.round(x).toLocaleString('en-IN');
+    }
+    function setText(id, text) {
+      document.getElementById(id).innerText = text;
+    }
 
-      document.getElementById('sipInvested').innerText = '₹' + Math.round(totalInvested).toLocaleString('en-IN');
-      document.getElementById('sipGain').innerText = '₹' + Math.round(gains).toLocaleString('en-IN');
-      document.getElementById('sipTotal').innerText = '₹' + Math.round(maturity).toLocaleString('en-IN');
+    function calculateSIP() {
+      const P = num('sipAmount');
+      const r = num('sipRate') / 12 / 100;
+      const n = Math.round(num('sipYears') * 12);
+      const invested = P * n;
+      const maturity = r > 0 ? P * ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : invested;
+
+      setText('sipInvested', inr(invested));
+      setText('sipGain', inr(maturity - invested));
+      setText('sipTotal', inr(maturity));
     }
 
     function calculateEMI() {
-      const P = parseFloat(document.getElementById('emiPrincipal').value) || 0;
-      const r = (parseFloat(document.getElementById('emiRate').value) || 0) / 12 / 100;
-      const n = (parseFloat(document.getElementById('emiYears').value) || 0) * 12;
+      const P = num('emiPrincipal');
+      const r = num('emiRate') / 12 / 100;
+      const n = Math.round(num('emiYears') * 12);
 
       let emi = 0;
-      if (r > 0 && n > 0) {
-        emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      if (n > 0) {
+        emi = r > 0
+          ? (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
+          : P / n;
       }
-      const totalPayment = emi * n;
-      const totalInterest = totalPayment - P;
+      const total = emi * n;
 
-      document.getElementById('monthlyEmi').innerText = '₹' + Math.round(emi).toLocaleString('en-IN');
-      document.getElementById('totalInterest').innerText = '₹' + Math.round(totalInterest).toLocaleString('en-IN');
-      document.getElementById('totalPayment').innerText = '₹' + Math.round(totalPayment).toLocaleString('en-IN');
+      setText('monthlyEmi', inr(emi));
+      setText('totalInterest', inr(total - P));
+      setText('totalPayment', inr(total));
+    }
+
+    // New regime slabs, FY 2026-27
+    function slabTax(t) {
+      const slabs = [
+        [400000, 0],
+        [800000, 0.05],
+        [1200000, 0.10],
+        [1600000, 0.15],
+        [2000000, 0.20],
+        [2400000, 0.25]
+      ];
+      let tax = 0;
+      let prev = 0;
+      for (let i = 0; i < slabs.length; i++) {
+        const limit = slabs[i][0];
+        const rate = slabs[i][1];
+        if (t > prev) tax += (Math.min(t, limit) - prev) * rate;
+        prev = limit;
+      }
+      if (t > 2400000) tax += (t - 2400000) * 0.30;
+      return tax;
     }
 
     function calculateTax() {
-      const gross = parseFloat(document.getElementById('annualIncome').value) || 0;
-      const taxable = Math.max(0, gross - 75000);
-      let tax = 0;
+      const gross = num('annualIncome');
+      const salaried = document.getElementById('isSalaried').checked;
+      const std = salaried ? Math.min(75000, gross) : 0;
+      const taxable = Math.max(0, gross - std);
 
-      if (taxable <= 300000) {
-        tax = 0;
-      } else if (taxable <= 700000) {
-        tax = (taxable - 300000) * 0.05;
-      } else if (taxable <= 1000000) {
-        tax = 20000 + (taxable - 700000) * 0.10;
-      } else if (taxable <= 1200000) {
-        tax = 50000 + (taxable - 1000000) * 0.15;
-      } else if (taxable <= 1500000) {
-        tax = 80000 + (taxable - 1200000) * 0.20;
+      let tax = slabTax(taxable);
+      if (taxable <= 1200000) {
+        tax = 0; // Section 87A rebate (up to 60,000)
       } else {
-        tax = 140000 + (taxable - 1500000) * 0.30;
+        tax = Math.min(tax, taxable - 1200000); // marginal relief
       }
+      const cess = tax * 0.04;
 
-      // Section 87A rebate for taxable income up to 7 Lakhs
-      if (taxable <= 700000) tax = 0;
-
-      document.getElementById('taxableIncome').innerText = '₹' + Math.round(taxable).toLocaleString('en-IN');
-      document.getElementById('netTax').innerText = '₹' + Math.round(tax).toLocaleString('en-IN');
+      setText('stdDed', inr(std));
+      setText('taxableIncome', inr(taxable));
+      setText('taxBeforeCess', inr(tax));
+      setText('cessAmt', inr(cess));
+      setText('netTax', inr(tax + cess));
     }
 
-    // Run initial calculations on load
     calculateSIP();
     calculateEMI();
     calculateTax();
